@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Private Cloud Catalog{% endblock title %}
+{% block title %}Private Cloud Catalog{% endblock %}
 {% block content %}
 
 <table id="sd" class="table nowrap table-hover" style="display: none; width: 100%;">
@@ -8,10 +8,6 @@
 </table>
 
 <script type="text/javascript">
-
-function capitalize(text) {
-    return text.split(' ').map(x => x.length > 3 ? x.charAt(0).toUpperCase() + x.slice(1) : x.toUpperCase()).join(' ');
-}
 
 function row_html(range, type, desc, row) {
     var key = 'price_' + conformity;
@@ -29,7 +25,7 @@ function row_html(range, type, desc, row) {
 
 var cache_bust = new Date().toDateString().replaceAll(' ','');
 var exportTitle = `Pricelist.ovh - Private Cloud - ${cache_bust}`;
-var url = ` https://share.s3.gra.io.cloud.ovh.net/private-cloud.json?cache_bust=${cache_bust}`;
+var url = `https://share.s3.gra.io.cloud.ovh.net/private-cloud.json?cache_bust=${cache_bust}`;
 
 document.addEventListener("DOMContentLoaded", function() {
     var conlist = document.getElementById('con-list');
@@ -86,7 +82,7 @@ fetch(url).then(res => res.json()).then(res => {
         dom: 'Bfrtip',
         columnDefs: [{ "targets": [], "visible": false }, {'targets': [3], 'type': 'num'}],
         buttons: [
-            { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' }, action: () => api.e } },
+            { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
             { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
         ]
     })

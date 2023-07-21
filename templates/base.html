@@ -1,3 +1,4 @@
+{% macro random_string(len) -%}{% for i in range(0,len) -%}{{ [0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f"]|random }}{% endfor %}{%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
 
 <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-1.13.5/b-2.4.1/b-html5-2.4.1/datatables.min.css" rel="stylesheet"/>
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-1.13.5/b-2.4.1/b-html5-2.4.1/datatables.min.js"></script>
-<link href="styles.css" rel="stylesheet"/>
+<link href="styles.css?{{ random_string(8) }}" rel="stylesheet"/>
 </head>
 <body data-bs-theme="dark">
 <nav class="navbar-dark bg-dark">
@@ -18,22 +19,22 @@
             <path d="M73.14 2.69C76.9967 9.6413 78.7003 17.5821 78.0344 25.5036C77.3685 33.4252 74.3631 40.9701 69.4 47.18H47.96L54.56 35.51H45.83L56.12 17.38H64.9L73.14 2.71V2.69ZM30.8 47.18H8.94001C3.88432 40.9972 0.816836 33.4299 0.140434 25.4719C-0.535968 17.5139 1.21034 9.53738 5.15001 2.59L19.33 27.22L34.96 0H57.96L30.81 47.16L30.8 47.18Z"/>
         </svg>
 
-        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="d-none d-md-block">&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <h1 style="margin: 0;font-size: 1.8rem;line-height: 1.5;">OVHcloud Pricelist</h2>
     </a>
 
-    <ul class="nav nav-pills hidden-sm" style="margin: 0 15px">
+    <ul class="nav nav-pills" style="margin: 0 15px">
         <li class="nav-item d-none d-md-block"><a class="nav-link" href="index.html" title="Get the list of all available Baremetal servers at OVHCloud">Baremetal Cloud Servers</a></li>
         <li class="nav-item d-none d-md-block"><a class="nav-link" href="private-cloud.html">Private Cloud</a></li>
         <li class="nav-item d-none d-md-block"><a class="nav-link" href="public-cloud.html">Public Cloud</a></li>
-        <li class="nav-item dropdown ">
-            <!-- d-md-none -->
+        <li class="nav-item dropdown d-md-none">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dropdown
+              Menu
             </a>
             <ul class="dropdown-menu dropdown-menu-dark">
-              <li><a class="nav-item dropdown-item" href="#">Action</a></li>
-              <li><a class="nav-item dropdown-item" href="#">Another action</a></li>
+              <li><a class="nav-item dropdown-item" href="index.html">Baremetal Cloud Servers</a></li>
+              <li><a class="nav-item dropdown-item" href="private-cloud.html">Private Cloud</a></li>
+              <li><a class="nav-item dropdown-item" href="public-cloud.html">Public Cloud</a></li>
             </ul>
         </li>
   
@@ -46,11 +47,10 @@
             </svg>
     </button>
     <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-        <div class="uppercase" id="sub-list"></div>
+        <div class="uppercase" id="sub-list" style="padding-bottom: 10px;"></div>
         <div class="uppercase" id="con-list" style="display: none"></div>
-        <div id="cache-time" class=""></div> 
+        <div id="cache-time" class="" style="padding-bottom: 10px;"></div> 
     </div>
-    <br>
 <script type="text/javascript">
 
 // VARS
@@ -69,6 +69,10 @@ function setLastUpdated(res) {
 
 function setURLParams(dict) {
     return `${location.pathname}?` +Object.keys(dict).sort().map((key) => `${key}=${dict[key]}`).join('&')
+}
+
+function capitalize(text) {
+    return text.split(' ').map(x => x.length > 3 ? x.charAt(0).toUpperCase() + x.slice(1) : x.toUpperCase()).join(' ');
 }
 
 document.addEventListener("DOMContentLoaded", function() {

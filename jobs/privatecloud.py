@@ -259,7 +259,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
 
 def privatecloud():
     subs = {}
-    for sub in ['FR']:
+    for sub in SUBSIDIARIES:
         # price_stuct {'invoiceName', description, 'price_...'}
         products = {
             'date': datetime.now().isoformat(),

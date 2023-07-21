@@ -167,7 +167,11 @@ def build_key_description(df, family, title):
                 desc += ' ' + ret[0] if bool(ret) else row[col] + f" {col},"
             else:
                 desc += f" {row[col]} {col},"
-        desc = re.sub(r'\s\s+', ' ', desc)[:-1].strip();
+
+        desc = re.sub(r'\s\s+', ' ', desc)[:-1].strip()
+        if family == 'storage' and 'per GB' not in desc:
+            desc += ' - per GB'
+
         keys.append(key.lower().replace('load balancer ', 'loadbalancer-').replace('load balancer', 'loadbalancer'))
         descriptions.append(desc)
     return keys, descriptions
