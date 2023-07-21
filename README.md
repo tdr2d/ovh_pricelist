@@ -3,17 +3,9 @@ Build a webpage showing OVHcloud baremetal servers pricelist.
 Aim is to browse quickly the vast OVHcloud servers catalog. I list all the derivatives.
 A server with 2 memory options and 4 storages option will appear in 2x4 = 8 lines.
 
-I collect all the informations from OVHcloud API then make big & dirty PHP loops to aggregate informations.
-One day i will move it to something else...
-
-Feel free to contribute and give me your feedbacks via http://twitter.com/bastienovh/ .
-
 
 ## Live demo
 You can test it via https://pricelist.ovh
-
-<img alt="preview" width="700" src="img/preview.png" />
-
 
 ## Features
 Thanks to datatables.net scripts :
@@ -22,35 +14,13 @@ Thanks to datatables.net scripts :
 * Export to CSV / EXCEL / PDF / JSON
 
 
-## Installation
-All you need is a working PHP >=5.6 and Internet connectivity. No databases. No API tokens.
-
-1. Download source code here.
-2. copy it on your PHP environment.
-3. create a `/cache` folder with read-write access.
-3. Then go on index.php through your web browser.
-
-Done !
-
-
-## Known limitations
-- OVHcloud US ranges are not shown (not the sames API calls, need work)
-- HG range derivatives are not fully shown (too many possibilities for customization)
-- Private Network and Public Network are not shown (need work)
-- CA/US and globally all billing countries with $USD are not shown (not the same API calls, need work)
-
-
 ## OVHcloud API structure for servers
-
-
 ### API for server specifications and prices
 
 For OVHcloud european information system, the API endpoints for retrieving servers specifications and prices are :
 
 
 - Classic ranges: https://api.ovh.com/console/#/order/catalog/public/baremetalServers#GET
-- Eco ranges: https://api.ovh.com/console/#/order/catalog/public/eco~GET
-
 
 The JSON structure need some clarifications :
 
