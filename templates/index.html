@@ -103,7 +103,7 @@ var mytable = $('#sd').DataTable( {
             var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
             var title = $(cell).text();
             var width = $(cell).width() - 15;
-            $(cell).html(`<input class="form-control form-control-sm" type="text" placeholder="${title}" style="max-width: ${width}px; font-size: 0.75rem;"/><div style="height: 0px"></div>`);
+            $(cell).html(`<input class="form-control form-control-sm" type="text" placeholder="${title}" style="max-width: ${width}px; font-size: 0.75rem;"/>`);
             $('input', $('.filters th').eq($(api.column(colIdx).header()).index()))
                 .off('keyup change')
                 .on('change', function (e) {

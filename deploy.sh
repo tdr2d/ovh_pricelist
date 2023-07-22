@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.1.0
+VERSION=2.3.0
 
 # S3 configuration
 cat << EOF > cors.json
@@ -26,7 +26,7 @@ kubectl create ingress ovh-pricelist-tls -n ovh-pricelist --class=default --rule
 
 
 # K8S Cronjob for computing plans
-docker build -t tdr2d/ovh_pricelist:${VERSION}-job -f Dockerfile-job .
+docker build -t tdr2d/ovh_pricelist:${VERSION}-job .
 docker push tdr2d/ovh_pricelist:${VERSION}job
 
 # deploy it

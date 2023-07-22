@@ -83,8 +83,9 @@ document.addEventListener("DOMContentLoaded", function() {
     mybutton.addEventListener("click", function () { document.getElementById('main').scrollTop = 0; });
     
     // NAV Router Active links
-        document.querySelectorAll('.nav-link').forEach((x) => {
-        x.classList.toggle('active', location.href.includes(x.href))
+    document.querySelectorAll('.nav-link').forEach((el) => {
+        var path = location.pathname == '/' ? '/index.html' : location.pathname;
+        el.classList.toggle('active', path.includes(el.pathname))
     });
 
     // Set sticky action
