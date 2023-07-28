@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - command:
+    - /bin/ash
+    - -c
+    - |
+      set -e
+      rm -rf *.py
+      for file in all privatecloud publiccloud utils baremetal; do
+        echo "Downloading ${file}"
+        wget -q "https://share.s3.gra.io.cloud.ovh.net/jobs/${file}.py"
+      done
+      python3 all.py
+    image: tdr2d/ovh_pricelist:2.5.0-job
+    imagePullPolicy: Always
+    name: compute-plans
+    envFrom:
+    - secretRef:
+        name: s3-share-secrets
+  restartPolicy: Never

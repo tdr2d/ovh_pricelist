@@ -66,6 +66,7 @@ def build_dataset(js):
                         system_storage = addon['product']
                     
                 fqn = '.'.join(list(filter(None, [plan['planCode'], memory_specs['product'], storage_specs['product'], system_storage])))
+                price = server_price + storage_specs['price'] + memory_specs['price']
                 item = {
                     'planCode': plan['planCode'],
                     'product': plan['product'],
@@ -77,29 +78,27 @@ def build_dataset(js):
                     'range': tech_specs['range'],
                     'frame': tech_specs['frame'],
                     'setupfee': server_price,
-                    'price': server_price + storage_specs['price'] + memory_specs['price']
+                    'price': price
                 }
+                if tech_specs['range'].lower() in ['scale', 'hgr']:
+                    item['price_snc'] = round(price * SNC_MARKUP)
                 if item['price'] > 0:
                     plans.append(item)
     return plans
 
 def baremetal():
-    for sub in SUBSIDIARIES:
+    for sub in ['FR']:
         base_api = get_base_api(sub)
-        # data1 = get_json(f'{base_api}/v1/order/catalog/public/eco?ovhSubsidiary={sub}')
         data = get_json(f'{base_api}/v1/order/catalog/public/baremetalServers?ovhSubsidiary={sub}')
         dataset = build_dataset(data)
-        # dataset += build_dataset(data2)
 
         assert len(dataset) > 1000, "Must have more than 1k refs"
         filename = f'baremetal_prices/{sub.lower()}.json'
-
-        upload_gzip_json({
-            'plans': dataset,
-            'date': datetime.now().isoformat(),
-            'currency': data['locale']['currencyCode']
-        }, filename, S3_BUCKET)
+        index = add_index(dataset)
+        data = { 'plans': dataset, 'date': datetime.now().isoformat(), 'currency': data['locale']['currencyCode'] }
+        upload_gzip_json(data , filename, S3_BUCKET)
         print(f'INFO: Uploaded {filename}')
+        yield data, index
 
 if __name__ == '__main__':
     baremetal()

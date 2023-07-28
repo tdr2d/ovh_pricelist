@@ -8,21 +8,6 @@
 </table>
 
 <script type="text/javascript">
-
-function row_html(range, type, desc, row) {
-    var key = 'price_' + conformity;
-    if (!(key in row) && !('price' in row)) {
-        return ''
-    }
-
-    return `<tr>
-        <td>${range.toUpperCase()}</td>
-        <td>${capitalize(type.replaceAll('_', ' '))}</td>
-        <td>${desc}</td>
-        <td>${'price_' + conformity in row ? row['price_' + conformity] : row['price']}</td>
-    </tr>`;
-}
-
 var cache_bust = new Date().toDateString().replaceAll(' ','');
 var exportTitle = `Pricelist.ovh - Private Cloud - ${cache_bust}`;
 var url = `https://share.s3.gra.io.cloud.ovh.net/private-cloud.json?cache_bust=${cache_bust}`;
@@ -38,37 +23,20 @@ fetch(url).then(res => res.json()).then(res => {
     setLastUpdated(res);
 
     var COLUMNS = [
-        "Range",
-        "Type",
-        "Description",
-        `Monthly Price without local taxes (${res.locale.currencyCode})`
+        {title: "Range", key: 'range'},
+        {title: "Type", key: 'type'},
+        {title: "Description", key: 'description'},
+        {title: `Monthly Price without local taxes (${res.locale.currencyCode})`, key: `price_${conformity}`},
     ];
-
-    document.querySelector('#sd-thead > tr').innerHTML = COLUMNS.map((x) => `<th>${x}</th>`).join('');
+    document.querySelector('#sd-thead > tr').innerHTML = COLUMNS.map((x) => `<th>${x.title}</th>`).join('');
 
     var rows = ``;
-    for (var range in res.ranges) {
-        for (var type in res.ranges[range]) {
-            if (type == 'regions') {
-                continue;
-            }
+    var key_price = `price_${conformity}`;
+    var items = res.catalog.filter((x) => x[key_price] > 0);
 
-            for (var i in res.ranges[range][type]) {
-                var row = res.ranges[range][type][i];
-                var description = 'description' in row ? row['description'] : row['invoiceName'];
-                if (type == 'public_ip') {
-                    description = row['invoiceName'] + ' - ' + description;
-                }
-                rows += row_html(range, type, description, row);
-            }
-        }
-    }
-
-    for (var type in res.other) {
-        for (var i in res.other[type]) {
-            var row = res.other[type][i];
-            rows += row_html('', type, 'description' in row ? row['description'] : row['invoiceName'], row)
-        }
+    for (var i in items) {
+        row = COLUMNS.map(x => `<td>${res.catalog[i][x.key]}</td>`).join('');
+        rows += `<tr>${row}</tr>`;
     }
 
     document.querySelector('#sd > tbody').innerHTML = rows;
