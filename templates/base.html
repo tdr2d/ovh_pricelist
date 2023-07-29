@@ -12,8 +12,8 @@
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-1.13.5/b-2.4.1/b-html5-2.4.1/datatables.min.js"></script>
 <link href="styles.css?{{ random_string(8) }}" rel="stylesheet"/>
 </head>
-<body data-bs-theme="dark">
-<nav class="navbar-dark bg-dark">
+<body>
+<nav class="navbar">
     <a class="navbar-brand" href="/" style="display: flex">
         <svg width="79" height="41" viewBox="0 0 79 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M73.14 2.69C76.9967 9.6413 78.7003 17.5821 78.0344 25.5036C77.3685 33.4252 74.3631 40.9701 69.4 47.18H47.96L54.56 35.51H45.83L56.12 17.38H64.9L73.14 2.71V2.69ZM30.8 47.18H8.94001C3.88432 40.9972 0.816836 33.4299 0.140434 25.4719C-0.535968 17.5139 1.21034 9.53738 5.15001 2.59L19.33 27.22L34.96 0H57.96L30.81 47.16L30.8 47.18Z"/>
@@ -49,7 +49,7 @@
             <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
             </svg>
     </button>
-    <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; padding-top: 0.4rem">
         <div class="uppercase" id="sub-list" style="padding-bottom: 10px;"></div>
         <div class="uppercase" id="con-list" style="display: none"></div>
         <div id="cache-time" class="" style="padding-bottom: 10px;"></div> 

@@ -8,7 +8,7 @@
 </table>
 
 <script type="text/javascript">
-var INVISIBLE_COLUMNS = [0,6,7,9,10,11];
+var INVISIBLE_COLUMNS = [0,6,7,9,10,11,19];
 
 // Fetch DATA
 var cache_bust = new Date().toDateString().replaceAll(' ','');
@@ -38,6 +38,7 @@ document.querySelector('#sd > thead').innerHTML =`<tr>
     <th>Disk #1 techno</th>
     <th>Storage price per TB (${res.currency})</th>
     <th>Monthly price (${res.currency})</th>
+    <th>SetupFee (${res.currency})</th>
 </tr>`;
 
 // Set content
@@ -56,10 +57,6 @@ document.querySelector('#sd > tbody').innerHTML = res.plans.reduce((acc, item) =
     if (item['range'].toLowerCase() == 'kimsufi' || item['range'] == 'soyoustart') {
         url = `https://eco.ovhcloud.com/`;
     }
-    
-    // if (item['invoiceName'].split('-').length > 3) {
-        // return acc;
-    // }
 
     return acc + `<tr>
     <td>${item['range'].toUpperCase()} </td>
@@ -81,6 +78,7 @@ document.querySelector('#sd > tbody').innerHTML = res.plans.reduce((acc, item) =
     <td>${item['storageSpecs']['specifications']['disks'][0]['technology']}</td>
     <td>${(item['price'] / storage_amount).toFixed(2)}</td>
     <td>${item['price'].toFixed(2)}</td>
+    <td>${item['setupfee'].toFixed(2)}</td>
 </tr>`;
 }, '');
 
@@ -133,8 +131,8 @@ var mytable = $('#sd').DataTable( {
     dom: 'Bfrtip',
     columnDefs: [{ "targets": INVISIBLE_COLUMNS, "visible": false }, {'targets': [17, 18], 'type': 'num'}],
     buttons: [
-        { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' }, action: () => api.e } },
-        { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
+        { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' }, action: () => api.e } },
+        { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
     ]
 } );
 

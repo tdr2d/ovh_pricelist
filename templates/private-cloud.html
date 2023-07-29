@@ -2,7 +2,7 @@
 {% block title %}Private Cloud Catalog{% endblock %}
 {% block content %}
 
-<table id="sd" class="table nowrap table-hover" style="display: none; width: 100%;">
+<table id="sd" class="table table-hover" style="display: none; width: 100%;">
     <thead id="sd-thead" class="thead-dark"><tr></tr></thead>
     <tbody></tbody>
 </table>
@@ -50,8 +50,8 @@ fetch(url).then(res => res.json()).then(res => {
         dom: 'Bfrtip',
         columnDefs: [{ "targets": [], "visible": false }, {'targets': [3], 'type': 'num'}],
         buttons: [
-            { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
-            { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-light btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
+            { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
+            { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
         ]
     })
 })

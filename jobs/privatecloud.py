@@ -53,6 +53,7 @@ def get_addon_families(obj):
                 if '_eu' in addon['plan']['planCode'] and addon['plan']['planCode'].replace('_eu', '') not in plan_codes:
                     plan_codes[addon['plan']['planCode'].replace('_eu', '')] = item
                 plan_codes[addon['plan']['planCode']] = item
+    # print(*dict.values(plan_codes), sep='\n')
     return plan_codes
 
 def get_backup_options(pcc_plan_codes):
@@ -138,7 +139,6 @@ def parse_windows_licenses(plan_codes, list_of_cores):
             item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - {cores} Cores' }
             for con in CONFORMITY + ['snc']:
                 item['price_'+con] = p['price_default'] * cores
-            # del item['family']
             computed_plans.append(item)
 
     return computed_plans
@@ -210,7 +210,11 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             nsxt_vdc_option_price = plan_codes[nsxt_vdc_option['planCode']] if nsxt_vdc_option is not None else None
             nsxt_ip_option_price = plan_codes[nsxt_ip_option['planCode']] if nsxt_ip_option is not None else None
             pack_datastore = plan_codes[h['storagesPack'][0]] # always X2 this value
-            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"2x Host {h['name']} \n  - {cpu_text}\n  - {ram_text} \n{STORAGE_PACK_DESCRIPTION}"}
+
+            num_host = 2
+            if 'vsan' in h['name'].lower():
+                num_host = 3
+            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n -  {num_host}x Host {h['name']} \n  - {cpu_text}\n  - {ram_text} \n{STORAGE_PACK_DESCRIPTION}"}
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text}"} | plan_codes[h['planCode']]
             cores_quandidates.add(h['specifications']['cpu']['cores'])
 
@@ -223,8 +227,8 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
                 # CRITICAL PRICING FORMULA FOR PACKS
                 pack_price = nsxt_vdc_option_price[price_key] if nsxt_vdc_option_price is not None else 0
                 pack_price += nsxt_ip_option_price[price_key] if nsxt_ip_option_price is not None else 0
-                pack_price += pack_datastore[price_key] * 2 + plan_codes[managementFeePlanCode][price_key] + 2 * price_host 
-                pack[price_key] = pack_price
+                pack_price += pack_datastore[price_key] * 2 + plan_codes[managementFeePlanCode][price_key] + num_host * price_host
+                pack[price_key] = round(pack_price)
 
                 if cr['name'] != 'essentials' and conformity == 'default':
                     pack['price_snc'] = round(pack_price * SNC_MARKUP)
@@ -261,7 +265,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
 
 def privatecloud():
     subs = {}
-    for sub in ['FR']: # SUBSIDIARIES:
+    for sub in SUBSIDIARIES:
         products = {
             'date': datetime.now().isoformat(),
             'locale': get_json(f'{get_base_api(sub)}/1.0/order/catalog/public/cloud?ovhSubsidiary={sub}')['locale'],
