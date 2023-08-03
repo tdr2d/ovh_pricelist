@@ -17,7 +17,7 @@ spec:
         echo "Downloading ${file}"
         wget -q "https://share.s3.gra.io.cloud.ovh.net/jobs/${file}.py"
       done
-      python3 all.py
+      S3_REGION=gra python3 all.py
     image: tdr2d/ovh_pricelist:2.5.0-job
     imagePullPolicy: Always
     name: compute-plans

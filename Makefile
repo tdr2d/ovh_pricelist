@@ -1,15 +1,17 @@
-ENDPOINT := https://s3.gra.io.cloud.ovh.net/
+ENDPOINT := https://s3.gra.io.cloud.ovh.net/  # PROD
+ENDPOINT_DEV := https://s3.sbg.io.cloud.ovh.net/
 
 help: ## Show this help
 	@grep -E "^[a-z_-]+:|^##" Makefile | sed -E 's/([\s_]+):.*##(.*)/\1:\2/' | column -s: -t | sed -e 's/##//'
 
-
 build: ## build static html files
-	jinja templates/index.html -o static/index.html
-	jinja templates/private-cloud.html -o static/private-cloud.html
-	jinja templates/public-cloud.html -o static/public-cloud.html
+	jinja templates/index.html -E S3_BUCKET -E S3_REGION -o static/index.html
+	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
+	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html
 
-upload_static: build
+upload_static:
+	export S3_BUCKET=share
+	S3_BUCKET=share S3_REGION=gra $(MAKE) build
 	aws s3 --endpoint-url $(ENDPOINT) sync --acl public-read static s3://share/
 
 purge_s3_objects:

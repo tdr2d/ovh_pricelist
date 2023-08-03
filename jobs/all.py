@@ -44,8 +44,8 @@ def save_indexes(bm, pcc=None, pci=None):
 
 if __name__ == '__main__':
     print('Getting Baremetal Catalog')
-    baremetal_gen = exponential_backoff(baremetal)
-    save_indexes(baremetal_gen)
+    bm_catalog_gen = exponential_backoff(baremetal)
+    save_indexes(bm_catalog_gen)
 
     # print('Getting Private Cloud Catalog')
     # privatecloud_cat_idx = exponential_backoff(privatecloud)

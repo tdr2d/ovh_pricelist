@@ -8,86 +8,43 @@
 </table>
 
 <script type="text/javascript">
-var INVISIBLE_COLUMNS = [0,6,7,9,10,11,19];
+var INVISIBLE_COLUMNS = [0,5,6,8,9,10,15];
 
 // Fetch DATA
 var cache_bust = new Date().toDateString().replaceAll(' ','');
 var exportTitle = `Pricelist.ovh - Baremetal Servers - ${cache_bust}`;
-var url = `https://share.s3.gra.io.cloud.ovh.net/baremetal_prices/${sub.toLowerCase()}.json?cache_bust=${cache_bust}`;
+var url = `${BUCKET_ROOT}/baremetal_prices/${sub.toLowerCase()}.json?cache_bust=${cache_bust}`;
 fetch(url).then(res => res.json()).then(res => {
-setLastUpdated(res);
-
-// Set header
-document.querySelector('#sd > thead').innerHTML =`<tr>
-    <th>Range</th>
-    <th>Name</th>
-    <th>CPU model</th>
-    <th>CPU cores</th>
-    <th>CPU threads</th>
-    <th>CPU speed (GHz)</th>
-    <th>CPU score</th>
-    <th>RAM summary</th>
-    <th>RAM (GB)</th>
-    <th>RAM clock speed (GHz)</th>
-    <th>RAM type</th>
-    <th>Storage summary</th>
-    <th>Storage RAID type</th>
-    <th>Storage (TB)</th>
-    <th>Disk #1 amount</th>
-    <th>Disk #1 capacity</th>
-    <th>Disk #1 techno</th>
-    <th>Storage price per TB (${res.currency})</th>
-    <th>Monthly price (${res.currency})</th>
-    <th>SetupFee (${res.currency})</th>
-</tr>`;
-
-// Set content
-document.querySelector('#sd > tbody').innerHTML = res.plans.reduce((acc, item) => {
-    var storage_amount = item['storageSpecs']['specifications']['disks'][0]['number'] * item['storageSpecs']['specifications']['disks'][0]['capacity'];
-    
-    // If second disk exist, we sum the amount of GB.
-    if (item['storageSpecs']['specifications']['disks'].length > 1 && item['storageSpecs']['specifications']['disks'][1]['number'] != '') {
-        storage_amount += item['storageSpecs']['specifications']['disks'][1]['number'] * item['storageSpecs']['specifications']['disks'][1]['capacity'];
-    }
-    storage_amount = Math.round(storage_amount / 1000)
-    
-    var range = item['range'] == 'hgr' ? 'high-grade' : item['range'];
-    var server = item['invoiceName'].toLowerCase().replace('advance', 'adv').split(' ')[0]
-    var url = `https://www.ovhcloud.com/en-ie/bare-metal/${range}/${server}/`;
-    if (item['range'].toLowerCase() == 'kimsufi' || item['range'] == 'soyoustart') {
-        url = `https://eco.ovhcloud.com/`;
-    }
-
-    return acc + `<tr>
-    <td>${item['range'].toUpperCase()} </td>
-    <td><a href="${url}" target="_blank">${item['invoiceName']} </a></td>
-    <td>${item['cpu']['brand']} ${item['cpu']['model']}</td>
-    <td>${item['cpu']['cores']}</td>
-    <td>${item['cpu']['threads']}</td>
-    <td>${item['cpu']['frequency']}</td>
-    <td>${item['cpu']['score']}</td>
-    <td>${item['memory']['invoiceName']}</td>
-    <td>${item['memory']['specifications']['size']}</td>
-    <td>${item['memory']['specifications']['frequency']}</td>
-    <td>${item['memory']['specifications']['ramType']}</td>
-    <td>${item['storageSpecs']['invoiceName']}</td>
-    <td>${item['storageSpecs']['specifications']['raid']}</td>
-    <td>${storage_amount}</td>
-    <td>${item['storageSpecs']['specifications']['disks'][0]['number']}</td>
-    <td>${item['storageSpecs']['specifications']['disks'][0]['capacity']}</td>
-    <td>${item['storageSpecs']['specifications']['disks'][0]['technology']}</td>
-    <td>${(item['price'] / storage_amount).toFixed(2)}</td>
-    <td>${item['price'].toFixed(2)}</td>
-    <td>${item['setupfee'].toFixed(2)}</td>
-</tr>`;
-}, '');
-
+var COLUMNS = [
+    {title: `Range`, key: 'range', render: (item)=> {
+        var url = `https://www.ovhcloud.com/en-ie/bare-metal/${item['range']}/${item['name']}/`;
+        return `<a href="${url}" target="_blank">${item['name']}</a>`;
+    }},
+    {title: `Name`, key: 'name' },
+    {title: `CPU model`, key: 'cpu_model' },
+    {title: `CPU cores`, key: 'cpu_cores' },
+    {title: `CPU threads`, key: 'cpu_threads' },
+    {title: `CPU speed (GHz)`, key: 'cpu_speed' },
+    {title: `RAM summary`, key: 'ram' },
+    {title: `RAM (GB)`, key: 'ram_size' },
+    {title: `RAM clock speed (GHz)`, key: 'ram_speed' },
+    {title: `RAM type`, key: 'ram_type' },
+    {title: `Storage summary`, key: 'storage' },
+    {title: `Storage RAID type`, key: 'storage_raid_type' },
+    {title: `Storage (TB)`, key: 'storage_total_tbytes' },
+    {title: `Storage price per TB (${res.currency})`, key: 'price', render: (item) => `${(item['price'] / storage_amount).toFixed(2)}` },
+    {title: `Monthly price (${res.currency})`, key: 'price', render: (item) => `${item['price'].toFixed(2)}` },
+    {title: `SetupFee (${res.currency})`, key: 'setupfee', render: (item) => `${item['setupfee'].toFixed(2)}` },
+];
 
 $(document).ready(function() {
-    $('#sd thead tr')
-    .clone(true)
-    .addClass('filters')
-    .appendTo('#sd thead');
+    setLastUpdated(res);
+    document.querySelector('#sd > thead').innerHTML = '<tr>' + COLUMNS.map(x=> `<th>${x.title}</th>`).join('') + '</tr>'
+    document.querySelector('#sd > tbody').innerHTML = res.plans.reduce((acc, item) => {
+        return acc + '<tr>' + COLUMNS.map(col => '<td>'+('render' in col) ? `${col.render(item)}` : `${item[col.key]}` + '</td>').join('') + '</tr>';
+    }, '');
+
+    $('#sd thead tr').clone(true).addClass('filters').appendTo('#sd thead');
 
 var mytable = $('#sd').DataTable( {
     initComplete: function () {
@@ -131,7 +88,7 @@ var mytable = $('#sd').DataTable( {
     dom: 'Bfrtip',
     columnDefs: [{ "targets": INVISIBLE_COLUMNS, "visible": false }, {'targets': [17, 18], 'type': 'num'}],
     buttons: [
-        { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' }, action: () => api.e } },
+        { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
         { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
     ]
 } );

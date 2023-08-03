@@ -13,6 +13,7 @@ SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN
 S3_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID')
 S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
 S3_BUCKET = os.getenv('S3_BUCKET')
+S3_REGION = os.getenv('S3_REGION', 'sbg') 
 API_US = 'https://api.us.ovhcloud.com'
 API_EU = 'https://api.ovh.com'
 API_CA = 'https://ca.api.ovh.com'
@@ -40,8 +41,8 @@ def s3():
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#examples
     return boto3.client(
         "s3",
-        endpoint_url="https://s3.gra.io.cloud.ovh.net/",
-        region_name='gra',
+        endpoint_url=f"https://s3.{S3_REGION}.io.cloud.ovh.net/",
+        region_name=S3_REGION,
         aws_access_key_id=S3_ACCESS_KEY_ID,
         aws_secret_access_key=S3_SECRET_ACCESS_KEY,
     )
@@ -62,12 +63,12 @@ def get_json(url):
     return json.loads(urllib.request.urlopen(req).read().decode("utf-8"))
 
 
-def exponential_backoff(fun):
-    for tries in range(5):
+def exponential_backoff(fun, tries=5):
+    for i in range(tries):
         try:
             return fun()
         except Exception as e:
             print(e)
-            print(f'Retrying {tries}')
-            time.sleep(2**tries)
+            print(f'Retrying {i}')
+            time.sleep(2**i)
     raise ValueError("Number of tries exceeded")

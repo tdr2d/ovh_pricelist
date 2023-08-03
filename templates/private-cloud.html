@@ -10,7 +10,7 @@
 <script type="text/javascript">
 var cache_bust = new Date().toDateString().replaceAll(' ','');
 var exportTitle = `Pricelist.ovh - Private Cloud - ${cache_bust}`;
-var url = `https://share.s3.gra.io.cloud.ovh.net/private-cloud.json?cache_bust=${cache_bust}`;
+var url = `${BUCKET_ROOT}/private-cloud.json?cache_bust=${cache_bust}`;
 
 document.addEventListener("DOMContentLoaded", function() {
     var conlist = document.getElementById('con-list');
