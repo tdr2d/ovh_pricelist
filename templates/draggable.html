@@ -1,68 +1,28 @@
 <style>
 .draggable-table {
-  position: absolute;
-  top: 25%;
-  left: 20%;
-  width: 60%;
-  height: 50%;
+  position: relative;
   border-collapse: collapse;
-  background: white;  
-  -webkit-box-shadow: 0px 0px 10px 8px rgba(0, 0, 0, 0.1);
-          box-shadow: 0px 0px 10px 8px rgba(0, 0, 0, 0.1);  
+  background-color: transparent;
 }
 .draggable-table__drag {
-    font-size: .95em;
-    font-weight: lighter;
-    text-transform: capitalize;    
     position: absolute;
-    width: 100%;
-    text-indent: 50px;    
-    border: 1px solid #f1f1f1;
+    /* text-indent: 50px; */
+    /* border: 1px solid #f1f1f1; */
     z-index: 10;
     cursor: grabbing;
     -webkit-box-shadow: 2px 2px 3px 0px rgba(0, 0, 0, 0.05);
             box-shadow: 2px 2px 3px 0px rgba(0, 0, 0, 0.05); 
-  
     opacity: 1;
-}  
-  
-thead th {
-    height: 25px;
-    font-weight: bold;
-    text-transform: capitalize;
-    padding: 10px;
-    user-select: none;
+    background-color: white;
 }
 
-tbody tr {
-    cursor: grabbing;
-  }
-
-tbody tr td {
-  font-size: .95em;
-  font-weight: lighter;
-  text-transform: capitalize;
-  text-indent: 50px;
-  padding: 10px;  
-  user-select: none;
-  border-top: 1px solid whitesmoke;
+tr.draggable-table__drag {
+  background-color: white;
 }
-    
-tr:nth-child(even) {
-    background-color: #f7f7f7;
-}
-
-tr:nth-child(odd) {
-    background-color: #ffffff;
-}    
 
 tr.is-dragging {
-  background: #f1c40f;
+  background: #8c8ff5;
 }    
-
-tr.is-dragging  td {
-    color: #ffe683;
-}
 
 </style>
 <script>
@@ -154,8 +114,8 @@ function draggable(tableElement) {
     function addDraggableRow(target) {    
         dragElem = target.cloneNode(true);
         dragElem.classList.add('draggable-table__drag');
-        dragElem.style.height = getStyle(target, 'height');
-        dragElem.style.background = getStyle(target, 'backgroundColor');     
+        // dragElem.style.height = getStyle(target, 'height');
+        // dragElem.style.background = getStyle(target, 'backgroundColor');     
         for(var i = 0; i < target.children.length; i++) {
           let oldTD = target.children[i],
               newTD = dragElem.children[i];
