@@ -25,11 +25,14 @@ def build_dataset(js):
 
     # Loop on servers
     for plan in js['plans']:
-        server_name = plan['invoiceName'].upper().replace('ADVANCE', 'ADV').split(' ')[0]
-        base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage': None, 'storage_system': None}
+        server_name = plan['invoiceName'].upper().replace('ADVANCE', 'ADV') # .split(' ')[0]
+        base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage': None, 'storage_system': None, 'gpu': None}
         tech_specs = products[plan['planCode']] if plan['planCode'] in products else products[plan['product']]
         server_range = 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range']
-        server_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']))['price'] / 100000000
+        has_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']), None)
+        if has_price is None:
+            continue
+        server_price = has_price['price'] / 100000000
 
         # Loop on server options (ram,storage,bandwidth)
         if not len(plan['addonFamilies']):
@@ -65,17 +68,11 @@ def build_dataset(js):
                         base_addon_options['pub_bp'] = addons[x]
                     else:
                         server_options.append(item)
+            elif addon_family['name'] == 'gpu':
+                base_addon_options['gpu'] = addons[addon_family['addons'][0]]
         
-        # print(server_name)
-        # print(server_price)
-        # print(base_addon_options)
-        # print(plan)
-
         storage_specs = products[base_addon_options['storage']['product']]
         memory_specs = products[base_addon_options['memory']['product']]
-
-        # price = server_price + base_addon_options['storage']['price'] + base_addon_options['memory']['price']
-        # print(base_addon_options['memory']['price'])
         storage_amount = storage_specs['storage']['disks'][0]['number'] * storage_specs['storage']['disks'][0]['capacity']
         if (len(storage_specs['storage']['disks']) > 1 and storage_specs['storage']['disks'][1]['number'] != ''):
             storage_amount += storage_specs['storage']['disks'][1]['number'] * storage_specs['storage']['disks'][1]['capacity']
@@ -102,6 +99,8 @@ def build_dataset(js):
 
         item['description'] = f"Dedicated Server {item['name']}\n"
         item['description'] += f"CPU: {tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']} {tech_specs['server']['cpu']['cores']} Cores/{tech_specs['server']['cpu']['threads']} Threads\n"
+        if base_addon_options['gpu'] is not None:
+            item['description'] += f"GPU: {base_addon_options['gpu']['invoiceName']}\n"
         item['description'] += f"RAM: {base_addon_options['memory']['invoiceName']}\n"
         item['description'] += f"Storage: {base_addon_options['storage_system']['invoiceName'] + ' + ' if base_addon_options['storage_system'] else ''}{base_addon_options['storage']['invoiceName']}\n"
         item['description'] += f"Default Public Bandwidth: {base_addon_options['pub_bp']['invoiceName']}"
@@ -116,29 +115,29 @@ def build_dataset(js):
     return plans + server_options
 
 def postprocessing(dataset):
-    df = pd.DataFrame(dataset)
+    df = pd.DataFrame(dataset).round(2)
     df = df.drop_duplicates(subset=['description'])
     df = df.fillna('')
     return df.to_dict('records')
 
-# TODO GROUP all sub in one file
 def baremetal():
-    for sub in ['FR']:
-        base_api = get_base_api(sub)
-        data = get_json(f'{base_api}/v1/order/catalog/public/baremetalServers?ovhSubsidiary={sub}')
-        
+    catalog, indexes = {}, {}
+    for sub in SUBSIDIARIES:
+        url = f'{get_base_api(sub)}/v1/order/catalog/public/baremetalServers?ovhSubsidiary={sub}'
+        print(url)
+        data = get_json(url)
         dataset = build_dataset(data)
         dataset = postprocessing(dataset)
-        print(len(dataset))
-        json.dump(dataset, open('tmp.json', 'w+'))
+        # print(len(dataset))
+        # json.dump(dataset, open('tmp.json', 'w+'))
+
         assert len(dataset) > 500, "Must have more than 1k refs"
-        filename = f'baremetal_prices/{sub.lower()}.json'
         index = add_index(dataset)
-        data = { 'plans': dataset, 'date': datetime.now().isoformat(), 'currency': data['locale']['currencyCode'] }
-        upload_gzip_json(data , filename, S3_BUCKET)
-        print(f'INFO: Uploaded {filename}')
-        yield data, index
+        data = { 'catalog': dataset, 'date': datetime.now().isoformat(), 'locale': data['locale'], 'currency': data['locale']['currencyCode'] }
+        catalog[sub] = data
+        indexes[sub] = index
+    upload_gzip_json(catalog , 'baremetal_prices.json', S3_BUCKET)
+    return catalog, indexes
 
 if __name__ == '__main__':
-    # print('HERE')
-    list(baremetal())
+    baremetal()

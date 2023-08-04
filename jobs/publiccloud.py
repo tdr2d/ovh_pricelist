@@ -50,7 +50,9 @@ MONTHLY_ONLY_FAMILIES = ['databases', 'instance', 'gateway', 'loadbalancer', 'oc
 
 
 def get_cloud_prices(sub):
-    cloud = get_json(f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}')
+    url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
+    print(url)
+    cloud = get_json(url)
     families = next(filter(lambda x: x['invoiceName'] == 'Public Cloud Project', cloud['plans']))['addonsFamily']
     currency = cloud['plans'][0]['details']['pricings']['default'][0]['price']['currencyCode']
 
@@ -105,7 +107,6 @@ def get_cloud_prices(sub):
                     continue
                 rows.append(item)
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
-
 
 
 COLUMNS_RENAME = {
@@ -213,22 +214,24 @@ def get_webpage():
 
 def publiccloud():
     subs = {}
+    indexes = {}
     df_desc = get_webpage()
 
     for sub in SUBSIDIARIES:
-        print(sub)
         publiccloud = get_cloud_prices(sub)
         df_agora = pd.DataFrame(publiccloud['catalog'])
 
         df = pd.merge(df_agora, df_desc, how='left', on='key')
         df['description'] = df['description'].combine_first(df['invoiceName'])
         df.drop(['invoiceName', 'key'], axis=1, inplace=True)
-        publiccloud['catalog'] = df.to_dict('records')
+        catalog = df.to_dict('records')
+        index = add_index(catalog)
+        publiccloud['catalog'] = catalog
         subs[sub] = publiccloud
+        indexes[sub] = index
 
     upload_gzip_json(subs, f'public-cloud.json', S3_BUCKET)
-    # df.to_csv('tmp.csv', sep='\t', index=False)
-    # print(df)
+    return subs, indexes
 
 if __name__ == '__main__':
     publiccloud()

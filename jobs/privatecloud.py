@@ -265,6 +265,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
 
 def privatecloud():
     subs = {}
+    indexes = {}
     for sub in SUBSIDIARIES:
         products = {
             'date': datetime.now().isoformat(),
@@ -286,11 +287,16 @@ def privatecloud():
         df['range'] = df['range'].fillna('').apply(lambda x: x.upper())
         df.fillna(0, inplace=True)
 
-        products['catalog'] = df.to_dict('records')
+        catalog = df.to_dict('records')
+        index = add_index(catalog)
+        products['catalog'] = catalog
         subs[sub] = products
+        indexes[sub] = index
 
     # json.dump(subs, open('tmp.json', 'w+'))
     upload_gzip_json(subs, f'private-cloud.json', S3_BUCKET)
+    return subs, indexes
+
 
 if __name__ == '__main__':
     privatecloud()

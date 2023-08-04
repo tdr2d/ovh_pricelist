@@ -2,91 +2,58 @@
 {% block title %}Baremetal Servers Catalog{% endblock %}
 {% block content %}
 
-<table id="sd" class="table nowrap table-hover" style="display: none; width: 100%;">
+<table id="sd" class="table table-hover" style="display: none; width: 100%;">
     <thead id="sd-thead" class="thead-dark"></thead>
     <tbody></tbody>
 </table>
 
 <script type="text/javascript">
-var INVISIBLE_COLUMNS = [0,5,6,8,9,10,15];
 
 // Fetch DATA
 var cache_bust = new Date().toDateString().replaceAll(' ','');
 var exportTitle = `Pricelist.ovh - Baremetal Servers - ${cache_bust}`;
-var url = `${BUCKET_ROOT}/baremetal_prices/${sub.toLowerCase()}.json?cache_bust=${cache_bust}`;
-fetch(url).then(res => res.json()).then(res => {
-var COLUMNS = [
-    {title: `Range`, key: 'range', render: (item)=> {
-        var url = `https://www.ovhcloud.com/en-ie/bare-metal/${item['range']}/${item['name']}/`;
-        return `<a href="${url}" target="_blank">${item['name']}</a>`;
-    }},
-    {title: `Name`, key: 'name' },
-    {title: `CPU model`, key: 'cpu_model' },
-    {title: `CPU cores`, key: 'cpu_cores' },
-    {title: `CPU threads`, key: 'cpu_threads' },
-    {title: `CPU speed (GHz)`, key: 'cpu_speed' },
-    {title: `RAM summary`, key: 'ram' },
-    {title: `RAM (GB)`, key: 'ram_size' },
-    {title: `RAM clock speed (GHz)`, key: 'ram_speed' },
-    {title: `RAM type`, key: 'ram_type' },
-    {title: `Storage summary`, key: 'storage' },
-    {title: `Storage RAID type`, key: 'storage_raid_type' },
-    {title: `Storage (TB)`, key: 'storage_total_tbytes' },
-    {title: `Storage price per TB (${res.currency})`, key: 'price', render: (item) => `${(item['price'] / storage_amount).toFixed(2)}` },
-    {title: `Monthly price (${res.currency})`, key: 'price', render: (item) => `${item['price'].toFixed(2)}` },
-    {title: `SetupFee (${res.currency})`, key: 'setupfee', render: (item) => `${item['setupfee'].toFixed(2)}` },
-];
+var url = `${BUCKET_ROOT}/baremetal_prices.json?cache_bust=${cache_bust}`;
 
-$(document).ready(function() {
+fetch(url).then(res => res.json()).then(res => {
+    res = res[sub];
+    for (var i in res.catalog) {
+        res.catalog[i].description = res.catalog[i].description.replace(/(Dedicated.*?)\n(CPU\:.+$)/gm, (m,p1,p2) => `<b>${p1}</b><br>${p2}` );
+    }
+    var COLUMNS = [
+        {title: `Range`, key: 'range', hidden: true},
+        {title: `Server Name`, key: 'name' },
+        {title: `Description`, key: 'description' },
+        {title: `CPU model`, key: 'cpu_model', hidden: true },
+        {title: `CPU cores`, key: 'cpu_cores', hidden: true },
+        {title: `CPU threads`, key: 'cpu_threads', hidden: true },
+        {title: `CPU speed (GHz)`, key: 'cpu_speed', hidden: true },
+        {title: `RAM summary`, key: 'ram', hidden: true },
+        {title: `RAM (GB)`, key: 'ram_size', hidden: true },
+        {title: `RAM clock speed (GHz)`, key: 'ram_speed', hidden: true },
+        {title: `RAM type`, key: 'ram_type', hidden: true },
+        {title: `Storage summary`, key: 'storage', hidden: true },
+        {title: `Storage RAID type`, key: 'storage_raid_type', hidden: true },
+        {title: `Storage (TB)`, key: 'storage_total_tbytes', hidden: true },
+        {title: `Monthly price (${res.currency})`, key: 'price'},
+        {title: `SetupFee (${res.currency})`, key: 'setupfee', hidden: true},
+    ];
+
+    $(document).ready(function() {
     setLastUpdated(res);
     document.querySelector('#sd > thead').innerHTML = '<tr>' + COLUMNS.map(x=> `<th>${x.title}</th>`).join('') + '</tr>'
-    document.querySelector('#sd > tbody').innerHTML = res.plans.reduce((acc, item) => {
-        return acc + '<tr>' + COLUMNS.map(col => '<td>'+('render' in col) ? `${col.render(item)}` : `${item[col.key]}` + '</td>').join('') + '</tr>';
+    document.querySelector('#sd > tbody').innerHTML = res.catalog.reduce((acc, item) => {
+        return acc + '<tr>' + COLUMNS.map(col => `<td>${item[col.key]}</td>`).join('') + '</tr>';
     }, '');
 
-    $('#sd thead tr').clone(true).addClass('filters').appendTo('#sd thead');
-
-var mytable = $('#sd').DataTable( {
-    initComplete: function () {
-        var api = this.api();
-
-        $('#sd').show();
-        api.columns().eq(0).each(function (colIdx) {
-            if (INVISIBLE_COLUMNS.indexOf(colIdx) != -1) {
-                return;
-            }
-            var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
-            var title = $(cell).text();
-            var width = $(cell).width() - 15;
-            $(cell).html(`<input class="form-control form-control-sm" type="text" placeholder="${title}" style="max-width: ${width}px; font-size: 0.75rem;"/>`);
-            $('input', $('.filters th').eq($(api.column(colIdx).header()).index()))
-                .off('keyup change')
-                .on('change', function (e) {
-                    $(this).attr('title', $(this).val());
-                    var regexr = '({search})';
-                    var cursorPosition = this.selectionStart;
-                    api.column(colIdx)
-                        .search(
-                            this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
-                            this.value != '',
-                            this.value == ''
-                        )
-                        .draw();
-                })
-                .on('keyup', function (e) {
-                    e.stopPropagation();
-                    $(this).trigger('change');
-                    $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
-                });
-            })
-        },
+    $('#sd').show();
+    var mytable = $('#sd').DataTable( {
     header: true,
     ordering: true,
     orderCellsTop: true,
-    order: [[ 18, "asc" ]],
+    order: [[ 1, "asc" ]],
     paging: false,
     dom: 'Bfrtip',
-    columnDefs: [{ "targets": INVISIBLE_COLUMNS, "visible": false }, {'targets': [17, 18], 'type': 'num'}],
+    columnDefs: [{ "targets": COLUMNS.map((x, i) => x.hidden ? i : -1).filter(x => x != -1), "visible": false }, {'targets': [COLUMNS.length-2, COLUMNS.length-1], 'type': 'num'}],
     buttons: [
         { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
         { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
