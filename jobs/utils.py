@@ -10,7 +10,7 @@ from itertools import product
 ssl._create_default_https_context = ssl._create_unverified_context
 
 SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
-# SUBSIDIARIES = ['FR']
+SUBSIDIARIES = ['FR']
 TZ_DCS = ['RBX', 'SBG']
 S3_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID')
 S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
@@ -20,13 +20,24 @@ API_US = 'https://api.us.ovhcloud.com'
 API_EU = 'https://api.ovh.com'
 API_CA = 'https://ca.api.ovh.com'
 SNC_MARKUP = 1.12
+ENCODING_PREFIXES = {
+    'index_version': 'v([0-9]+)',
+    'condition': 'c-',  # 'abcdefghij'
+    'zone': 'z-([A-Z ]+)', # Prefix
 
+    'bm': 'b-',  # Prefix
+    'pcc': 'q-', # Prefix
+    'pci': 'p-', # Prefix
 
-def add_index(catalog):
+    'commitment': 'e-', # Prefix
+    'discount': 'd-',   # Prefix
+}
+
+def index_catalog(catalog, prefix='b-'):
     index = {}
     keys = product('abcdefghijklmnopkrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', repeat=2) # 3844 uniq keys
     for item in catalog:
-        key = ''.join(next(keys))
+        key = prefix + ''.join(next(keys))
         index[key] = item
     return index
 

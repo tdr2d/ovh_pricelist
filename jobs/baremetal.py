@@ -121,7 +121,7 @@ def postprocessing(dataset):
     return df.to_dict('records')
 
 def baremetal():
-    catalog, indexes = {}, {}
+    catalog = {}
     for sub in SUBSIDIARIES:
         url = f'{get_base_api(sub)}/v1/order/catalog/public/baremetalServers?ovhSubsidiary={sub}'
         print(url)
@@ -132,12 +132,10 @@ def baremetal():
         # json.dump(dataset, open('tmp.json', 'w+'))
 
         assert len(dataset) > 500, "Must have more than 1k refs"
-        index = add_index(dataset)
         data = { 'catalog': dataset, 'date': datetime.now().isoformat(), 'locale': data['locale'], 'currency': data['locale']['currencyCode'] }
         catalog[sub] = data
-        indexes[sub] = index
     upload_gzip_json(catalog , 'baremetal_prices.json', S3_BUCKET)
-    return catalog, indexes
+    return catalog
 
 if __name__ == '__main__':
     baremetal()

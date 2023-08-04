@@ -8,7 +8,9 @@ body {
     overflow: hidden;
     background: url("background-white.jpg") center/cover no-repeat; 
 }
-
+h3 { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; padding: 22px 0; margin: 0; }
+.sep { display: inline-block; height: 1px; background: var(--bs-body-color); flex-grow: 1; margin-left: 21px; }
+.float-right { float: right; }
 /* input.form-control, .form-control::placeholder, input.form-control, .form-control:focus { */
     /* background-color: transparent; */
     /* border: 1px solid #848484; */

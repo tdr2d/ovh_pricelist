@@ -214,7 +214,6 @@ def get_webpage():
 
 def publiccloud():
     subs = {}
-    indexes = {}
     df_desc = get_webpage()
 
     for sub in SUBSIDIARIES:
@@ -225,13 +224,11 @@ def publiccloud():
         df['description'] = df['description'].combine_first(df['invoiceName'])
         df.drop(['invoiceName', 'key'], axis=1, inplace=True)
         catalog = df.to_dict('records')
-        index = add_index(catalog)
         publiccloud['catalog'] = catalog
         subs[sub] = publiccloud
-        indexes[sub] = index
 
     upload_gzip_json(subs, f'public-cloud.json', S3_BUCKET)
-    return subs, indexes
+    return subs
 
 if __name__ == '__main__':
     publiccloud()

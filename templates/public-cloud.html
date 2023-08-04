@@ -13,7 +13,7 @@ var exportTitle = `Pricelist.ovh - Public Cloud - ${cache_bust}`;
 
 fetch(`${BUCKET_ROOT}/public-cloud.json?sub=${sub}&cache_bust=${cache_bust}`).then(res => res.json()).then(res => {
     res = res[sub];
-    setLastUpdated(res);
+    setLastUpdated(res.date);
 
     var COLUMNS = [
         {text: "Family", key: 'family'},

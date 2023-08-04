@@ -39,7 +39,7 @@ fetch(url).then(res => res.json()).then(res => {
     ];
 
     $(document).ready(function() {
-    setLastUpdated(res);
+    setLastUpdated(res.date);
     document.querySelector('#sd > thead').innerHTML = '<tr>' + COLUMNS.map(x=> `<th>${x.title}</th>`).join('') + '</tr>'
     document.querySelector('#sd > tbody').innerHTML = res.catalog.reduce((acc, item) => {
         return acc + '<tr>' + COLUMNS.map(col => `<td>${item[col.key]}</td>`).join('') + '</tr>';

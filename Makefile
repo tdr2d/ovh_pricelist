@@ -5,6 +5,7 @@ help: ## Show this help
 	@grep -E "^[a-z_-]+:|^##" Makefile | sed -E 's/([\s_]+):.*##(.*)/\1:\2/' | column -s: -t | sed -e 's/##//'
 
 build: ## build static html files
+	jinja templates/calculator.html -E S3_BUCKET -E S3_REGION -o static/calculator.html
 	jinja templates/index.html -E S3_BUCKET -E S3_REGION -o static/index.html
 	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
 	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html

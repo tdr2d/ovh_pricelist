@@ -67,8 +67,14 @@ var CONFORMITY = ['default', 'hds', 'hipaa', 'pcidss', 'snc'];
 var sub = new URLSearchParams(location.search).get('sub') || 'FR';
 var conformity = new URLSearchParams(location.search).get('con') || 'default';
 
-function setLastUpdated(res) {
-    document.getElementById('cache-time').innerText = 'Last updated: ' + new Date(res.date).toString();
+function setLastUpdated(date) {
+    document.getElementById('cache-time').innerText = 'Last updated: ' + new Date(date).toString();
+}
+
+function setConformityList() {
+    var conlist = document.getElementById('con-list');
+    conlist.innerHTML = 'Conformity: '  + CONFORMITY.reduce((acc, c, idx) => acc + `${idx != 0 ? '/' :''} <a href="${setURLParams({sub: sub, con: c})}">${c == conformity ? '<b>'+c+'</b>' : c}</a> `, '');
+    conlist.style.display = 'block';
 }
 
 function setURLParams(dict) {
@@ -94,11 +100,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Set sticky action
     const el = document.getElementById("sd-thead");
-    const observer = new IntersectionObserver( 
-        ([e]) => e.target.classList.toggle("stuck", e.intersectionRatio < 1),
-        {threshold: [1] }
-    );
-    observer.observe(el);
+    if (el) {
+        const observer = new IntersectionObserver( 
+            ([e]) => e.target.classList.toggle("stuck", e.intersectionRatio < 1),
+            {threshold: [1] }
+        );
+        observer.observe(el);
+    }
+
 
     // SUB get parameter
     document.getElementById('sub-list').innerHTML = SUBSIDIARIES.reduce((acc, s, idx) => acc + `${idx != 0 ? '/' :''} <a href="${setURLParams({con: conformity, sub: s})}">${s == sub ? '<b>'+s+'</b>' : s}</a> `, '');

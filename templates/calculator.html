@@ -1,40 +1,200 @@
 {% extends "base.html" %}
 {% block title %}Cost Calculator{% endblock %}
 {% block content %}
+<style>
+.list-group {
+    padding: 10px;
+    background: white;
+    border-radius: 0 0 7px 7px;
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+  }
 
-<div id="#item" style="display: none">
-    <label for="exampleDataList" class="form-label">Datalist example</label>
-    <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search...">
-    <datalist id="datalistOptions">
-        <option value="San Francisco">
-        <option value="Chicago">
-    </datalist>
-</div>
+.list-group li {
+    list-style: none;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.list-group div { padding: 10px; }
+.list-group li:hover {  background: #dfe4ea; }
+</style>
+{% include 'draggable.html' %}
 
-<div>
-    <div>
-        
-        <div>
-            <div>ITEM</div>
-            ADD ITEM
-        </div>
+<h3>Cost Calculator <span class="sep"></span></h3>
 
-        ADD Zone
+<div class="row g-3 align-items-center">
+    <div class="col-auto">
+        <label for="title" class="col-form-label">Title</label>
+    </div>
+    <div class="col-auto">
+        <input type="text" id="title" class="form-control form-control-sm" placeholder="Title of my estimate">
     </div>
 
+    <div class="col-auto">
+        <label for="company" class="col-form-label">Company</label>
+    </div>
+    <div class="col-auto">
+        <input type="text" id="company" class="form-control form-control-sm" placeholder="Company">
+    </div>
 
-    <label for="exampleDataList" class="form-label">Datalist example</label>
-    <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search...">
-    <datalist id="datalistOptions">
-        <option value="San Francisco">
-        <option value="Chicago">
-    </datalist>
+    <div class="col-auto">
+        <label for="author" class="col-form-label">Author</label>
+    </div>
+    <div class="col-auto">
+        <input type="text" id="author" class="form-control form-control-sm" placeholder="Author">
+    </div>
+</div>
+
+<div id="calculator">
+    <h3>Zone  <input type="text" id="zone0" class="form-control form-control-sm zone0" style="width: 200px; margin-left: 20px;">  <span class="sep"></span></h3>
+    
+    <table id="table" class="draggable-table">
+        <thead>
+          <th>Name</th>
+          <th>Occupation</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>April Douglas</td>
+            <td>Health Educator</td>
+          </tr>
+          <tr>
+            <td>Salma Mcbride</td>
+            <td>Mental Health Counselor</td>
+          </tr>  
+          <tr>
+            <td>Kassandra Donovan</td>
+            <td>Makeup Artists</td>
+          </tr> 
+          <tr>
+            <td>Yosef Hartman</td>
+            <td>Theatrical and Performance</td>
+          </tr>
+          <tr>
+            <td>Ronald Mayo</td>
+            <td>Plant Etiologist</td>
+          </tr>  
+          <tr>
+            <td>Trey Woolley</td>
+            <td>Maxillofacial Surgeon</td>
+          </tr>  
+        </tbody>
+      </table>
+    
+    
+    <div class="search" style="position: relative">
+        <input id="inputTxt" class="form-control"  placeholder="Type to search..." style="border-radius: 7px 7px 0 0">
+        <span style="position: absolute;right: 13px; top: 8px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></span>
+    </div>
+    <div class="list-group"></div>
+
+</div>
+
+    <h3>Total <span class="sep"></span></h3>
+    <h3>Share <span class="sep"></span></h3>
 </div>
 
 <script>
+// var url = `${BUCKET_ROOT}/pricelist-index.json`;
+const pricekey = 'price_' + conformity;
+fetch('pricelist-index.json').then(res => res.json()).then(res => {
+const dcs = res.dcs;
+const lastupdated = res.date;
+res = res[sub];
 
+setLastUpdated(lastupdated);
+setConformityList();
 
+let $ = document;
+let list_group = $.querySelector(".list-group");
 
+let state = {
+    'check-b': true,
+    'check-q': true,
+    'check-p': true,
+};
+
+draggable($.getElementById('table'))
+
+function CatalogFilterRender(state) { return  `<div>
+    Search in catalogs: &nbsp;&nbsp;
+    <input class="catalog-filter form-check-input" type="checkbox" value="" id="check-b" ${(state['check-b']) ? 'checked' : ''}>
+    <label class="form-check-label" for="check-b"> Baremetal</label>
+    &nbsp;
+    <input class="catalog-filter form-check-input" type="checkbox" value="" id="check-q" ${(state['check-q']) ? 'checked' : ''}>
+    <label class="form-check-label" for="check-p"> Private Cloud</label>
+    &nbsp;
+    <input class="catalog-filter form-check-input" type="checkbox" value="" id="check-p" ${(state['check-p']) ? 'checked' : ''}>
+    <label class="form-check-label" for="check-p"> Public Cloud</label>
+</div>`}
+
+function CatalogFilterEffects() {
+    $.querySelectorAll('.catalog-filter').forEach(function(el) {
+        el.addEventListener('change', function(e) {
+            state[el.id] = el.checked;
+            SearchOnKeyUp();
+        })
+    });
+}
+
+function SearchOnKeyUp() {
+    let inputTxt = $.getElementById('inputTxt');
+    let index_keys = [];
+    if (!inputTxt.value || inputTxt.value.length <= 1) {
+        inputTxt.parentElement.classList.remove("active");
+        list_group.style.display = "none";
+        return;
+    }
+    const prefixes =  ['check-b', 'check-q', 'check-p'].map(x => state[x] ? x.split('-')[1] : false).filter(x => x);
+    inputTxt.parentElement.classList.add("active");
+    list_group.style.display = "block";
+    list_group.innerHTML = CatalogFilterRender(state)
+
+    const tokens = inputTxt.value.toLowerCase().split(' ').filter(x => x.length > 1);
+    index_keys = index_keys.concat(Object.keys(res).filter(function (key) {
+        if (!(prefixes.includes(key.charAt(0)))) {
+            return false;
+        }
+
+        const desc = res[key].description.toLowerCase();
+        for (const token of tokens) {
+            if (!(desc.includes(token))) {
+                return false;
+            }
+        }
+        return true;
+    }));
+
+    if (!index_keys.length) {
+        list_group.innerHTML += "<li>Result not Found, Try typing something else</li>";;
+    } else {
+        list_group.innerHTML += index_keys.map(function (key) {
+            let text = res[key].description;
+            for (const token of tokens) {
+                text = text.replaceAll(RegExp(token, 'gi'), '<b>$&</b>')
+            }
+            return `<li data-key="${key}">${text}<span class='float-right'>${pricekey in res[key] ? res[key][pricekey] : res[key].price} ${res.locale.currencyCode}</span></li>`;
+        }).join('');
+        
+        all_list_items = list_group.querySelectorAll("li");
+        all_list_items.forEach(function (list) {
+            list.addEventListener("click", function (e) {
+                console.log(list.getAttribute('data-key'))
+                inputTxt.value = e.target.textContent;
+                list_group.style.display = "none";
+            });
+        });
+    }
+    CatalogFilterEffects(state);
+}
+
+inputTxt.addEventListener("keyup", SearchOnKeyUp);
+
+}) // fetch
 
 </script>
 
