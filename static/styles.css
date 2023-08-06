@@ -42,7 +42,7 @@ article {
 .uppercase > a > b { text-decoration: underline; }
 
 /* Custom datatable updates */
-thead {
+.table thead {
     position: sticky;
     z-index: 12;
     top: -6px;

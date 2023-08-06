@@ -22,11 +22,11 @@
 .list-group div { padding: 10px; }
 .list-group li:hover {  background: #dfe4ea; }
 
-.item-row-1 {
+.item-first-row {
     display: flex;
     align-items: center;
 }
-.item-row-1-text {
+.item-first-row-text {
     width: 450px;
     padding: 10px;
 }
@@ -65,7 +65,8 @@
 </div>
 <br>
 <div id="calculator">
-<div class="zone" data-zone="0">
+<div id="zones">
+<!-- <div class="zone" data-zone="0">
     <h3>Zone
         <select id="z0" class="form-select form-select-sm" aria-label="Default select example" style="width: 200px; margin-left: 20px;">
             <option value="1">One</option>
@@ -75,74 +76,106 @@
         <span class="sep"></span>
     </h3>
     
-    <table class="draggable-table">
+    <table>
         <thead>
           <th>Item</th>
           <th class="item-th">Setup Cost</th>
           <th class="item-th">Cost per Unit</th>
-          <th class="item-th">#Quantity</th>
+          <th class="item-th"># Quantity</th>
           <th class="item-th">Commitment (Month)</th>
           <th class="item-th">Discount on Commitment (%)</th>
           <th class="item-th">Cost / Month (EUR)</th>
         </thead>
-        <tbody>
-          <tr>
-            <td>
-            <div class="item-row-1">
-                <button class="btn" type="button">
-                    <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/>
-                    </svg> 
-                </button>
-                <button class="btn" type="button" style="cursor: grabbing">
-                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 1.64743C0 0.819003 0.50368 0.14743 1.125 0.14743H10.875C11.4963 0.14743 12 0.819003 12 1.64743C12 2.47586 11.4963 3.14743 10.875 3.14743H1.125C0.50368 3.14743 0 2.47586 0 1.64743Z" fill="#C1C1C1"/>
-                        <path d="M0 7.64743C0 6.819 0.50368 6.14743 1.125 6.14743H10.875C11.4963 6.14743 12 6.819 12 7.64743C12 8.47586 11.4963 9.14743 10.875 9.14743H1.125C0.50368 9.14743 0 8.47586 0 7.64743Z" fill="#C1C1C1"/>
-                    </svg> 
-                </button>
-                <span class="item-row-1-text lighter">
-                    Pack VSPHERE PRE 96 -  2x Host PRE 96   - Intel(r) Xeon(r) Silver 4214R - 2.4 GHz - 12 cores/24 Threads  - 96 GB 2x Datastore 3 TB
-                </span>
-            </div>
-
-            </td>
-            <td class="lighter">0</td>
-            <td class="lighter">2349</td>
-            <td><input type="number" id="z0-item1-quantity" class="form-control form-control-sm" placeholder="0" value="1" style="max-width: 60px"></td>
-            <td><input type="number" id="z0-item1-commit" class="form-control form-control-sm" placeholder="1" value="1" style="max-width: 60px"></td>
-            <td><input type="number" id="z0-item1-discount" class="form-control form-control-sm" placeholder="0" value="0" style="max-width: 60px"></td>
-            <td><b>2349</b></td>
-          </tr>
-        </tbody>
+        <tbody class="draggable"></tbody>
     </table>
     <div class="search-placeholder"></div>
     <button class="btn add-item">+ Add Item</button>
-</div>  <!-- Zone -->
-
-<button class="btn add-zone">+ Add Zone</button>
+</div>  Zone -->
+</div>
+<br>
+<button id="add-zone" class="btn btn-sm add-zone" style="font-size: 0.8rem;">+ Add Zone</button>
 <h3>Total <span class="sep"></span></h3>
 <h3>Share <span class="sep"></span></h3>
 
 </div> <!-- Calculator -->
 <script>
 // var url = `${BUCKET_ROOT}/pricelist-index.json`;
+const DELETE_SVG = '<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/></svg>';
 const pricekey = 'price_' + conformity;
 fetch('pricelist-index.json').then(res => res.json()).then(res => {
-const dcs = res.dcs;
+const DCS = res.dcs;
+const CURRENCY = res[sub].locale.currencyCode;
+// const DCS = Object.keys(res.dcs).map((key) => `${key} ${res.dcs[key].city} (${res.dcs[key].country})`);
 const lastupdated = res.date;
 res = res[sub];
+// TODOS
+// create zones
+// CONFORMITY PRICES
+// export excel
+// export link
 
 setLastUpdated(lastupdated);
 setConformityList();
-
 let $ = document;
-
 let state = {
     'check-b': true,
     'check-q': true,
     'check-p': true,
-    'zones': [{'name': '', 'items': []}]
+    'zones': []
 };
+addZone();
+$.getElementById('add-zone').addEventListener('click', () => addZone());
+
+function addZone() {
+    const zoneIndex = state.zones.length;
+    let newzone = document.createElement('div');
+    newzone.setAttribute('class', `zone zone${zoneIndex}`);
+    newzone.setAttribute('data-zone', `${zoneIndex}`);
+    const selected = 'SBG';
+    const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${key} - ${DCS[key].city} (${DCS[key].country})</option>`).join('');
+    let deleteBtn = `<button class="btn" type="button" id="z${zoneIndex}-delete">${DELETE_SVG}</button>`;
+    if (zoneIndex == 0) {
+        deleteBtn = '';
+    }
+    newzone.innerHTML = `
+    <h3>
+        ${deleteBtn}
+        Zone
+        <select id="z${zoneIndex}" class="form-select form-select-sm" aria-label="Default select example" style="width: 200px; margin-left: 20px;">
+            ${options}
+        </select>
+        <span class="sep"></span>
+    </h3>
+    <table style="margin-bottom: 5px;">
+        <thead style="display: none;">
+          <th>Item</th>
+          <th class="item-th">Setup Cost (${CURRENCY})</th>
+          <th class="item-th">Cost per Unit (${CURRENCY})</th>
+          <th class="item-th"># Quantity</th>
+          <th class="item-th">Commitment (Month)</th>
+          <th class="item-th">Discount on Commitment (%)</th>
+          <th class="item-th">Cost / Month (${CURRENCY})</th>
+        </thead>
+        <tbody class="draggable-container"></tbody>
+    </table>
+    <div class="search-placeholder"></div>
+    <button id="add-item-zone${zoneIndex}" class="btn btn-sm btn-primary add-item">+ Add Item</button>
+    `;
+    $.getElementById('zones').appendChild(newzone);
+    
+    state.zones.push({'key': selected, 'items': []})
+    $.getElementById(`z${zoneIndex}`).addEventListener('change', (e) => state.zones[zoneIndex].key = e.target.value);
+    $.getElementById(`add-item-zone${zoneIndex}`).addEventListener('click', function() {AddItemOnClick(this)});
+    
+    if (zoneIndex > 0) {
+        $.getElementById(`z${zoneIndex}-delete`).addEventListener('click', function() {
+            this.parentElement.parentElement.remove();
+            state.zones[zoneIndex] = {};
+        });
+    }
+
+}
+
 
 function AddItemOnClick(el) {
     const zone = el.parentElement;
@@ -151,12 +184,22 @@ function AddItemOnClick(el) {
         <input id="inputTxt" class="form-control"  placeholder="Type to search..." style="border-radius: 7px 7px 0 0">
         <span style="position: absolute;right: 13px; top: 8px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></span>
     </div>
-    <div class="list-group"></div>
+    <div class="list-group" tabindex="0"></div>
 `;
-    setTimeout(()=>{}, 0);
+    // setTimeout(()=>{}, 0);
     const inputTxt = $.getElementById('inputTxt');
-    const listGroup = $.querySelector(".list-group");
+    const listGroup = zone.querySelector(".list-group");
     inputTxt.addEventListener("keyup", () => SearchOnKeyUp(zone, inputTxt, listGroup));
+    inputTxt.addEventListener('focusout', (e) => { 
+        e.preventDefault(); e.stopPropagation();
+        // console.log(e);
+        // console.log(e.relatedTarget.getAttribute('class'));
+        const targetElementClass = e.relatedTarget ? e.relatedTarget.getAttribute('class') : null;
+        if (e.relatedTarget && (targetElementClass.includes('list-group') || targetElementClass.includes('catalog-filter'))) {
+        } else {
+            SearchDestroy(zone);
+        }
+    });
     inputTxt.focus();
     SearchOnKeyUp(zone, inputTxt, listGroup);
 }
@@ -184,13 +227,6 @@ function SearchFilterEffects(zone, inputTxt, list_group) {
 
 function SearchOnKeyUp(zone, inputTxt, list_group) {
     let index_keys = [];
-    console.log(inputTxt);
-    console.log(inputTxt.value)
-    // if (!inputTxt.value || inputTxt.value.length <= 1) {
-    //     inputTxt.parentElement.classList.remove("active");
-    //     list_group.style.display = "none";
-    //     return;
-    // }
     const prefixes =  ['check-b', 'check-q', 'check-p'].map(x => state[x] ? x.split('-')[1] : false).filter(x => x);
     inputTxt.parentElement.classList.add("active");
     list_group.style.display = "block";
@@ -230,58 +266,91 @@ function SearchOnKeyUp(zone, inputTxt, list_group) {
                 AddItemToZone(zone, list.getAttribute('data-key'))
                 // inputTxt.value = e.target.textContent;
                 list_group.style.display = "none";
-                    // TODO  Destroy Search
-                // $.querySelectorAll('.catalog-filter').forEach(function(el) {
-                //     el.removeEventListener('change');
-                // });
-                // $.querySelectorAll('.catalog-filter').forEach(function (list) {
-                //         list.addEventListener("click", function (e) {
+                SearchDestroy(zone)
             });
         });
     }
     SearchFilterEffects(zone, inputTxt, list_group);
 }
 
+function SearchDestroy(zone) {
+    zone.querySelector('.search-placeholder').innerHTML = '';
+    // $.querySelectorAll('.catalog-filter').forEach(function(el) {
+    //     el.removeEventListener('change');
+    // });
+    // $.querySelectorAll('.catalog-filter').forEach(function (list) {
+    //         list.addEventListener("click", function (e) {
+}
+
+
 function AddItemToZone(zone, key) {
-    console.log(key);
-    console.log(zone);
     const zoneIndex = parseInt(zone.getAttribute('data-zone'));
-    
-    let tr = $.createDocumentFragment('tr');
+    const itemIndex = state.zones[zoneIndex].items.length;
+    console.log([key, zone, state.zones[zoneIndex].items.length]);
+    let tr = $.createElement('tr');
+    console.log(pricekey);
+    console.log(res[key]);
+
+    const item = {
+        description: res[key].description,
+        setupfee: res[key].setupfee,
+        pricePerUnit: pricekey in res[key] ? res[key][pricekey] : res[key].price,
+        quantity: 1,
+        commit: 1,
+        discout: 0,
+    };
+    item['total'] = item['pricePerUnit'] * item.quantity;
     tr.innerHTML = `
     <td>
-        <div class="item-row-1">
-            <button class="btn" type="button">
-                <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/>
-                </svg> 
-            </button>
+        <div class="item-first-row">
+            <button class="btn" type="button" id="z${zoneIndex}-item${itemIndex}-delete">${DELETE_SVG}</button>
             <button class="btn" type="button" style="cursor: grabbing">
                 <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M0 1.64743C0 0.819003 0.50368 0.14743 1.125 0.14743H10.875C11.4963 0.14743 12 0.819003 12 1.64743C12 2.47586 11.4963 3.14743 10.875 3.14743H1.125C0.50368 3.14743 0 2.47586 0 1.64743Z" fill="#C1C1C1"/>
                     <path d="M0 7.64743C0 6.819 0.50368 6.14743 1.125 6.14743H10.875C11.4963 6.14743 12 6.819 12 7.64743C12 8.47586 11.4963 9.14743 10.875 9.14743H1.125C0.50368 9.14743 0 8.47586 0 7.64743Z" fill="#C1C1C1"/>
                 </svg> 
             </button>
-            <span class="item-row-1-text lighter">
-                Pack VSPHERE PRE 96 -  2x Host PRE 96   - Intel(r) Xeon(r) Silver 4214R - 2.4 GHz - 12 cores/24 Threads  - 96 GB 2x Datastore 3 TB
-            </span>
+            <span class="item-first-row-text lighter">${item.description}</span>
         </div>
+    </td>
+    <td class="lighter">${item.setupfee || 0}</td>
+    <td class="lighter">${item.pricePerUnit}</td>
+    <td><input type="number" id="z${zoneIndex}-item${itemIndex}-quantity" class="form-control form-control-sm" placeholder="0" min="0" value="${item.quantity}" style="max-width: 70px"></td>
+    <td><input type="number" id="z${zoneIndex}-item${itemIndex}-commit" class="form-control form-control-sm" placeholder="1" min="1" max="60" value="${item.commit}" style="max-width: 52px; background: transparent;"></td>
+    <td><input type="number" id="z${zoneIndex}-item${itemIndex}-discount" class="form-control form-control-sm" placeholder="0" min="0" max="100" value="${item.discount}" style="max-width: 52px; background: transparent;"></td>
+    <td><b id="z${zoneIndex}-item${itemIndex}-total">${item.total}</b></td>`;
+    state.zones[zoneIndex].items.push(item);
+    zone.querySelector('table tbody').appendChild(tr);
+    zone.querySelector('table thead').style.display = 'table-header-group';
 
-        </td>
-        <td class="lighter">0</td>
-        <td class="lighter">2349</td>
-        <td><input type="number" id="z0-item1-quantity" class="form-control form-control-sm" placeholder="0" value="1" style="max-width: 60px"></td>
-        <td><input type="number" id="z0-item1-commit" class="form-control form-control-sm" placeholder="1" value="1" style="max-width: 60px"></td>
-        <td><input type="number" id="z0-item1-discount" class="form-control form-control-sm" placeholder="0" value="0" style="max-width: 60px"></td>
-        <td><b>2349</b></td>`;
-    zone.querySelector('table.tbody').appendChild(tr);
+    function updateTotalPrice(zoneIndex, itemIndex) {
+        console.log(state.zones[zoneIndex].items);
+        let stateItem = state.zones[zoneIndex].items[itemIndex];
+        stateItem['total'] = stateItem['pricePerUnit'] * stateItem.quantity * (1 - (stateItem.discount || 0) / 100);
+        stateItem['total'] = stateItem['total'].toFixed(2);
+        $.getElementById(`z${zoneIndex}-item${itemIndex}-total`).innerText = stateItem['total'];
+    }
 
-
+    $.getElementById(`z${zoneIndex}-item${itemIndex}-delete`).addEventListener('click', (el) => {
+        console.log(el.currentTarget.parentElement.parentElement.parentElement);
+        el.currentTarget.parentElement.parentElement.parentElement.remove();
+        state.zones[zoneIndex].items[itemIndex] = {};
+    });
+    $.getElementById(`z${zoneIndex}-item${itemIndex}-quantity`).addEventListener('change', (e) => {
+        state.zones[zoneIndex].items[itemIndex].quantity = e.target.value;
+        updateTotalPrice(zoneIndex, itemIndex)
+    });
+    $.getElementById(`z${zoneIndex}-item${itemIndex}-commit`).addEventListener('change', (e) => {
+        state.zones[zoneIndex].items[itemIndex].commit = e.target.value;
+        updateTotalPrice(zoneIndex, itemIndex);
+    });
+    $.getElementById(`z${zoneIndex}-item${itemIndex}-discount`).addEventListener('change', (e) => {
+        state.zones[zoneIndex].items[itemIndex].discount = e.target.value;
+        updateTotalPrice(zoneIndex, itemIndex);
+    });
 }
 
-$.querySelectorAll('.add-item').forEach(function (el){
-    el.addEventListener('click', function(){ AddItemOnClick(el); });
-})
+
 
 
 

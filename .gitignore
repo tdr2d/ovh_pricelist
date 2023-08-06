@@ -4,3 +4,4 @@
 static/*.html
 excel/node_modules
 *.xlsx
+static/tmp
