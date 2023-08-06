@@ -47,9 +47,7 @@ def get_dcs():
     
     for tz in TZ_DCS:
         code = f"{tz} TZ"
-        dcs[code] = dcs[tz]
-        dcs[code]['code'] = code
-        dcs[code]['city'] += ' (Trusted Zone)'
+        dcs[code] = {'code': code, 'city': dcs[tz]['city'] + ' (Trusted Zone)', 'country': dcs[tz]['country'] }
 
     assert len(dict.values(dcs)) > 13
     return dcs
