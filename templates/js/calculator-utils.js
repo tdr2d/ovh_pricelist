@@ -1,6 +1,5 @@
 
 function getItem(key, quantity, commit, discount) {
-    console.log(res[key]);
     let item = {
         key: key,
         description: res[key].description,
