@@ -9,7 +9,7 @@ from itertools import product
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
+# SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
 SUBSIDIARIES = ['FR']
 TZ_DCS = ['RBX', 'SBG']
 S3_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID')
@@ -21,16 +21,9 @@ API_EU = 'https://api.ovh.com'
 API_CA = 'https://ca.api.ovh.com'
 SNC_MARKUP = 1.12
 ENCODING_PREFIXES = {
-    'index_version': 'v([0-9]+)',
-    'condition': 'c-',  # 'abcdefghij'
-    'zone': 'z-([A-Z ]+)', # Prefix
-
-    'bm': 'b-',  # Prefix
-    'pcc': 'q-', # Prefix
-    'pci': 'p-', # Prefix
-
-    'commitment': 'e-', # Prefix
-    'discount': 'd-',   # Prefix
+    'bm': 'b-',  # Prefix baremetal catalog
+    'pcc': 'q-', # Prefix private cloud catalog
+    'pci': 'p-', # Prefix public cloud catalog
 }
 
 def index_catalog(catalog, prefix='b-'):
@@ -48,6 +41,14 @@ def get_base_api(sub):
     elif sub == 'CA':
         base_api = API_CA
     return base_api
+
+
+def get_website_tries_for_country(sub):
+    if sub == 'DE':
+        sub = 'en-ie'
+    elif sub == 'US':
+        sub = 'en'
+    return [sub, f'en-{sub}', f'fr-{sub}']
 
 def s3():
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#examples

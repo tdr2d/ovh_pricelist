@@ -16,7 +16,7 @@ SNC_PRODUCTS = [
     {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN (Secured Private Network) incluant:\n   - 5 SPNs\n - 5 sous-réseaux par SPN\n - 50 routes statiques par SPN\n - Trafic illimité', 'price_snc': round(1000*SNC_MARKUP)},
     {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN option connectivité InterDC chiffré\n  - Trafic illimité', 'price_snc': round(1000*SNC_MARKUP)},
 ]
-TZ_REGION = ['RBX_TZ', 'SBG_TZ']
+# TZ_REGION = ['RBX_TZ', 'SBG_TZ']
 SNC_PS_PRICE = 2000
 STORAGE_PACK_DESCRIPTION = '2x Datastore 3 TB'
 BACKUP_DESCRIPTION = {

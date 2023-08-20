@@ -9,6 +9,7 @@
     display: flex;
     justify-content: space-around;
     padding-right: 30px;
+    align-items: center;
 }
 .label-input > * { display: inline-block; }
 .list-group {
@@ -36,7 +37,7 @@
     align-items: center;
 }
 .item-first-row-text {
-    width: 450px;
+    width: 510px;
     padding: 5px 10px;
 }
 .lighter {
@@ -104,9 +105,12 @@
         </button>
         </div>
         <div id="share-link-placeholder" style="padding: 0 20px;"></div>
+        <br>
+
+        <table id="legalcheckboxes">
+        </table>
     </div>
-    <br>
-    <br>
+    <br> <br>
 </div> <!-- Calculator -->
 <script>
 let $ = document;
@@ -134,7 +138,7 @@ res = res[sub];
 {% include 'js/calculator-utils.js' %}
 
 // TODOS
-// export link
+// get legal condition in fr and en
 // get support prices for every countries
 // export excel
 
@@ -227,7 +231,7 @@ function addZone(key) {
         </select>
         <span class="sep"></span>
     </h3>
-    <table style="margin-bottom: 5px;">
+    <table style="margin-bottom: 5px;width:100%;min-width: 1000px;">
         <thead style="display: none;">
           <th style="padding-left: 47px">Item</th>
           <th class="item-th">Setup Cost (${CURRENCY})</th>

@@ -2,13 +2,26 @@ from baremetal import baremetal
 from privatecloud import privatecloud
 from publiccloud import publiccloud
 from utils import *
+from support import get_support_prices
 import datetime
 import json
 import gzip
 import bs4
 import unicodedata
 
-def save_indexes(bm, pcc, pci, dcs):
+def save_indexes():
+    dcs = get_dcs()
+    print(*dict.values(dcs), sep='\n')
+    assert len(dict.values(dcs)) >= 14
+
+    print('Getting Baremetal Catalog')
+    bm = exponential_backoff(baremetal)
+    print('Getting Private Cloud Catalog')
+    pcc = exponential_backoff(privatecloud)
+    print('Getting Public Cloud Catalog')
+    pci = exponential_backoff(publiccloud)
+    supports = get_support_prices();
+
     version = 0
     # try:
     #     last_index = s3().get_object(Bucket=S3_BUCKET, Key=f'pricelist-index.json')
@@ -21,15 +34,19 @@ def save_indexes(bm, pcc, pci, dcs):
         'version': version,
         'date': datetime.datetime.now().isoformat(),
         'dcs': dcs,
+        'subsidiaries': {},
     }
     for sub in SUBSIDIARIES:
-        subs[sub] = index_catalog(bm[sub]['catalog'], ENCODING_PREFIXES['bm']) | \
+        subs['subsidiaries'][sub] = {}
+        subs['subsidiaries'][sub]['catalog'] = index_catalog(bm[sub]['catalog'], ENCODING_PREFIXES['bm']) | \
             index_catalog(pcc[sub]['catalog'], ENCODING_PREFIXES['pcc']) | \
             index_catalog(pci[sub]['catalog'], ENCODING_PREFIXES['pci'])
-        subs[sub]['locale'] = pcc[sub]['locale']
+        subs['subsidiaries'][sub]['locale'] = pcc[sub]['locale']
+        subs['subsidiaries'][sub]['support'] = supports[sub]
 
-    upload_gzip_json(subs, f'pricelist-index.json')
-    upload_gzip_json(subs, f'pricelist-index-v{version}.json')
+    json.dump(subs, open('pricelist-index.json', 'w+'))
+    # upload_gzip_json(subs, f'pricelist-index.json')
+    # upload_gzip_json(subs, f'pricelist-index-v{version}.json')
 
 def get_dcs():
     base_url = 'https://smokeping.ovh.net/smokeping'
@@ -53,14 +70,4 @@ def get_dcs():
     return dcs
 
 if __name__ == '__main__':
-    dcs = get_dcs()
-    print(*dict.values(dcs), sep='\n')
-
-    print('Getting Baremetal Catalog')
-    bm = exponential_backoff(baremetal)
-
-    print('Getting Private Cloud Catalog')
-    pcc = exponential_backoff(privatecloud)
-    print('Getting Public Cloud Catalog')
-    pci = exponential_backoff(publiccloud)
-    save_indexes(bm, pcc, pci, dcs)
+    save_indexes()

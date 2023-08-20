@@ -13,3 +13,11 @@ function getItem(key, quantity, commit, discount) {
     item['total'] = item['pricePerUnit'] * item.quantity * (1 - (item.discount) / 100);
     return item;
 }
+
+function renderLegalCheckboxes() {
+    const conditions = [
+        ''
+    ]
+    const table = document.getElementById('legalcheckboxes');
+
+}
