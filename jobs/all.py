@@ -8,6 +8,7 @@ import json
 import gzip
 import bs4
 import unicodedata
+from legal import get_legal_forward_links
 
 def save_indexes():
     dcs = get_dcs()
@@ -30,21 +31,22 @@ def save_indexes():
     #     version = last_index_content['version'] + 1
     # except boto3.resource('s3').meta.client.exceptions.NoSuchKey:
     #     pass
-    subs = {
+    data = {
         'version': version,
         'date': datetime.datetime.now().isoformat(),
         'dcs': dcs,
+        'legal': get_legal_forward_links(),
         'subsidiaries': {},
     }
     for sub in SUBSIDIARIES:
-        subs['subsidiaries'][sub] = {}
-        subs['subsidiaries'][sub]['catalog'] = index_catalog(bm[sub]['catalog'], ENCODING_PREFIXES['bm']) | \
+        data['subsidiaries'][sub] = {}
+        data['subsidiaries'][sub]['catalog'] = index_catalog(bm[sub]['catalog'], ENCODING_PREFIXES['bm']) | \
             index_catalog(pcc[sub]['catalog'], ENCODING_PREFIXES['pcc']) | \
             index_catalog(pci[sub]['catalog'], ENCODING_PREFIXES['pci'])
-        subs['subsidiaries'][sub]['locale'] = pcc[sub]['locale']
-        subs['subsidiaries'][sub]['support'] = supports[sub]
+        data['subsidiaries'][sub]['locale'] = pcc[sub]['locale']
+        data['subsidiaries'][sub]['support'] = supports[sub]
 
-    json.dump(subs, open('pricelist-index.json', 'w+'))
+    json.dump(data, open('pricelist-index.json', 'w+'))
     # upload_gzip_json(subs, f'pricelist-index.json')
     # upload_gzip_json(subs, f'pricelist-index-v{version}.json')
 
