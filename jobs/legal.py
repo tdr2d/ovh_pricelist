@@ -33,6 +33,7 @@ LEGALS = {
 }
 
 def get_legal_forward_links():
+    print('Getting legal links')
     for lang in dict.keys(LEGALS):
         for key in dict.keys(LEGALS[lang]):
             r = requests.get(LEGALS[lang][key]['url'], timeout=10)

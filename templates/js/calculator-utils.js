@@ -2,9 +2,9 @@
 function getItem(key, quantity, commit, discount) {
     let item = {
         key: key,
-        description: res[key].description,
-        setupfee: res[key].setupfee || 0,
-        pricePerUnit: pricekey in res[key] ? res[key][pricekey] : res[key].price,
+        description: index[key].description,
+        setupfee: index[key].setupfee || 0,
+        pricePerUnit: pricekey in index[key] ? index[key][pricekey] : index[key].price,
         quantity: quantity || 1,
         commit: commit || 1,
         discount: discount || 0,

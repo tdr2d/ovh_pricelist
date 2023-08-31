@@ -16,3 +16,6 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 * Export to CSV / EXCEL / PDF / JSON
 * Price estimate
 * Quote generator
+
+## Known Bugs
+### Calculator

@@ -4,6 +4,7 @@ const ABREV_TOTAL = {
     'author': 'a',
     'support': 's',
     'totaldiscount': 'u',
+    'legal_checked': 'l',
 }
 
 const ABREV_ITEM = {

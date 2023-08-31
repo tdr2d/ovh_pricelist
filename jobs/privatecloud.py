@@ -216,6 +216,9 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
                 num_host = 3
             pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n -  {num_host}x Host {h['name']} \n  - {cpu_text}\n  - {ram_text} \n{STORAGE_PACK_DESCRIPTION}"}
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text}"} | plan_codes[h['planCode']]
+            if 'NSX-T' not in host['description']:
+                host['description'] = host['description'].replace('NSX', 'NSX-T')
+                print(host['description'])
             cores_quandidates.add(h['specifications']['cpu']['cores'])
 
             for conformity in CONFORMITY:

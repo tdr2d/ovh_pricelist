@@ -2,6 +2,7 @@
 {% block title %}Cost Calculator{% endblock %}
 {% block content %}
 <style>
+.section-padding { padding: 0 10px}
 .drop-shadow-1 {
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
@@ -78,26 +79,25 @@
     <button id="add-zone" class="btn btn-sm add-zone" style="font-size: 0.8rem;">+ Add Zone</button>
 
     <h3>Total <span class="sep"></span></h3>
-<div style="display: flex">
-    <div class="label-input">
-        <label for="support" class="col-form-label">Support</label>&nbsp;&nbsp;&nbsp;
-        <select id="support" class="form-select form-select-sm" style="width: 290px;">
-            <option value="e">Entreprise (30% - minimum 5000 EUR)</option>
-            <option value="b" selected>Business (10% - minimum 250 EUR)</option>
-            <option value="p">Premium (50)</option>
-            <option value="s">Standard</option>
-        </select>
-    </div>
-    <div class="label-input">
-        <label for="totaldiscount" class="col-form-label">Additional Discount (%)</label>&nbsp;&nbsp;&nbsp;
-        <input type="number" min="0" max="30" id="totaldiscount" class="form-control form-control-sm" placeholder="0" value="0" style="width: 54px; background: transparent">
-    </div>
-</div>
-<div id="price-placeholder"></div>
+    <div class="section-padding" style="display: flex">
+        <div class="label-input">
+            <label for="support" class="col-form-label">Support</label>&nbsp;&nbsp;&nbsp;
+            <select id="support" class="form-select form-select-sm" style="width: 290px;">
+                <option value="e">Entreprise (30%)</option>
+                <option value="b" selected>Business (10%)</option>
+                <option value="s">Standard</option>
+            </select>
+        </div>
+        <div class="label-input">
+            <label for="totaldiscount" class="col-form-label">Additional Discount (%)</label>&nbsp;&nbsp;&nbsp;
+            <input type="number" min="0" max="30" id="totaldiscount" class="form-control form-control-sm" placeholder="0" value="0" style="width: 54px; background: transparent">
+        </div>
 
-</div>
+    </div>
+    <div class="section-padding" id="price-placeholder"></div>
+
     <h3>Share <span class="sep"></span></h3>
-    <div style="display: flex;">
+    <div class="section-padding" style="display: flex;">
         <div>
         <button class="btn btn-primary drop-shadow-1" id="copy-link-button" style="white-space: nowrap;"> 
             <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M11.1586 5.24877C12.2805 4.04744 12.2805 2.10191 11.1586 0.900579C10.1658 -0.162549 8.60114 -0.300755 7.45942 0.573136L7.42765 0.596525C7.14172 0.815529 7.0762 1.24078 7.28071 1.54483C7.48523 1.84889 7.88235 1.92118 8.1663 1.70218L8.19806 1.67879C8.83544 1.19188 9.70712 1.26842 10.2591 1.86165C10.8846 2.53142 10.8846 3.61581 10.2591 4.28558L8.03127 6.67549C7.40581 7.34526 6.39315 7.34526 5.76768 6.67549C5.2137 6.08226 5.14222 5.14884 5.59692 4.46844L5.61876 4.43442C5.82328 4.12823 5.75577 3.70298 5.47183 3.48611C5.18789 3.26923 4.78878 3.33939 4.58625 3.64345L4.56441 3.67747C3.74634 4.89794 3.8754 6.57343 4.86821 7.63656C5.99007 8.83789 7.8069 8.83789 8.92877 7.63656L11.1586 5.24877ZM0.8414 4.75123C-0.280467 5.95256 -0.280467 7.89809 0.8414 9.09942C1.8342 10.1625 3.39886 10.3008 4.54058 9.42686L4.57235 9.40347C4.85828 9.18447 4.9238 8.75922 4.71929 8.45516C4.51477 8.15111 4.11765 8.07882 3.83371 8.29782L3.80194 8.32121C3.16456 8.80812 2.29288 8.73158 1.74088 8.13835C1.11541 7.46646 1.11541 6.38207 1.74088 5.7123L3.96873 3.32451C4.59419 2.65474 5.60685 2.65474 6.23232 3.32451C6.7863 3.91774 6.85778 4.85116 6.40308 5.53369L6.38124 5.56771C6.17672 5.87389 6.24423 6.29914 6.52817 6.51602C6.81211 6.7329 7.21122 6.66273 7.41375 6.35868L7.43559 6.32466C8.25366 5.10206 8.1246 3.42657 7.13179 2.36344C6.00993 1.16211 4.1931 1.16211 3.07123 2.36344L0.8414 4.75123Z" fill="white"/></svg> 
@@ -106,40 +106,50 @@
         </div>
         <div id="share-link-placeholder" style="padding: 0 20px;"></div>
         <br>
-
-        <table id="legalcheckboxes">
+    </div>
+    <br>
+    <br>
+    <div class="section-padding">
+        <div style="font-size: 0.9rem;">Included Terms of services in Excel Export:</div>
+        <table style="margin-top: 10px;">
+            <tbody id="legalcheckboxes"></tbody>
         </table>
+        <br>
+        <button class="btn btn-primary drop-shadow-1" id="export-button" style="white-space: nowrap;"> 
+            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.5" d="M3 15C3 17.8284 3 19.2426 3.87868 20.1213C4.75736 21 6.17157 21 9 21H15C17.8284 21 19.2426 21 20.1213 20.1213C21 19.2426 21 17.8284 21 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>
+            Export Excel Quote
+        </button>
     </div>
     <br> <br>
 </div> <!-- Calculator -->
 <script>
 let $ = document;
-// var url = `${BUCKET_ROOT}/pricelist-index.json`;
+// const url = `${BUCKET_ROOT}/pricelist-index.json`;
 const DELETE_SVG = '<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/></svg>';
-const UP_SVG = '<svg width="20" height="10" viewBox="0 0 20 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.26209 8.71104C1.11739 8.55 1.13078 8.30211 1.29198 8.15759L8.29955 1.87527C9.47634 0.820267 11.2698 0.859187 12.3997 1.96425L18.7321 8.15737C18.8819 8.30382 18.8896 8.54227 18.7496 8.69806V8.69806C18.6014 8.86294 18.346 8.87175 18.1868 8.71747L12.3852 3.094C11.26 2.00329 9.48481 1.96243 8.31056 3.0002L1.81283 8.74274C1.65168 8.88516 1.40584 8.87101 1.26209 8.71104V8.71104Z" fill="#C1C1C1" stroke="#C1C1C1"/></svg>';
-const DOWN_SVG = '<svg width="20" height="10" viewBox="0 0 20 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18.7379 1.28896C18.8826 1.45 18.8692 1.69789 18.708 1.84241L11.7005 8.12473C10.5237 9.17973 8.73019 9.14081 7.60027 8.03575L1.26787 1.84263C1.11813 1.69618 1.11044 1.45773 1.25043 1.30194V1.30194C1.39858 1.13706 1.65405 1.12825 1.81321 1.28253L7.61478 6.906C8.74003 7.99671 10.5152 8.03757 11.6894 6.9998L18.1872 1.25726C18.3483 1.11484 18.5942 1.12899 18.7379 1.28896V1.28896Z" fill="#C1C1C1" stroke="#C1C1C1"/></svg>';
 const pricekey = 'price_' + conformity;
-const SUPPORT_MARKUPS_MAP = {
-    'e': (price) => price + Math.max(5000, price*0.3),   // TODO get support start prices for every countries
-    'b': (price) => price + Math.max(250, price*0.1),
-    'p': (price) => price + 50,
-    's': (price) => price,
-}
+const LANG = sub == 'FR' ? 'fr' : 'en';
+
 fetch('pricelist-index.json').then(res => res.json()).then(res => {
 const DCS = res.dcs;
-const CURRENCY = res[sub].locale.currencyCode;
-const TAX_RATE = res[sub].locale.taxRate;
-const lastupdated = res.date;
+const CURRENCY = res.subsidiaries[sub].locale.currencyCode;
+const SUPPORT = res.subsidiaries[sub].support;
+const TAX_RATE = res.subsidiaries[sub].locale.taxRate;
+const SUPPORT_MARKUPS_MAP = {
+    'e': (price) => price + Math.max(SUPPORT['entreprise'].minimun || 5000, price*0.3),
+    'b': (price) => price + Math.max(SUPPORT['business'].minimun || 250, price*0.1),
+    's': (price) => price,
+};
 
 let loadedState = {};
-res = res[sub];
+const index = res.subsidiaries[sub].catalog;
 
 {% include 'js/serialize.js' %}
 {% include 'js/calculator-utils.js' %}
 
 // TODOS
 // get legal condition in fr and en
-// get support prices for every countries
 // export excel
 
 try {
@@ -156,6 +166,7 @@ let state = {
     'support': loadedState.support || 'b',
     'totaldiscount': loadedState.totaldiscount || 0,
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
+    'legal_checked': loadedState.legal_checked || Object.keys(res.legal[LANG]).join(''),
 };
 
 for (const i in loadedState.zones) {
@@ -168,10 +179,13 @@ if (!(state.zones.length)) {
     addZone('SBG');
 }
 
-setLastUpdated(lastupdated);
+setLastUpdated(res.date);
 setConformityList();
 
 Object.keys(ABREV_TOTAL).forEach((id) => {
+    if (id == 'legal_checked') {
+        return;
+    }
     $.getElementById(id).value = state[id];
     $.getElementById(id).addEventListener('change', () => {
         state[id] = $.getElementById(id).value;
@@ -181,10 +195,9 @@ Object.keys(ABREV_TOTAL).forEach((id) => {
 $.getElementById('add-zone').addEventListener('click', () => addZone());
 $.getElementById('copy-link-button').addEventListener('click', () => {
     const uri = SerilizeState(state);
-    $.getElementById('share-link-placeholder').innerHTML = uri;
-    alert("Copied the text in clipboard: \n" + uri);
+    $.getElementById('share-link-placeholder').innerHTML = `The Share link has been Saved to the clipboard!<br><a href=${uri} target="_blank">${uri}</a>`;
 });
-
+renderLegalCheckboxes();
 
 function renderTotalPrice() {
     let total = 0; let installFee = 0;
@@ -266,7 +279,7 @@ function SearchFilterRender(state) { return  `<div>
     <label class="form-check-label" for="check-b"> Baremetal</label>
     &nbsp;
     <input class="catalog-filter form-check-input" type="checkbox" value="" id="check-q" ${(state['check-q']) ? 'checked' : ''}>
-    <label class="form-check-label" for="check-p"> Private Cloud</label>
+    <label class="form-check-label" for="check-q"> Private Cloud</label>
     &nbsp;
     <input class="catalog-filter form-check-input" type="checkbox" value="" id="check-p" ${(state['check-p']) ? 'checked' : ''}>
     <label class="form-check-label" for="check-p"> Public Cloud</label>
@@ -289,14 +302,14 @@ function SearchOnKeyUp(zone, inputTxt, list_group) {
     list_group.innerHTML = SearchFilterRender(state);
 
     const tokens = inputTxt.value.toLowerCase().split(' ').filter(x => x.length > 1);
-    index_keys = index_keys.concat(Object.keys(res).filter(function (key) {
+    index_keys = index_keys.concat(Object.keys(index).filter(function (key) {
         if (!(prefixes.includes(key.charAt(0)))) {
             return false;
         }
         if (!inputTxt.value) {
             return true;
         }
-        const desc = res[key].description.toLowerCase();
+        const desc = index[key].description.toLowerCase();
         for (const token of tokens) {
             if (!(desc.includes(token))) {
                 return false;
@@ -309,11 +322,11 @@ function SearchOnKeyUp(zone, inputTxt, list_group) {
         list_group.innerHTML += "<li>Result not Found, Try typing something else</li>";;
     } else {
         list_group.innerHTML += index_keys.map(function (key) {
-            let text = res[key].description;
+            let text = index[key].description;
             for (const token of tokens) {
                 text = text.replaceAll(RegExp(token, 'gi'), '<b>$&</b>')
             }
-            return `<li data-key="${key}">${text}<span class='float-right'>${pricekey in res[key] ? res[key][pricekey] : res[key].price} ${res.locale.currencyCode}</span></li>`;
+            return `<li data-key="${key}">${text}<span class='float-right'>${pricekey in index[key] ? index[key][pricekey] : index[key].price} ${CURRENCY}</span></li>`;
         }).join('');
         
         all_list_items = list_group.querySelectorAll("li");
@@ -410,6 +423,37 @@ function AddItemToZone(zone, item) {
         updateTotalPrice(zoneIndex, itemIndex);
     });
     renderTotalPrice();
+}
+
+function renderLegalCheckboxes() {
+    const columns = 3;
+    const keys = Object.keys(res.legal[LANG]);
+    let html = '<tr>';
+    
+    for (let i = 0; i < keys.length; i++) {
+        const checked =  state.legal_checked.includes(keys[i]) ? 'checked' : '';
+        html += `<td><input class="form-check-input legal-checkbox" type="checkbox" value="" id="legal-${keys[i]}" ${checked}>
+        <label class="form-check-label" for="legal-${keys[i]}" style="padding: 0 7px;">
+            ${res.legal[LANG][keys[i]].text}
+        </label>   </td>`;
+        if (i != 0 && (i+1)%columns == 0) {
+            html += '</tr>';
+            if (i+1 < keys.length) {
+                html += '<tr>'
+            }
+        }
+    }
+    html += '</tr>';
+    $.getElementById('legalcheckboxes').innerHTML = html;
+    $.querySelectorAll('.legal-checkbox').forEach((el) => {
+        el.addEventListener('change', (e) => {
+            let set = new Set(state.legal_checked.split(''));
+            const key = el.id.replace('legal-', '');
+            (el.checked) ? set.add(key) : set.delete(key);
+            state.legal_checked = Array.from(set).join('');
+            console.log(state.legal_checked);
+        })
+    })
 }
 
 }) // fetch
