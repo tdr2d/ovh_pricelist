@@ -3,7 +3,6 @@ import requests
 
 LEGALS = {
     'fr': {
-        '0': {'text': 'General terms and conditions of services', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_genServices-fr.pdf'},
         '1': {'text': 'Baremetal', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_partDedie-fr.pdf'},
         '2': {'text': 'Private Cloud', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/HPCPremier-fr.pdf'},
         '3': {'text': 'Public Cloud', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/Conditions_particulieres_OVH_Stack-we.pdf'},
@@ -18,7 +17,6 @@ LEGALS = {
         'c': {'text': 'Professional Service', 'url': 'https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/9eae50b-Contract_Professional_Services-FR-1.0.pdf'},
     },
     'en': {
-        '0': {'text': 'General terms and conditions of services', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_genServices-ie.pdf'},
         '1': {'text': 'Baremetal', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_partDedie-ie.pdf'},
         '2': {'text': 'Private Cloud', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/HPCPremier-ie.pdf'},
         '3': {'text': 'Public Cloud', 'url': 'https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/7daede7-Conditions_particulieres_OVH_Stack-IE-16.0.pdf'},

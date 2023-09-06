@@ -61,7 +61,7 @@ function DeserializeURI() {
     
     search = decodeURIComponent(new URLSearchParams(search).get('zs'));
     const search_zones = search.split(ZONE_RE).slice(1); // Split zones
-    console.log(search_zones);
+    // console.log(search_zones);
     for (let i = 0; i < search_zones.length; i+=2) {
         const zoneData = search_zones[i+1].split(ITEM_RE).slice(1);
         let items = []
@@ -78,4 +78,3 @@ function DeserializeURI() {
 
     return newstate;
 }
-// http://localhost/calculator.html?con=default&sub=FR&t=My%20big%20title&b=my%20company%20X%20andY%20&a=thomas%20%C2%A0%26%20Alexa&s=b&u=0&zs=zSBGkb-aac1e0q1kb-aac1e0q1kb-aac1e0q1zSBG%20TZkb-aac1e0q1kb-abc1e0q1zSBGkb-abc1e0q1zSYD1kb-aac1e0q1kq-aac1e0q1kq-abc1e0q1kq-axc1e0q1kq-azc1e0q1

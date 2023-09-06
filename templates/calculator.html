@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Cost Calculator{% endblock %}
+{% block head %}
+<script src="/tmp/exceljs.min.js"></script>
+{% endblock %}
 {% block content %}
 <style>
 .section-padding { padding: 0 10px}
@@ -115,7 +118,7 @@
             <tbody id="legalcheckboxes"></tbody>
         </table>
         <br>
-        <button class="btn btn-primary drop-shadow-1" id="export-button" style="white-space: nowrap;"> 
+        <button class="btn btn-primary drop-shadow-1" id="export-excel-button" style="white-space: nowrap;"> 
             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.5" d="M3 15C3 17.8284 3 19.2426 3.87868 20.1213C4.75736 21 6.17157 21 9 21H15C17.8284 21 19.2426 21 20.1213 20.1213C21 19.2426 21 17.8284 21 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>
@@ -130,6 +133,8 @@ let $ = document;
 const DELETE_SVG = '<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/></svg>';
 const pricekey = 'price_' + conformity;
 const LANG = sub == 'FR' ? 'fr' : 'en';
+const XLSX_TEMPLATE = '/template.xlsx';
+const XLSX_SHEETNAME = 'feuille1';
 
 fetch('pricelist-index.json').then(res => res.json()).then(res => {
 const DCS = res.dcs;
@@ -147,11 +152,6 @@ const index = res.subsidiaries[sub].catalog;
 
 {% include 'js/serialize.js' %}
 {% include 'js/calculator-utils.js' %}
-
-// TODOS
-// get legal condition in fr and en
-// export excel
-
 try {
     loadedState = DeserializeURI();
 } catch(err) {
@@ -197,6 +197,9 @@ $.getElementById('copy-link-button').addEventListener('click', () => {
     const uri = SerilizeState(state);
     $.getElementById('share-link-placeholder').innerHTML = `The Share link has been Saved to the clipboard!<br><a href=${uri} target="_blank">${uri}</a>`;
 });
+$.getElementById('export-excel-button').addEventListener('click', () => {
+    saveXLSX(state);
+});
 renderLegalCheckboxes();
 
 function renderTotalPrice() {
@@ -230,7 +233,7 @@ function addZone(key) {
     newzone.setAttribute('class', `zone zone${zoneIndex}`);
     newzone.setAttribute('data-zone', `${zoneIndex}`);
     const selected = key || 'SBG';
-    const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${key} - ${DCS[key].city} (${DCS[key].country})</option>`).join('');
+    const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${DC_key_to_text(key)}</option>`).join('');
     let deleteBtn = `<button class="btn" type="button" id="z${zoneIndex}-delete">${DELETE_SVG}</button>`;
     if (zoneIndex == 0) {
         deleteBtn = '';
@@ -244,7 +247,7 @@ function addZone(key) {
         </select>
         <span class="sep"></span>
     </h3>
-    <table style="margin-bottom: 5px;width:100%;min-width: 1000px;">
+    <table style="margin-bottom: 5px;width:100%;min-width: 1000px;max-width: 1500px;">
         <thead style="display: none;">
           <th style="padding-left: 47px">Item</th>
           <th class="item-th">Setup Cost (${CURRENCY})</th>
@@ -383,11 +386,11 @@ function AddItemToZone(zone, item) {
     <td>
         <div class="item-first-row">
             <button class="btn btn" type="button" id="z${zoneIndex}-item${itemIndex}-delete">${DELETE_SVG}</button>
-            <span class="item-first-row-text lighter">${item.description}</span>
+            <span class="item-first-row-text">${item.description}</span>
         </div>
     </td>
-    <td class="lighter" id="z${zoneIndex}-item${itemIndex}-setupfee">${item.setupfee}</td>
-    <td class="lighter">${item.pricePerUnit}</td>
+    <td class="" id="z${zoneIndex}-item${itemIndex}-setupfee">${item.setupfee}</td>
+    <td class="">${item.pricePerUnit}</td>
     <td><input type="number" id="z${zoneIndex}-item${itemIndex}-quantity" class="form-control form-control-sm" placeholder="0" min="0" value="${item.quantity}" style="max-width: 70px"></td>
     <td><input type="number" id="z${zoneIndex}-item${itemIndex}-commit" class="form-control form-control-sm" placeholder="1" min="1" max="60" value="${item.commit}" style="max-width: 52px; background: transparent;"></td>
     <td><input type="number" id="z${zoneIndex}-item${itemIndex}-discount" class="form-control form-control-sm" placeholder="0" min="0" max="100" value="${item.discount}" style="max-width: 52px; background: transparent;"></td>
@@ -405,7 +408,6 @@ function AddItemToZone(zone, item) {
     }
 
     $.getElementById(`z${zoneIndex}-item${itemIndex}-delete`).addEventListener('click', (el) => {
-        // console.log(el.currentTarget.parentElement.parentElement.parentElement);
         el.currentTarget.parentElement.parentElement.parentElement.remove();
         state.zones[zoneIndex].items[itemIndex] = {};
         renderTotalPrice();
@@ -451,7 +453,6 @@ function renderLegalCheckboxes() {
             const key = el.id.replace('legal-', '');
             (el.checked) ? set.add(key) : set.delete(key);
             state.legal_checked = Array.from(set).join('');
-            console.log(state.legal_checked);
         })
     })
 }
