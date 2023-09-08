@@ -14,7 +14,7 @@ const SPECIAL_CELLS = {
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
     'exceptionnal_discount': 'C12',
     'budget_duration': 'C13',
-    'legal_start': 'A61'
+    'legal_start': 'A60'
 };
 const SUPPORT_KEY_TO_NAME = {'e': 'entreprise', 'b': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = 'Conditions Particulières ';
@@ -31,12 +31,20 @@ function DC_key_to_text(key) {
 }
 
 function getItem(key, quantity, commit, discount) {
+    let defaultQuantity = 1;
+    if (index[key].description.includes('DB')) {
+        const match = index[key].description.match(/([0-9]) node/);
+        if (match.length == 2) {
+            defaultQuantity = parseInt(match[1]);
+        }
+    }
+
     let item = {
         key: key,
         description: index[key].description,
         setupfee: index[key].setupfee || 0,
         pricePerUnit: pricekey in index[key] ? index[key][pricekey] : index[key].price,
-        quantity: quantity || 1,
+        quantity: quantity || defaultQuantity,
         commit: commit || 1,
         discount: discount || 0,
     };
@@ -46,6 +54,9 @@ function getItem(key, quantity, commit, discount) {
 }
 
 function saveXLSX(state, currency) {
+    if (state.zones.length == 0 || state.zones[0].items.length == 0) {
+        return;
+    }
     getXLSXTemplate(XLSX_TEMPLATE, XLSX_SHEETNAME).then(sheet => {
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['client_2']).value = state.company;
@@ -54,7 +65,9 @@ function saveXLSX(state, currency) {
         sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
         sheet.getCell(SPECIAL_CELLS['support_min']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
-        sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
+        if (state.totaldiscount > 0) {
+            sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
+        }
 
         // Display legals
         let legal_count = 0;
@@ -116,7 +129,7 @@ function update_formula(sheet, old_coordinates, voffset) {
     console.log(voffset);
     for (const i in old_coordinates) {
         const new_coord = cell_vertical_offset(old_coordinates[i], voffset);
-        const old_formula = sheet.getCell(new_coord).formula;
+        const old_formula = sheet.getCell(new_coord).formula || '';
         // regex https://regex101.com/r/SHrdes/1
         const new_formula = old_formula.replace(/(^|[^(])([A-Z]+)([1-9][0-9]*)/g, (m, p0,p1,p2) => `${p0}${p1}${parseInt(p2)+voffset}`);
         console.log({old: old_coordinates[i], new: new_coord, old_formula: old_formula, new_formula: new_formula})

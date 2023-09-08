@@ -46,9 +46,7 @@ EXCLUDE_PRODUCTS = [
     'ks-2',
 ]
 
-MONTHLY_ONLY_FAMILIES = ['databases', 'instance', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
-
-
+MONTHLY_ONLY_FAMILIES = ['databases', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
 def get_cloud_prices(sub):
     url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
     print(url)
@@ -63,10 +61,12 @@ def get_cloud_prices(sub):
         for addon in family['addons']:
             for price in addon['plan']['details']['pricings']['default']:
                 duration = price['description'].lower()
-                invoiceName = addon['invoiceName'].replace(' on region #REGION#', '').replace(' on #REGION#', '')
+                invoiceName = addon['plan']['invoiceName'] if family['family'] == 'ai-training' else addon['invoiceName']
+                invoiceName = invoiceName.replace(' on region #REGION#', '').replace(' on #REGION#', '')
                 invoiceName = invoiceName.replace('Monthly usage for ', '')
                 invoiceName = invoiceName.replace('Public Cloud Database', '').strip()
-                if invoiceName in EXCLUDE_PRODUCTS:
+
+                if invoiceName in EXCLUDE_PRODUCTS or invoiceName.replace(' consumption', '').strip() in EXCLUDE_PRODUCTS:
                     continue
                 
                 if 'month' in duration:
@@ -75,7 +75,6 @@ def get_cloud_prices(sub):
                     duration = 'minute'
                 elif 'hour' in duration or 'consumption' in duration:
                     duration = 'hour'
-
 
                 invoiceName = re.sub('^snapshot$', 'Volume Backup - per GB',  invoiceName)
                 invoiceName = re.sub('^storage$', 'Object Storage Swift - per GB',  invoiceName) \
@@ -105,6 +104,8 @@ def get_cloud_prices(sub):
                 }
                 if item['price'] < 0.00000001 or ('hour' in duration and item['family'] in MONTHLY_ONLY_FAMILIES):
                     continue
+                if family['family'] == 'instance':
+                    item['key'] = item['key'].replace(' consumption', '')
                 rows.append(item)
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
 
@@ -222,6 +223,8 @@ def publiccloud():
 
         df = pd.merge(df_agora, df_desc, how='left', on='key')
         df['description'] = df['description'].combine_first(df['invoiceName'])
+        df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
+
         df.drop(['invoiceName', 'key'], axis=1, inplace=True)
         catalog = df.to_dict('records')
         publiccloud['catalog'] = catalog

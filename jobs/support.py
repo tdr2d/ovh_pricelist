@@ -7,6 +7,7 @@ REGEX_SUPPORT_MIN_NUMBER = re.compile('([1-9][0-9\.,]+(?: ?[0-9]+)?)')
 
 def get_support_prices():
     prices = {
+        'standard': {'percent': 0, 'minimum': 0},
         'premium': {'percent': 0, 'minimum': None},
         'business': {'percent': 10, 'minimum': None},
         'entreprise': {'percent': 30, 'minimum': None},
@@ -22,6 +23,8 @@ def get_support_prices():
                     continue
                 i = 2
                 for key in dict.keys(prices):
+                    if key == 'standard':
+                        continue
                     m0 = re.findall(REGEX_SUPPORT_MIN_NUMBER, th[i].get_text().replace(u"\u00A0", " "))
                     if bool(m0):
                         prices[key]['minimum'] = float(m0[0].replace(' ', '').replace(',', '.'))
