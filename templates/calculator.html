@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Cost Calculator{% endblock %}
 {% block head %}
-<script src="/tmp/exceljs.min.js"></script>
+<script src="/lib/exceljs.min.js"></script>
 {% endblock %}
 {% block content %}
 <style>
@@ -166,7 +166,7 @@ let state = {
     'support': loadedState.support || 'b',
     'totaldiscount': loadedState.totaldiscount || 0,
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
-    'legal_checked': loadedState.legal_checked || Object.keys(res.legal[LANG]).join(''),
+    'legal_checked': loadedState.legal_checked || '12389',
 };
 
 for (const i in loadedState.zones) {
