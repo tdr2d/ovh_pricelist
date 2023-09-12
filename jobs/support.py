@@ -6,14 +6,14 @@ import re
 REGEX_SUPPORT_MIN_NUMBER = re.compile('([1-9][0-9\.,]+(?: ?[0-9]+)?)')
 
 def get_support_prices():
-    prices = {
-        'standard': {'percent': 0, 'minimum': 0},
-        'premium': {'percent': 0, 'minimum': None},
-        'business': {'percent': 10, 'minimum': None},
-        'entreprise': {'percent': 30, 'minimum': None},
-    }
     subs = {}
     for sub in SUBSIDIARIES:
+        prices = {
+            'standard': {'percent': 0, 'minimum': 0},
+            'premium': {'percent': 0, 'minimum': None},
+            'business': {'percent': 10, 'minimum': None},
+            'entreprise': {'percent': 30, 'minimum': None},
+        }
         for s in get_website_tries_for_country(sub):
             try:
                 html = get_html(f'https://www.ovhcloud.com/{s.lower()}/support-levels/plans/')
@@ -37,4 +37,4 @@ def get_support_prices():
 
 
 if __name__ == '__main__':
-    get_support_prices()
+    print(get_support_prices())
