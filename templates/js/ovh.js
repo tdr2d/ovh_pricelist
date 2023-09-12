@@ -1,0 +1,20 @@
+const OVH_SUBSIDIARY_DEFAULT = 'FR';
+const OVH_SUBSIDIARY_ADDRESS = {
+    'FR': 'OVHCloud - 2 rue Kellermann BP 80 157 59053 Roubaix Cedex 1 – France Société par Actions Simplifiée au capital de 10 174 560 € - RCS Lille Métropole 424 761 419 – Code APE 2620Z N°TVA FR22424761419',
+    'CZ': '',
+    'DE': 'OVH GmbH, with an authorized capital of € 25.000,  having its registered offfice at  Christophstraße 19, 50670 Köln, Germany registered in Commercial Register Saarbrücken, with the Company Registration Number HRB 15369',
+    'ES': 'OVH HISPANO SL, with an authorised capital of € 203 006 having its registered offfice at C/ Alcalá 21, 5.ª planta, 28014 Madrid, España, registered in the Registro Mercantil de Madrid Tomo 19.514, Folio 77, Sección 8ª, Hoja M-342678 e inscripción 5ª',
+    'FI': '',
+    'CA': 'HEBERGEMENT OVH INC., société par actions régie par la Loi sur les sociétés par actions (RLRQ, C. S-31.1), dont le siège social est situé au 800-1801 avenue McGill Collège, Montréal, QC, H3A 2N4 (Canada)',
+    'IE': 'OVH Hosting Limited, registered under number 468585, with its offices at 38/39 Fitzwilliam Square West Dublin 2 D02 NX53 , Ireland',
+    'IT': 'OVH srl, with an authorized capital of € 200 000,  having its registered offfice at  Via Carlo Imbonati, 18 20159, Italy registered in Camera di Commercio della Provincia di Milano, Lodi, Monza e Brianza, with the Company Registration Number ID 06157670966',
+    'LT': '',
+    'MA': '',
+    'NL': '',
+    'PL': 'OVH Spółka z ograniczoną odpowiedzialnością z siedzibą we Wrocławiu (50-088), przy ul. Swobodna 1, wpisaną do Rejestru Przedsiębiorców KRS prowadzonego przez Sąd Rejonowy dla Wrocławia – Fabrycznej we Wrocławiu, VI Wydział Gospodarczy Krajowego Rejestru Sądowego pod numerem KRS: 0000220286, NIP: 8992520556, REGON: 933029040, kapitał zakładowy w wysokości 50.000,00 zł.',
+    'PT': 'OVH HOSTING - SISTEMAS INFORMÁTICOS, UNIPESSOAL LDA with an authorised capital of € 10.000,00,having its registered offfice at Praça de Alvalade, nº 7, 7º dtº 1700 036 Lisboa, Portugal, registered in CRComercial Lisboa with the Company Registration Number ID508769329',
+    'SN': '',
+    'TN': '',
+    'US': '',
+    'GB': 'OVH Limited , headquartered at Becket House, 1 Lambeth Palace Road, London SE1 7EU and registered under number 05519821',
+};

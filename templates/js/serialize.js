@@ -64,12 +64,13 @@ function DeserializeURI() {
     // console.log(search_zones);
     for (let i = 0; i < search_zones.length; i+=2) {
         const zoneData = search_zones[i+1].split(ITEM_RE).slice(1);
+        console.log(zoneData)
         let items = []
         for (let j=0; j < zoneData.length; j+=2) {  // Split items
             const key = zoneData[j];
             const data = zoneData[j+1];
             const qcd = ['quantity', 'commit', 'discount'].map((x) => {
-                return parseInt(data.match(new RegExp(`${ABREV_ITEM[x]}([0-9]{1,4})`, 'g'))[1]);
+                return parseInt(data.match(new RegExp(`${ABREV_ITEM[x]}([0-9]+)`))[1]);
             });
             items.push(getItem(key, qcd[0], qcd[1], qcd[2]));
         }

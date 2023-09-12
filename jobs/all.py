@@ -47,8 +47,8 @@ def save_indexes():
         data['subsidiaries'][sub]['support'] = supports[sub]
 
     json.dump(data, open('pricelist-index.json', 'w+'))
-    # upload_gzip_json(subs, f'pricelist-index.json')
-    # upload_gzip_json(subs, f'pricelist-index-v{version}.json')
+    upload_gzip_json(data, f'pricelist-index.json')
+    upload_gzip_json(data, f'pricelist-index-v{version}.json')
 
 def get_dcs():
     base_url = 'https://smokeping.ovh.net/smokeping'

@@ -8,7 +8,7 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 
 ## Live
 * Pricelist https://pricelist.ovh
-* Calculator https://calculator.ovh
+* Calculator https://ovh-calculator.ovh
 
 ## Features
 * Table view of all ovhcloud.com catalogue with hardware, price, and few other informations.
@@ -17,5 +17,5 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 * Price estimate
 * Quote generator
 
-## Known Bugs
-### Calculator
+### TODO Calculator
+- TODO ISSUE With french support business prices

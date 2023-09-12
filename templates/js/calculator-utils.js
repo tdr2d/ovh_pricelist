@@ -2,6 +2,8 @@ const COORDINATES_TO_SAVE_FORMULA = [
     'J20','J21','J22','J23','J24','J25','J26','J27', 'J28',
 ];
 const SPECIAL_CELLS = {
+    'subsidiary_description': 'B6',
+    'price_formated_cells': ['E17', 'F17', 'J17'],
     'client': 'B10',
     'client_2': 'D10',
     'author': 'G7',
@@ -9,6 +11,7 @@ const SPECIAL_CELLS = {
     'item_width': 'A-D',
     'row_ref_zone': 16,
     'row_ref_item': 17,
+    'currency_symbol': 'C5',
     'currency': 'C6',
     'taxe_name': 'C7', 'taxe_rate': 'C8',
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
@@ -19,6 +22,7 @@ const SPECIAL_CELLS = {
 const SUPPORT_KEY_TO_NAME = {'e': 'entreprise', 'b': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = 'Conditions Particulières ';
 const PREFIX_ZONE_TEXT = 'Zone ';
+const num_format = (symbol) => `_ # ##0.00" ${symbol}"`;
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
 const cell_vertical_offset = (coord, offset) => coord.replace(/([A-Z]+)([0-9]+)/g, (m,col,row)=>`${col}${parseInt(row)+offset}`);
 
@@ -57,16 +61,29 @@ function saveXLSX(state, currency) {
     if (state.zones.length == 0 || state.zones[0].items.length == 0) {
         return;
     }
-    getXLSXTemplate(XLSX_TEMPLATE, XLSX_SHEETNAME).then(sheet => {
+    const date = new Date().toISOString().split('T')[0];
+    const currency_symbol = currency in CURRENCIES ? CURRENCIES[currency]['symbol']['grapheme'] : '€';
+    const currency_name = currency in CURRENCIES ? CURRENCIES[currency]['name'] : 'EURO';
+
+    getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${LANG}`), XLSX_SHEETNAME).then(sheet => {
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['client_2']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
-        sheet.getCell(SPECIAL_CELLS['currency']).value = currency;
+        sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
         sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
         sheet.getCell(SPECIAL_CELLS['support_min']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
+
+        console.log(SUPPORT[SUPPORT_KEY_TO_NAME[state.support]]);
+
         if (state.totaldiscount > 0) {
             sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
+        }
+        for (const cell of SPECIAL_CELLS['price_formated_cells']) {
+            sheet.getCell(cell).numFmt = num_format(currency_symbol);
+        }
+        for (const cell of COORDINATES_TO_SAVE_FORMULA) {
+            sheet.getCell(cell).numFmt = num_format(currency_symbol);
         }
 
         // Display legals
@@ -107,7 +124,7 @@ function saveXLSX(state, currency) {
         update_formula(sheet, COORDINATES_TO_SAVE_FORMULA, offset);
         return sheet._workbook.xlsx.writeBuffer();
     })
-    .then(buffer => saveByteArray([buffer], 'test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
+    .then(buffer => saveByteArray([buffer], `${state.title} v${date}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
 }
 
 var saveByteArray = (function () {
@@ -126,13 +143,13 @@ var saveByteArray = (function () {
 
 // Add a vertical offset to all saved_formulas
 function update_formula(sheet, old_coordinates, voffset) {
-    console.log(voffset);
+    // console.log(voffset);
     for (const i in old_coordinates) {
         const new_coord = cell_vertical_offset(old_coordinates[i], voffset);
         const old_formula = sheet.getCell(new_coord).formula || '';
         // regex https://regex101.com/r/SHrdes/1
         const new_formula = old_formula.replace(/(^|[^(])([A-Z]+)([1-9][0-9]*)/g, (m, p0,p1,p2) => `${p0}${p1}${parseInt(p2)+voffset}`);
-        console.log({old: old_coordinates[i], new: new_coord, old_formula: old_formula, new_formula: new_formula})
+        // console.log({old: old_coordinates[i], new: new_coord, old_formula: old_formula, new_formula: new_formula})
         sheet.getCell(new_coord).value = {formula: new_formula};
     }
 }

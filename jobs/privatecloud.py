@@ -184,6 +184,8 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
     for plans in pcc_plans['plans']:
         plan_codes |= get_addon_families(plans)
 
+    # for k in plan_codes:
+        # print(f'{k} {plan_codes[k]["price_default"]}')
     cores_quandidates = set([10,6,8,20])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
@@ -194,6 +196,9 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
         # if cr['name'] in SNC_RANGES:
         #     zones += TZ_REGION
         managementFeePlanCode = cr['datacenters'][0]['managementFees']['planCode']
+        if managementFeePlanCode not in plan_codes:
+            managementFeePlanCode = managementFeePlanCode.replace('nsx-t', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
+            managementFeePlanCode = managementFeePlanCode.replace('vsphere', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
         nsxt_vdc_option = cr['datacenters'][0]['nsxt-vdc-option'] if 'nsxt-vdc-option' in cr['datacenters'][0] else None
         nsxt_ip_option = cr['datacenters'][0]['nsxt-ip-block'] if 'nsxt-ip-block' in cr['datacenters'][0] else None
 
