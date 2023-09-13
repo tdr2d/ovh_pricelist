@@ -13,16 +13,20 @@ const SPECIAL_CELLS = {
     'row_ref_item': 17,
     'currency_symbol': 'C5',
     'currency': 'C6',
-    'taxe_name': 'C7', 'taxe_rate': 'C8',
+    'tax_name': 'C7', 'tax_rate': 'C8',
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
     'exceptionnal_discount': 'C12',
     'budget_duration': 'C13',
     'legal_start': 'A60'
 };
 const SUPPORT_KEY_TO_NAME = {'e': 'entreprise', 'b': 'business', 's': 'standard'};
-const PREFIX_LEGAL_TEXT = 'Conditions Particulières ';
+const PREFIX_LEGAL_TEXT = {
+    'fr': 'Conditions Particulières ',
+    'en': 'Special Condition',
+};
 const PREFIX_ZONE_TEXT = 'Zone ';
-const num_format = (symbol) => `_ # ##0.00" ${symbol}"`;
+
+const num_format = (symbol) => `_ # ##0.00" ${symbol}";- # ##0.00" ${symbol}";_ "";`;
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
 const cell_vertical_offset = (coord, offset) => coord.replace(/([A-Z]+)([0-9]+)/g, (m,col,row)=>`${col}${parseInt(row)+offset}`);
 
@@ -57,16 +61,18 @@ function getItem(key, quantity, commit, discount) {
     return item;
 }
 
-function saveXLSX(state, currency) {
+function saveXLSX(state) {
     if (state.zones.length == 0 || state.zones[0].items.length == 0) {
         return;
     }
     const date = new Date().toISOString().split('T')[0];
-    const currency_symbol = currency in CURRENCIES ? CURRENCIES[currency]['symbol']['grapheme'] : '€';
-    const currency_name = currency in CURRENCIES ? CURRENCIES[currency]['name'] : 'EURO';
+    const currency_name = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['name'] : CURRENCY;
 
     getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${LANG}`), XLSX_SHEETNAME).then(sheet => {
+        sheet.getCell(SPECIAL_CELLS['subsidiary_description']).value = OVH_SUBSIDIARY_ADDRESS[sub] || OVH_SUBSIDIARY_ADDRESS[OVH_SUBSIDIARY_DEFAULT];
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
+        sheet.getCell(SPECIAL_CELLS['tax_name']).value = (LANG == 'fr') ? 'TVA' : 'VAT';
+        sheet.getCell(SPECIAL_CELLS['tax_rate']).value = TAX_RATE;
         sheet.getCell(SPECIAL_CELLS['client_2']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
         sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
@@ -74,16 +80,14 @@ function saveXLSX(state, currency) {
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
         sheet.getCell(SPECIAL_CELLS['support_min']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
 
-        console.log(SUPPORT[SUPPORT_KEY_TO_NAME[state.support]]);
-
         if (state.totaldiscount > 0) {
             sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
         }
         for (const cell of SPECIAL_CELLS['price_formated_cells']) {
-            sheet.getCell(cell).numFmt = num_format(currency_symbol);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
         }
         for (const cell of COORDINATES_TO_SAVE_FORMULA) {
-            sheet.getCell(cell).numFmt = num_format(currency_symbol);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
         }
 
         // Display legals
@@ -91,7 +95,7 @@ function saveXLSX(state, currency) {
         for (const key of state.legal_checked.split('')) {
             const text_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count);
             const url_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count+1);
-            sheet.getCell(text_cell).value =  PREFIX_LEGAL_TEXT + res.legal[LANG][key].text;
+            sheet.getCell(text_cell).value =  PREFIX_LEGAL_TEXT[LANG] + res.legal[LANG][key].text;
             sheet.getCell(text_cell).style =  {'font': {'bold': true, 'size': 10}};
             sheet.getCell(url_cell).value =  {'text': res.legal[LANG][key].url, 'hyperlink': res.legal[LANG][key].url};
             legal_count += 2;

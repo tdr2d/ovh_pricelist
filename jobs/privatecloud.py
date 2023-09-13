@@ -62,6 +62,7 @@ def get_backup_options(pcc_plan_codes):
         size, plan = m['invoiceName'].split('-')[-1], m['invoiceName'].split('-')[-2]
         m['description'] = f"{BACKUP_DESCRIPTION[plan]} - {BACKUP_SIZE[size]}"
         m['type'] = 'Managed Backups'
+        m['price_snc'] = round(m['price_default']*SNC_MARKUP)
     return managed_backup
 
 def get_occ_options(sub='FR'):
@@ -123,10 +124,10 @@ def get_ps(sub='FR'):
         mPlan = sorted(list(mPlan))
         price = mPlan[-1]
         item = {'type': 'PS', 'description': plan['invoiceName'], 'setupfee': price / 10 ** 8}
-        for con in CONFORMITY + ['snc']:
+        for con in CONFORMITY:
             item['price_'+con] = 0
         plans.append(item)
-        plans.append({'type': 'PS', 'description': plan['invoiceName'], 'setupfee': price / 10 ** 8, 'price_snc': 0})
+        plans.append({'type': 'PS', 'description': plan['invoiceName'] + ' SNC', 'setupfee': SNC_PS_PRICE, 'price_snc': 0})
     return plans
 
 def parse_windows_licenses(plan_codes, list_of_cores):
@@ -172,7 +173,7 @@ def get_veeam_and_zerto_licenses(sub='FR'):
         veam['price_'+con] = veeam_price
         zerto['price_'+con] = zerto_price
     veam['price_snc'] = round(veeam_price*SNC_MARKUP)
-    zerto['price_snc'] = round(zerto_price*SNC_MARKUP)
+    # zerto['price_snc'] = round(zerto_price*SNC_MARKUP)
 
     return list(filter(lambda x: x['price_default'] > 0, [veam, zerto]))
 
