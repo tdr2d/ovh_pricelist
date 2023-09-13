@@ -18,5 +18,4 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 * Quote generator
 
 ### TODO Calculator
-- PS catalogue in double
-- Veeam managed backup SNC prices
+bug index pricelist compression

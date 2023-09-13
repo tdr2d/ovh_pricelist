@@ -13,11 +13,11 @@ data:
       server_name _;
 
       location / {
-        index static/baremetal.html;
+        index baremetal.html;
         rewrite ^/$ /baremetal.html;
         proxy_redirect off;
         proxy_buffering off;
-        proxy_pass https://share.s3.gra.io.cloud.ovh.net/;
+        proxy_pass https://share.s3.gra.io.cloud.ovh.net/static/;
       }
     }
 ---

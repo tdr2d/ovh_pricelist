@@ -137,8 +137,10 @@ const pricekey = 'price_' + conformity;
 const LANG = sub == 'FR' ? 'fr' : 'en';
 const XLSX_TEMPLATE = '/template.xlsx';
 const XLSX_SHEETNAME = 'quote';
+const version = new URLSearchParams(location.search).get('version') || null;
+const url = BUCKET_ROOT + '/' + (version === null) ? 'pricelist-index.json' : `pricelist-index-v${version}.json`;
 
-fetch('pricelist-index.json').then(res => res.json()).then(res => {
+fetch(url).then(res => res.json()).then(res => {
 const DCS = res.dcs;
 const CURRENCY = res.subsidiaries[sub].locale.currencyCode;
 const CURRENCY_SYMBOL = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['symbol']['grapheme'] : '€';
@@ -171,6 +173,7 @@ let state = {
     'totaldiscount': loadedState.totaldiscount || 0,
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
     'legal_checked': loadedState.legal_checked || '12389',
+    'version': res.version,
 };
 
 for (const i in loadedState.zones) {
