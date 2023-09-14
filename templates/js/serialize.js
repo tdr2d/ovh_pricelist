@@ -5,6 +5,7 @@ const ABREV_TOTAL = {
     'support': 's',
     'totaldiscount': 'u',
     'legal_checked': 'l',
+    'version': 'v'
 }
 
 const ABREV_ITEM = {

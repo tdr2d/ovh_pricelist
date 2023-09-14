@@ -9,13 +9,13 @@ help: ## Show this help
 serve: ## dev http server
 	cd static && python3 -m http.server 80
 
-build: ## build static html files
+build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share make build
 	jinja templates/calculator.html -E S3_BUCKET -E S3_REGION -o static/calculator.html
 	jinja templates/baremetal.html -E S3_BUCKET -E S3_REGION -o static/baremetal.html
 	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
 	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html
 
-upload_static_prod: # ## Usage S3_BUCKET=share make upload_static_prod
+upload_static_prod: ## Usage S3_BUCKET=share make upload_static_prod
 	@S3_BUCKET=share S3_REGION=gra $(MAKE) build
 	aws s3 --endpoint-url $(ENDPOINT) sync --delete --acl public-read static $(BUCKET)/static
 	find ./static/lib/ -type f -exec gzip -9 "{}" \; -exec mv "{}.gz" "{}" \;

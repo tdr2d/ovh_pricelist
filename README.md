@@ -18,4 +18,3 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 * Quote generator
 
 ### TODO Calculator
-bug index pricelist compression
