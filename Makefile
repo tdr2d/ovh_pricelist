@@ -15,8 +15,8 @@ build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share 
 	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
 	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html
 
-upload_static_prod: ## Usage S3_BUCKET=share make upload_static_prod
-	@S3_BUCKET=share S3_REGION=gra $(MAKE) build
+upload_static_prod: ## Usage for prod: S3_BUCKET=share S3_REGION=gra make upload_static_prod
+	S3_BUCKET=share S3_REGION=gra $(MAKE) build
 	aws s3 --endpoint-url $(ENDPOINT) sync --delete --acl public-read static $(BUCKET)/static
 	find ./static/lib/ -type f -exec gzip -9 "{}" \; -exec mv "{}.gz" "{}" \;
 	ls static/lib/*.js | xargs -I{} aws s3api --endpoint-url $(ENDPOINT) put-object --key {} --body {} --bucket ${S3_BUCKET} --content-type text/javascript --content-encoding gzip --acl public-read

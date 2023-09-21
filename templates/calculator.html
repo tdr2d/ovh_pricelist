@@ -226,10 +226,10 @@ function renderTotalPrice() {
     state.totalSupportLocalTax = (state.totalSupport * ((100+TAX_RATE)/100));
     $.getElementById('price-placeholder').innerHTML = `
     <table style="margin-top: 34px; font-size: 1rem;"><tbody>
-        <tr><td>Mensuel HT</td> <td>${state.total.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
-        <tr><td><b>Mensuel HT + Support</b></td> <td><b>${state.totalSupport.toFixed(2)} ${CURRENCY_SYMBOL}</b></td> </tr>
-        <tr><td>Mensuel TCC (${TAX_RATE}%)</td> <td>${state.totalSupportLocalTax.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
-        <tr><td>Frais d'installation</td> <td>${state.installfee.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
+        <tr><td>Monthly ex. VAT</td> <td>${state.total.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
+        <tr><td><b>Monthly ex. VAT + Support</b></td> <td><b>${state.totalSupport.toFixed(2)} ${CURRENCY_SYMBOL}</b></td> </tr>
+        <tr><td>Monthly inc. VAT (${TAX_RATE}%)</td> <td>${state.totalSupportLocalTax.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
+        <tr><td>Setup Fees</td> <td>${state.installfee.toFixed(2)} ${CURRENCY_SYMBOL}</td> </tr>
     </tbody></table>
     `;
 }

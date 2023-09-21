@@ -105,6 +105,9 @@ function saveXLSX(state) {
         let offset = -2;
         let row_index = SPECIAL_CELLS.row_ref_item + 1;
         for (const zone of state.zones) {
+            if (!zone || !(zone.items) || zone.items.length == 0) {
+                continue;
+            }
             if (offset < 0) {
                 sheet.getCell(`A${row_index - 2}`).value = PREFIX_ZONE_TEXT + DC_key_to_text(zone['key']);
             } else {
@@ -112,6 +115,9 @@ function saveXLSX(state) {
             }
             offset += 1;
             for (const item of zone['items']) {
+                if (!item || Object.keys(item).length == 0) {
+                    continue;
+                }
                 if (offset < 0) {
                     const row = sheet.getRow(row_index - 1);
                     const item_keys = ['description', 'description', 'description', 'description', 'setupfee', 'pricePerUnit', 'quantity', 'commit', 'discount']
@@ -160,9 +166,12 @@ function update_formula(sheet, old_coordinates, voffset) {
 
 function insertPriceRow(sheet, rowIndex, description, installCost, unitCost, quantity, commitDuration, commitDiscount) {
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_item);
-    const row_values = [description, description, description, description, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
+    const row_values = [description, null, null, null, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
     const new_row = sheet.insertRow(rowIndex, row_values, 'i');
     const s_e = SPECIAL_CELLS['item_width'].split('-');
+    if (`${s_e[0]}${rowIndex}` in sheet._merges) {
+        delete sheet._merges[`${s_e[0]}${rowIndex}`];
+    }
     sheet.mergeCells(`${s_e[0]}${rowIndex}:${s_e[1]}${rowIndex}`);
     for (const i in row_ref._cells) {
         new_row._cells[i].style = row_ref._cells[i].style;
@@ -175,6 +184,9 @@ function insertZoneRow(sheet, rowIndex, zoneDescription) {
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_zone);
     const new_row = sheet.insertRow(rowIndex, row_ref._cells.map(x => zoneDescription));
     const s_e = SPECIAL_CELLS['zone_width'].split('-');
+    if (`${s_e[0]}${rowIndex}` in sheet._merges) {
+        delete sheet._merges[`${s_e[0]}${rowIndex}`];
+    }
     sheet.mergeCells(`${s_e[0]}${rowIndex}:${s_e[1]}${rowIndex}`);
     for (const i in row_ref._cells) {
         new_row._cells[i].style = row_ref._cells[i].style;
