@@ -84,9 +84,10 @@
     <br> 
     <h3>Total <span class="sep"></span></h3>
     <div class="section-padding" style="display: flex">
-        <div class="label-input">
+        <div class="label-input" id="support-placeholder">
             <label for="support" class="col-form-label">Support</label>&nbsp;&nbsp;&nbsp;
             <select id="support" class="form-select form-select-sm" style="width: 290px;">
+                <option value="f">Entreprise (30%) - No minimum</option>
                 <option value="e">Entreprise (30%)</option>
                 <option value="b" selected>Business (10%)</option>
                 <option value="s">Standard</option>
@@ -119,12 +120,17 @@
             <tbody id="legalcheckboxes"></tbody>
         </table>
         <br>
-        <button class="btn btn-primary drop-shadow-1" id="export-excel-button" style="white-space: nowrap;"> 
-            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.5" d="M3 15C3 17.8284 3 19.2426 3.87868 20.1213C4.75736 21 6.17157 21 9 21H15C17.8284 21 19.2426 21 20.1213 20.1213C21 19.2426 21 17.8284 21 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>
-            Export Excel Quote
-        </button>
+        
+        <div style="display: flex; align-items: center;">
+            <div id="languages-placeholder" style='width: 200px; margin-right: 2rem'></div>
+            <button class="btn btn-primary drop-shadow-1" id="export-excel-button" style="white-space: nowrap;"> 
+                <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.5" d="M3 15C3 17.8284 3 19.2426 3.87868 20.1213C4.75736 21 6.17157 21 9 21H15C17.8284 21 19.2426 21 20.1213 20.1213C21 19.2426 21 17.8284 21 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>
+                Export Excel Quote
+            </button>
+        </div>
+
     </div>
     <br> <br>
 </div> <!-- Calculator -->
@@ -133,12 +139,12 @@
 let $ = document;
 const DELETE_SVG = '<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70404 1.85522C10.0945 1.46478 10.0945 0.830704 9.70404 0.440262C9.3136 0.0498199 8.67952 0.0498199 8.28908 0.440262L5 3.73247L1.70779 0.443385C1.31735 0.0529434 0.683273 0.0529434 0.292831 0.443385C-0.0976105 0.833827 -0.0976105 1.4679 0.292831 1.85835L3.58504 5.14743L0.295955 8.43964C-0.0944869 8.83008 -0.0944869 9.46416 0.295955 9.8546C0.686397 10.245 1.32047 10.245 1.71092 9.8546L5 6.56239L8.29221 9.85147C8.68265 10.2419 9.31673 10.2419 9.70717 9.85147C10.0976 9.46103 10.0976 8.82695 9.70717 8.43651L6.41496 5.14743L9.70404 1.85522Z" fill="#C1C1C1"/></svg>';
 const pricekey = 'price_' + conformity;
-const LANG = sub == 'FR' ? 'fr' : 'en';
 const XLSX_TEMPLATE = '/template.xlsx';
 const XLSX_SHEETNAME = 'quote';
 const version = new URLSearchParams(location.search).get('v') || null;
 const cache_bust = new Date().toDateString().replaceAll(' ','');
 const url = BUCKET_ROOT + '/' + ((version === null) ? `pricelist-index.json?${cache_bust}` : `pricelist-index-v${version}.json`);
+
 
 fetch(url).then(res => res.json()).then(res => {
 const DCS = res.dcs;
@@ -146,7 +152,9 @@ const CURRENCY = res.subsidiaries[sub].locale.currencyCode;
 const CURRENCY_SYMBOL = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['symbol']['grapheme'] : '€';
 const SUPPORT = res.subsidiaries[sub].support;
 const TAX_RATE = res.subsidiaries[sub].locale.taxRate;
+const OVH_SUBSIDIARY_ADDRESS = res.addresses;
 const SUPPORT_MARKUPS_MAP = {
+    'f': (price) => price + price*0.3,
     'e': (price) => price + Math.max(SUPPORT['entreprise'].minimun || 5000, price*0.3),
     'b': (price) => price + Math.max(SUPPORT['business'].minimun || 250, price*0.1),
     's': (price) => price,
@@ -155,9 +163,10 @@ const SUPPORT_MARKUPS_MAP = {
 let loadedState = {};
 const index = res.subsidiaries[sub].catalog;
 
-{% include 'js/ovh.js' %}
 {% include 'js/serialize.js' %}
 {% include 'js/calculator-utils.js' %}
+{% include 'js/calculator-languages.js' %}
+
 try {
     loadedState = DeserializeURI();
 } catch(err) {
@@ -174,6 +183,7 @@ let state = {
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
     'legal_checked': loadedState.legal_checked || '12389',
     'version': res.version,
+    'lang': sub == 'FR' ? 'fr' : 'en',
 };
 
 for (const i in loadedState.zones) {
@@ -188,7 +198,7 @@ if (!(state.zones.length)) {
 
 setLastUpdated(res.date);
 setConformityList();
-
+renderLanguages(state);
 Object.keys(ABREV_TOTAL).forEach((id) => {
     if (id == 'legal_checked' || id == 'version') {
         return;
@@ -217,7 +227,7 @@ function renderTotalPrice() {
                 continue;
             }
             total += i.total;
-            installFee += i.setupfee;
+            installFee += (i.setupfee * i.quantity);
         }
     }
     state.total = total * ((100 - state.totaldiscount)/100);
@@ -409,8 +419,16 @@ function AddItemToZone(zone, item) {
     function updateTotalPrice(zoneIndex, itemIndex) {
         let stateItem = state.zones[zoneIndex].items[itemIndex];
         stateItem['total'] = stateItem['pricePerUnit'] * stateItem.quantity * (1 - (stateItem.discount) / 100);
-        $.getElementById(`z${zoneIndex}-item${itemIndex}-total`).innerText = stateItem['total'];
-        $.getElementById(`z${zoneIndex}-item${itemIndex}-setupfee`).innerText = (stateItem['setupfee'] * stateItem.quantity);
+        $.getElementById(`z${zoneIndex}-item${itemIndex}-total`).innerText = stateItem['total'].toFixed(2);
+        
+        
+        stateItem['setupfee'] = index[stateItem['key']].setupfee || 0;
+        let setupFee = stateItem['setupfee'] * stateItem.quantity;
+        if (stateItem.key.startsWith('b-') && stateItem.commit >= 6) {
+            setupFee = 0;
+            stateItem['setupfee'] = 0
+        }
+        $.getElementById(`z${zoneIndex}-item${itemIndex}-setupfee`).innerText = setupFee.toFixed(2);
         renderTotalPrice();
     }
 
@@ -436,14 +454,14 @@ function AddItemToZone(zone, item) {
 
 function renderLegalCheckboxes() {
     const columns = 3;
-    const keys = Object.keys(res.legal[LANG]);
+    const keys = Object.keys(res.legal['en']);
     let html = '<tr>';
     
     for (let i = 0; i < keys.length; i++) {
         const checked =  state.legal_checked.includes(keys[i]) ? 'checked' : '';
         html += `<td><input class="form-check-input legal-checkbox" type="checkbox" value="" id="legal-${keys[i]}" ${checked}>
         <label class="form-check-label" for="legal-${keys[i]}" style="padding: 0 7px;">
-            ${res.legal[LANG][keys[i]].text}
+            ${res.legal['en'][keys[i]].text}
         </label>   </td>`;
         if (i != 0 && (i+1)%columns == 0) {
             html += '</tr>';

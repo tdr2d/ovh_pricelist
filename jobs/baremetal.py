@@ -118,7 +118,12 @@ def postprocessing(dataset):
     df = pd.DataFrame(dataset).round(2)
     df = df.drop_duplicates(subset=['description'])
     df = df.fillna('')
-    return df.to_dict('records')
+
+    servers, options = df[df['setupfee'] > 0], df[df['setupfee'] == 0]
+    # remove duplicated server name, keep cheaper
+    servers = servers.sort_values('price', ascending=True).drop_duplicates('name', keep='first')
+
+    return pd.concat([servers, options]).to_dict('records')
 
 def baremetal():
     catalog = {}
@@ -128,13 +133,12 @@ def baremetal():
         data = get_json(url)
         dataset = build_dataset(data)
         dataset = postprocessing(dataset)
-        # print(len(dataset))
-        # json.dump(dataset, open('tmp.json', 'w+'))
 
         assert len(dataset) > 500, "Must have more than 1k refs"
         data = { 'catalog': dataset, 'date': datetime.now().isoformat(), 'locale': data['locale'], 'currency': data['locale']['currencyCode'] }
         catalog[sub] = data
     upload_gzip_json(catalog , 'baremetal_prices.json', S3_BUCKET)
+    # json.dump(catalog, open('baremetal.json', 'w+'))
     return catalog
 
 if __name__ == '__main__':

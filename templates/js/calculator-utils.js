@@ -2,6 +2,7 @@ const COORDINATES_TO_SAVE_FORMULA = [
     'J20','J21','J22','J23','J24','J25','J26','J27', 'J28',
 ];
 const SPECIAL_CELLS = {
+    'link': 'M2',
     'subsidiary_description': 'B6',
     'price_formated_cells': ['E17', 'F17', 'J17'],
     'client': 'B10',
@@ -19,10 +20,11 @@ const SPECIAL_CELLS = {
     'budget_duration': 'C13',
     'legal_start': 'A60'
 };
-const SUPPORT_KEY_TO_NAME = {'e': 'entreprise', 'b': 'business', 's': 'standard'};
+const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'e': 'entreprise', 'b': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = {
-    'fr': 'Conditions Particulières ',
+    'fr': 'Conditions Particulières',
     'en': 'Special Condition',
+    'de': 'Besonderen Bedingungen '
 };
 const PREFIX_ZONE_TEXT = 'Zone ';
 
@@ -68,17 +70,18 @@ function saveXLSX(state) {
     const date = new Date().toISOString().split('T')[0];
     const currency_name = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['name'] : CURRENCY;
 
-    getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${LANG}`), XLSX_SHEETNAME).then(sheet => {
-        sheet.getCell(SPECIAL_CELLS['subsidiary_description']).value = OVH_SUBSIDIARY_ADDRESS[sub] || OVH_SUBSIDIARY_ADDRESS[OVH_SUBSIDIARY_DEFAULT];
+    getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${state.lang}`), XLSX_SHEETNAME).then(sheet => {
+        sheet.getCell(SPECIAL_CELLS['link']).value = {'text': 'Calculator link', 'hyperlink': SerilizeState()};
+        sheet.getCell(SPECIAL_CELLS['subsidiary_description']).value = OVH_SUBSIDIARY_ADDRESS[sub] || OVH_SUBSIDIARY_ADDRESS['FR'];
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
-        sheet.getCell(SPECIAL_CELLS['tax_name']).value = (LANG == 'fr') ? 'TVA' : 'VAT';
+        sheet.getCell(SPECIAL_CELLS['tax_name']).value = (state.lang == 'fr') ? 'TVA' : 'VAT';
         sheet.getCell(SPECIAL_CELLS['tax_rate']).value = TAX_RATE;
         sheet.getCell(SPECIAL_CELLS['client_2']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
         sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
         sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
-        sheet.getCell(SPECIAL_CELLS['support_min']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
+        sheet.getCell(SPECIAL_CELLS['support_min']).value = state.support == 'f' ? 0 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
 
         if (state.totaldiscount > 0) {
             sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
@@ -95,9 +98,9 @@ function saveXLSX(state) {
         for (const key of state.legal_checked.split('')) {
             const text_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count);
             const url_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count+1);
-            sheet.getCell(text_cell).value =  PREFIX_LEGAL_TEXT[LANG] + res.legal[LANG][key].text;
+            sheet.getCell(text_cell).value =  PREFIX_LEGAL_TEXT[state.lang] + ' ' + res.legal[state.lang][key].text;
             sheet.getCell(text_cell).style =  {'font': {'bold': true, 'size': 10}};
-            sheet.getCell(url_cell).value =  {'text': res.legal[LANG][key].url, 'hyperlink': res.legal[LANG][key].url};
+            sheet.getCell(url_cell).value =  {'text': res.legal[state.lang][key].url, 'hyperlink': res.legal[state.lang][key].url};
             legal_count += 2;
         }
 

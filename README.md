@@ -20,11 +20,4 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 
 
 ### Bugs
-- Bug when deleting rows and adding rows and exporting.
-- Baremetal catalog, duplicated servers ADV stor-2
-- Public cloud catalog in calculator, no win-b2-15
-- 3x c2-7 bug too many numbers after ,
-- BM - Remove setup fees if there is comitment
-- BM ADV stor 1 missing 
-- https://pricelist.ovh/calculator.html?con=default&sub=FR&t=Bare-Mertal%20servers&b=ROQ.AD&a=Pierre%20Noirel&s=b&u=0&l=1c9&v=1&zs=zLIMkb-a9c1e0q44kb-jEc1e0q44kb-aic1e0q37kb-aGc1e0q5kb-aGc1e0q3kb-gnc1e0q3kb-aGc1e0q1kb-gnc1e0q1kb-glc1e0q3zBHSkb-a9c1e0q44kb-jEc1e0q44kb-aGc1e0q16kb-aGc1e0q1kb-goc1e0q1kb-aGc1e0q3kb-gtc1e0q3kb-glc1e0q3 
-Error: Cannot merge already merged cells
+
