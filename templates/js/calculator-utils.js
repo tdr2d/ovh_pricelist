@@ -42,6 +42,7 @@ function DC_key_to_text(key) {
 
 function getItem(key, quantity, commit, discount) {
     let defaultQuantity = 1;
+    console.log(key);
     if (index[key].description.includes('DB')) {
         const match = index[key].description.match(/([0-9]) node/);
         if (match.length == 2) {
@@ -58,7 +59,13 @@ function getItem(key, quantity, commit, discount) {
         commit: commit || 1,
         discount: discount || 0,
     };
-    item['setupfee'] *= item.quantity;
+    let setupFee = item['setupfee'] * item.quantity;
+    if (item.key.startsWith('b-') && item.commit >= 6) {
+        setupFee = 0;
+        item['setupfee'] = 0
+    }
+    item.setupfee = setupFee;
+
     item['total'] = item['pricePerUnit'] * item.quantity * (1 - (item.discount) / 100);
     return item;
 }

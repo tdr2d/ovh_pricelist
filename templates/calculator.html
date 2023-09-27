@@ -416,19 +416,10 @@ function AddItemToZone(zone, item) {
     zone.querySelector('table tbody').appendChild(tr);
     zone.querySelector('table thead').style.display = 'table-header-group';
 
-    function updateTotalPrice(zoneIndex, itemIndex) {
-        let stateItem = state.zones[zoneIndex].items[itemIndex];
-        stateItem['total'] = stateItem['pricePerUnit'] * stateItem.quantity * (1 - (stateItem.discount) / 100);
+    function renderItemPrice(zoneIndex, itemIndex) {
+        const stateItem = state.zones[zoneIndex].items[itemIndex];
         $.getElementById(`z${zoneIndex}-item${itemIndex}-total`).innerText = stateItem['total'].toFixed(2);
-        
-        
-        stateItem['setupfee'] = index[stateItem['key']].setupfee || 0;
-        let setupFee = stateItem['setupfee'] * stateItem.quantity;
-        if (stateItem.key.startsWith('b-') && stateItem.commit >= 6) {
-            setupFee = 0;
-            stateItem['setupfee'] = 0
-        }
-        $.getElementById(`z${zoneIndex}-item${itemIndex}-setupfee`).innerText = setupFee.toFixed(2);
+        $.getElementById(`z${zoneIndex}-item${itemIndex}-setupfee`).innerText = stateItem['setupfee'].toFixed(2);
         renderTotalPrice();
     }
 
@@ -438,16 +429,19 @@ function AddItemToZone(zone, item) {
         renderTotalPrice();
     });
     $.getElementById(`z${zoneIndex}-item${itemIndex}-quantity`).addEventListener('change', (e) => {
-        state.zones[zoneIndex].items[itemIndex].quantity = e.target.value;
-        updateTotalPrice(zoneIndex, itemIndex)
+        const old = state.zones[zoneIndex].items[itemIndex];
+        state.zones[zoneIndex].items[itemIndex] = getItem(old.key, e.target.value, old.commit, old.discount);
+        renderItemPrice(zoneIndex, itemIndex)
     });
     $.getElementById(`z${zoneIndex}-item${itemIndex}-commit`).addEventListener('change', (e) => {
-        state.zones[zoneIndex].items[itemIndex].commit = e.target.value;
-        updateTotalPrice(zoneIndex, itemIndex);
+        const old = state.zones[zoneIndex].items[itemIndex];
+        state.zones[zoneIndex].items[itemIndex] = getItem(old.key, old.quantity, e.target.value, old.discount);
+        renderItemPrice(zoneIndex, itemIndex);
     });
     $.getElementById(`z${zoneIndex}-item${itemIndex}-discount`).addEventListener('change', (e) => {
-        state.zones[zoneIndex].items[itemIndex].discount = e.target.value;
-        updateTotalPrice(zoneIndex, itemIndex);
+        const old = state.zones[zoneIndex].items[itemIndex];
+        state.zones[zoneIndex].items[itemIndex] = getItem(old.key, old.quantity, old.commit, e.target.value);
+        renderItemPrice(zoneIndex, itemIndex);
     });
     renderTotalPrice();
 }

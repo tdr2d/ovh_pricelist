@@ -47,7 +47,7 @@ def save_indexes():
         data['subsidiaries'][sub]['locale'] = pcc[sub]['locale']
         data['subsidiaries'][sub]['support'] = supports[sub]
 
-    # json.dump(data, open('pricelist-index.json', 'w+'))
+    json.dump(data, open('pricelist-index.json', 'w+'))
     upload_gzip_json(data, f'pricelist-index.json', S3_BUCKET)
     upload_gzip_json(data, f'pricelist-index-v{version}.json', S3_BUCKET)
 
