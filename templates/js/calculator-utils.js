@@ -1,7 +1,8 @@
 const COORDINATES_TO_SAVE_FORMULA = [
-    'J20','J21','J22','J23','J24','J25','J26','J27', 'J28',
+    'J20','J21','J22','J23','J24','J25','J27','J28','J29','J30'
 ];
 const SPECIAL_CELLS = {
+    'conformity': 'A2',
     'link': 'M2',
     'subsidiary_description': 'B6',
     'price_formated_cells': ['E17', 'F17', 'J17'],
@@ -18,7 +19,7 @@ const SPECIAL_CELLS = {
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
     'exceptionnal_discount': 'C12',
     'budget_duration': 'C13',
-    'legal_start': 'A60'
+    'legal_start': 'A62'
 };
 const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'e': 'entreprise', 'b': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = {
@@ -27,6 +28,7 @@ const PREFIX_LEGAL_TEXT = {
     'de': 'Besonderen Bedingungen '
 };
 const PREFIX_ZONE_TEXT = 'Zone ';
+const TEMPLATE_VERSION = 1;
 
 const num_format = (symbol) => `_ # ##0.00" ${symbol}";- # ##0.00" ${symbol}";_ "";`;
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
@@ -37,7 +39,7 @@ function getItemRowHeightFromDescription(description) {
 }
 
 function DC_key_to_text(key) {
-    return `${key} - ${DCS[key].city} (${DCS[key].country})`;
+    return `${DCS[key].city} (${DCS[key].country})`;
 }
 
 function getItem(key, quantity, commit, discount) {
@@ -78,6 +80,10 @@ function saveXLSX(state) {
     const currency_name = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['name'] : CURRENCY;
 
     getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${state.lang}`), XLSX_SHEETNAME).then(sheet => {
+        console.log(sheet.getCell(SPECIAL_CELLS['conformity']).value)
+        sheet.getCell(SPECIAL_CELLS['conformity']).value = `${sheet.getCell(SPECIAL_CELLS['conformity']).value} ${(conformity != 'default') ? conformity.toUpperCase() : ''}`;
+        console.log(sheet.getCell(SPECIAL_CELLS['conformity']).value)
+        
         sheet.getCell(SPECIAL_CELLS['link']).value = {'text': 'Calculator link', 'hyperlink': SerilizeState()};
         sheet.getCell(SPECIAL_CELLS['subsidiary_description']).value = OVH_SUBSIDIARY_ADDRESS[sub] || OVH_SUBSIDIARY_ADDRESS['FR'];
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
@@ -207,7 +213,7 @@ function insertZoneRow(sheet, rowIndex, zoneDescription) {
 
 
 function getXLSXTemplate(url, sheetName) {
-    return fetch(url)
+    return fetch(`${url}?v${TEMPLATE_VERSION}`)
         .then(response => checkStatus(response) && response.arrayBuffer())
         .then(buffer => {
             const workbook = new ExcelJS.Workbook();
