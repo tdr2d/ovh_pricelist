@@ -24,13 +24,13 @@ def save_indexes():
     supports = get_support_prices();
 
     version = 0
-    try:
-        last_index = s3().get_object(Bucket=S3_BUCKET, Key=f'pricelist-index.json')
-        last_index_content = json.loads(gzip.decompress(last_index['Body'].read()))
-        print(f"Found index version: {last_index_content['version']}")
-        version = last_index_content['version'] + 1
-    except boto3.resource('s3').meta.client.exceptions.NoSuchKey:
-        pass
+    # try:
+    #     last_index = s3().get_object(Bucket=S3_BUCKET, Key=f'pricelist-index.json')
+    #     last_index_content = json.loads(gzip.decompress(last_index['Body'].read()))
+    #     print(f"Found index version: {last_index_content['version']}")
+    #     version = last_index_content['version'] + 1
+    # except boto3.resource('s3').meta.client.exceptions.NoSuchKey:
+    #     pass
     data = {
         'version': version,
         'date': datetime.datetime.now().isoformat(),
