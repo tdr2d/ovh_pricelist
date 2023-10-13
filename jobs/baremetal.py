@@ -23,10 +23,10 @@ def build_dataset(js):
     addons = index_addons(js)
     products = index_products(js)
 
-    # Loop on servers
+    # Loop on servers 
     for plan in js['plans']:
         server_name = plan['invoiceName'].upper().replace('ADVANCE', 'ADV') # .split(' ')[0]
-        base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage': None, 'storage_system': None, 'gpu': None}
+        base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage_system': None, 'gpu': None}
         tech_specs = products[plan['planCode']] if plan['planCode'] in products else products[plan['product']]
         server_range = 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range']
         has_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']), None)
@@ -51,10 +51,10 @@ def build_dataset(js):
                 for x in addon_family['addons']:
                     item = {'range': server_range, 'price': addons[x]['price'], 'name': server_name, 'setupfee': 0 }
                     item['description'] = f"{item['name']} - Storage Option: {addons[x]['invoiceName']}"
-                    if item['price'] == 0:
-                        base_addon_options['storage'] = addons[x]
-                    else:
-                        server_options.append(item)
+                    # if item['price'] == 0:
+                    #     base_addon_options['storage'] = addons[x]
+                    # else:
+                    server_options.append(item)
             elif addon_family['name'] == 'system-storage':
                 base_addon_options['storage_system'] = addons[addon_family['addons'][0]]
             elif addon_family['name'] in ['vrack', 'bandwidth']:
@@ -71,38 +71,38 @@ def build_dataset(js):
             elif addon_family['name'] == 'gpu':
                 base_addon_options['gpu'] = addons[addon_family['addons'][0]]
         
-        storage_specs = products[base_addon_options['storage']['product']]
+        # storage_specs = products[base_addon_options['storage']['product']]
         memory_specs = products[base_addon_options['memory']['product']]
-        storage_amount = storage_specs['storage']['disks'][0]['number'] * storage_specs['storage']['disks'][0]['capacity']
-        if (len(storage_specs['storage']['disks']) > 1 and storage_specs['storage']['disks'][1]['number'] != ''):
-            storage_amount += storage_specs['storage']['disks'][1]['number'] * storage_specs['storage']['disks'][1]['capacity']
-        storage_amount = round(storage_amount / 1000)
+        # storage_amount = storage_specs['storage']['disks'][0]['number'] * storage_specs['storage']['disks'][0]['capacity']
+        # if (len(storage_specs['storage']['disks']) > 1 and storage_specs['storage']['disks'][1]['number'] != ''):
+        #     storage_amount += storage_specs['storage']['disks'][1]['number'] * storage_specs['storage']['disks'][1]['capacity']
+        # storage_amount = round(storage_amount / 1000)
         
         item = {
             'range': 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range'],
             'name': server_name,
             'cpu_model': f"{tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']}",
-            'cpu_cores': tech_specs['server']['cpu']['cores'],
-            'cpu_threads': tech_specs['server']['cpu']['threads'],
+            'cpu_cores': tech_specs['server']['cpu']['cores'] * tech_specs['server']['cpu']['number'],
+            'cpu_threads': tech_specs['server']['cpu']['threads'] * tech_specs['server']['cpu']['number'],
             'cpu_speed': tech_specs['server']['cpu']['frequency'],
             'ram': base_addon_options['memory']['invoiceName'], 
             'ram_size': memory_specs['memory']['size'],
             'ram_speed': memory_specs['memory']['frequency'],
             'ram_type': memory_specs['memory']['ramType'],
-            'storage': base_addon_options['storage']['invoiceName'],
-            'storage_type': ' + '.join(list(map(lambda x: x['technology'], storage_specs['storage']['disks']))),
-            'storage_raid_type': storage_specs['storage']['raid'],
-            'storage_total_tbytes': storage_amount,
+            # 'storage': base_addon_options['storage']['invoiceName'],
+            # 'storage_type': ' + '.join(list(map(lambda x: x['technology'], storage_specs['storage']['disks']))),
+            # 'storage_raid_type': storage_specs['storage']['raid'],
+            # 'storage_total_tbytes': storage_amount,
             'setupfee': server_price,
             'price': server_price, 'price_snc': 0,
         }
 
         item['description'] = f"Dedicated Server {item['name']}\n"
-        item['description'] += f"CPU: {tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']} {tech_specs['server']['cpu']['cores']} Cores/{tech_specs['server']['cpu']['threads']} Threads\n"
+        item['description'] += f"CPU: {'Dual ' if tech_specs['server']['cpu']['number'] == 2 else ''}{tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']} {tech_specs['server']['cpu']['cores']} Cores/{tech_specs['server']['cpu']['threads']} Threads\n"
         if base_addon_options['gpu'] is not None:
             item['description'] += f"GPU: {base_addon_options['gpu']['invoiceName']}\n"
         item['description'] += f"RAM: {base_addon_options['memory']['invoiceName']}\n"
-        item['description'] += f"Storage: {base_addon_options['storage_system']['invoiceName'] + ' + ' if base_addon_options['storage_system'] else ''}{base_addon_options['storage']['invoiceName']}\n"
+        item['description'] += f"Storage: {base_addon_options['storage_system']['invoiceName'] + ' + ' if base_addon_options['storage_system'] else ''}\n"
         item['description'] += f"Default Public Bandwidth: {base_addon_options['pub_bp']['invoiceName']}"
         if base_addon_options['priv_bp'] is not None:
             item['description'] += f"\nDefault Private Bandwidth: {base_addon_options['priv_bp']['invoiceName']}"

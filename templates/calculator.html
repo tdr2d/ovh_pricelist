@@ -408,7 +408,7 @@ function AddItemToZone(zone, item) {
     </td>
     <td class="" id="z${zoneIndex}-item${itemIndex}-setupfee">${item.setupfee}</td>
     <td class="">${item.pricePerUnit}</td>
-    <td><input type="number" id="z${zoneIndex}-item${itemIndex}-quantity" class="form-control form-control-sm" placeholder="0" min="0" value="${item.quantity}" style="max-width: 70px"></td>
+    <td><input type="number" id="z${zoneIndex}-item${itemIndex}-quantity" class="form-control form-control-sm" placeholder="0" min="0" value="${item.quantity}" style="max-width: 85px"></td>
     <td><input type="number" id="z${zoneIndex}-item${itemIndex}-commit" class="form-control form-control-sm" placeholder="1" min="1" max="60" value="${item.commit}" style="max-width: 52px; background: transparent;"></td>
     <td><input type="number" id="z${zoneIndex}-item${itemIndex}-discount" class="form-control form-control-sm" placeholder="0" min="0" max="100" value="${item.discount}" style="max-width: 52px; background: transparent;"></td>
     <td><b id="z${zoneIndex}-item${itemIndex}-total">${item.total.toFixed(2)}</b></td>`;

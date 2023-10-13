@@ -9,8 +9,8 @@ from itertools import product
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
-# SUBSIDIARIES = ['FR']
+# SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
+SUBSIDIARIES = ['FR']
 TZ_DCS = ['RBX', 'SBG']
 S3_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID')
 S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')

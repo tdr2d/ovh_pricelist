@@ -14,6 +14,7 @@ EXCLUDE_FAMILY = [
     'bandwidth_instance',
 ]
 EXCLUDE_PRODUCTS = [
+    'bandwidth_archive_out',
     'bandwidth_storage',
     'serco-asp-r2-256 monthly instance',
     'eg-120', 'win-eg-120',
@@ -45,9 +46,14 @@ EXCLUDE_PRODUCTS = [
     'ks-1',
     'ks-2',
 ]
-
+REPLACE_PRODUCT_MAP = {
+    'archive': 'Cloud Archive Storage - per GB',
+    'archive consumption': 'Cloud Archive Storage - per GB',
+    'bandwidth_archive_out consumption': 'Cloud Archive - Egress fees - per GB',
+    # 'archive consumption': 'Cold Archive storage consumption. Minimum 1TB. Minimum duration is 180 days - per GB'
+}
 MONTHLY_ONLY_FAMILIES = ['databases', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
-def get_cloud_prices(sub):
+def get_api_cloud_prices(sub):
     url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
     print(url)
     cloud = get_json(url)
@@ -218,11 +224,12 @@ def publiccloud():
     df_desc = get_webpage()
 
     for sub in SUBSIDIARIES:
-        publiccloud = get_cloud_prices(sub)
+        publiccloud = get_api_cloud_prices(sub)
         df_agora = pd.DataFrame(publiccloud['catalog'])
 
         df = pd.merge(df_agora, df_desc, how='left', on='key')
         df['description'] = df['description'].combine_first(df['invoiceName'])
+        df = df.drop_duplicates(subset=['invoiceName', 'price'])
         df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
 
         df.drop(['invoiceName', 'key'], axis=1, inplace=True)
