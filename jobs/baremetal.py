@@ -77,13 +77,16 @@ def build_dataset(js):
         # if (len(storage_specs['storage']['disks']) > 1 and storage_specs['storage']['disks'][1]['number'] != ''):
         #     storage_amount += storage_specs['storage']['disks'][1]['number'] * storage_specs['storage']['disks'][1]['capacity']
         # storage_amount = round(storage_amount / 1000)
-        
+        cpus = 1
+        if 'number' in tech_specs['server']['cpu']:
+            cpus = tech_specs['server']['cpu']['number']
+
         item = {
             'range': 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range'],
             'name': server_name,
             'cpu_model': f"{tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']}",
-            'cpu_cores': tech_specs['server']['cpu']['cores'] * tech_specs['server']['cpu']['number'],
-            'cpu_threads': tech_specs['server']['cpu']['threads'] * tech_specs['server']['cpu']['number'],
+            'cpu_cores': tech_specs['server']['cpu']['cores'] * cpus,
+            'cpu_threads': tech_specs['server']['cpu']['threads'] * cpus,
             'cpu_speed': tech_specs['server']['cpu']['frequency'],
             'ram': base_addon_options['memory']['invoiceName'], 
             'ram_size': memory_specs['memory']['size'],
@@ -98,7 +101,7 @@ def build_dataset(js):
         }
 
         item['description'] = f"Dedicated Server {item['name']}\n"
-        item['description'] += f"CPU: {'Dual ' if tech_specs['server']['cpu']['number'] == 2 else ''}{tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']} {tech_specs['server']['cpu']['cores']} Cores/{tech_specs['server']['cpu']['threads']} Threads\n"
+        item['description'] += f"CPU: {'Dual ' if cpus == 2 else ''}{tech_specs['server']['cpu']['brand']} {tech_specs['server']['cpu']['model']} {item['cpu_cores']} Cores/{item['cpu_threads']} Threads\n"
         if base_addon_options['gpu'] is not None:
             item['description'] += f"GPU: {base_addon_options['gpu']['invoiceName']}\n"
         item['description'] += f"RAM: {base_addon_options['memory']['invoiceName']}\n"

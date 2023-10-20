@@ -12,6 +12,7 @@ EXCLUDE_FAMILY = [
     'ai-serving-engine',
     'ai-voxist',
     'bandwidth_instance',
+    'data-integration'
 ]
 EXCLUDE_PRODUCTS = [
     'bandwidth_archive_out',
@@ -47,17 +48,22 @@ EXCLUDE_PRODUCTS = [
     'ks-2',
 ]
 REPLACE_PRODUCT_MAP = {
-    'archive': 'Cloud Archive Storage - per GB',
-    'archive consumption': 'Cloud Archive Storage - per GB',
     'bandwidth_archive_out consumption': 'Cloud Archive - Egress fees - per GB',
-    # 'archive consumption': 'Cold Archive storage consumption. Minimum 1TB. Minimum duration is 180 days - per GB'
+    'volume.snapshot': 'Volume Snapshot - per GB',
+    'storage-high-perf': 'Object Storage High-Perf - per GB',
+    'storage-standard': 'Object Storage Standard-Perf - per GB',
+    'storage-standard': 'Object Storage Standard-Perf - per GB',
+    'bandwidth_storage consumption': 'Outgoing public traffic (Egress) - per GB',
+    'archive': 'Cloud Archive Storage - per GB',
+    'image': 'Instance Backup - per GB',
+    'archive consumption': 'Cloud Archive Storage - per GB',
 }
 MONTHLY_ONLY_FAMILIES = ['databases', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
 def get_api_cloud_prices(sub):
     url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
     print(url)
     cloud = get_json(url)
-    families = next(filter(lambda x: x['invoiceName'] == 'Public Cloud Project', cloud['plans']))['addonsFamily']
+    families = next(filter(lambda x: x['planCode'] == 'project', cloud['plans']))['addonsFamily']
     currency = cloud['plans'][0]['details']['pricings']['default'][0]['price']['currencyCode']
 
     rows = []
@@ -72,9 +78,11 @@ def get_api_cloud_prices(sub):
                 invoiceName = invoiceName.replace('Monthly usage for ', '')
                 invoiceName = invoiceName.replace('Public Cloud Database', '').strip()
 
+
                 if invoiceName in EXCLUDE_PRODUCTS or invoiceName.replace(' consumption', '').strip() in EXCLUDE_PRODUCTS:
                     continue
                 
+
                 if 'month' in duration:
                     duration = 'month'
                 elif 'minute' in duration:
@@ -82,18 +90,16 @@ def get_api_cloud_prices(sub):
                 elif 'hour' in duration or 'consumption' in duration:
                     duration = 'hour'
 
-                invoiceName = re.sub('^snapshot$', 'Volume Backup - per GB',  invoiceName)
-                invoiceName = re.sub('^storage$', 'Object Storage Swift - per GB',  invoiceName) \
-                    .replace('volume.snapshot', 'Volume Snapshot - per GB') \
-                    .replace('image', 'Instance Backup - per GB') \
-                    .replace('storage-high-perf', 'Object Storage High-Perf - per GB') \
-                    .replace('storage-standard', 'Object Storage Standard-Perf - per GB') \
-                    .replace('storage-standard', 'Object Storage Standard-Perf - per GB') \
-                    .replace('bandwidth_storage consumption', 'Outgoing public traffic (Egress) - per GB')
+                invoiceName = re.sub(r'^snapshot$', 'Volume Backup - per GB',  invoiceName)
+                invoiceName = re.sub(r'^storage$', 'Object Storage Swift - per GB',  invoiceName)
+                for token in dict.keys(REPLACE_PRODUCT_MAP):
+                    invoiceName = invoiceName.replace(token, REPLACE_PRODUCT_MAP[token])
+                if family['family'] == 'coldarchive':
+                    invoiceName = invoiceName + ' - per GB'
 
                 item = {
                     'family': family['family'],
-                    'invoiceName': invoiceName + (' - per GB' if family['family'] == 'coldarchive' else ''),
+                    'invoiceName': invoiceName,
                     'key': invoiceName.lower()
                         .replace('octavia ', '')
                         .replace('large','l')

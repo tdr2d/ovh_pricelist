@@ -17,10 +17,10 @@ build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share 
 
 upload_static_prod: ## Usage for prod: S3_BUCKET=share S3_REGION=gra make upload_static_prod
 	S3_BUCKET=share S3_REGION=gra $(MAKE) build
-	aws s3 --endpoint-url $(ENDPOINT) sync --delete --acl public-read static $(BUCKET)/static
+	aws s3 --endpoint-url $(ENDPOINT) sync --delete --acl public-read static s3://share/static
 	find ./static/lib/ -type f -exec gzip -9 "{}" \; -exec mv "{}.gz" "{}" \;
-	ls static/lib/*.js | xargs -I{} aws s3api --endpoint-url $(ENDPOINT) put-object --key {} --body {} --bucket ${S3_BUCKET} --content-type text/javascript --content-encoding gzip --acl public-read
-	ls static/lib/*.css | xargs -I{} aws s3api --endpoint-url $(ENDPOINT) put-object --key {} --body {} --bucket ${S3_BUCKET} --content-type text/css --content-encoding gzip --acl public-read
+	ls static/lib/*.js | xargs -I{} aws s3api --endpoint-url $(ENDPOINT) put-object --key {} --body {} --bucket share --content-type text/javascript --content-encoding gzip --acl public-read
+	ls static/lib/*.css | xargs -I{} aws s3api --endpoint-url $(ENDPOINT) put-object --key {} --body {} --bucket share --content-type text/css --content-encoding gzip --acl public-read
 	gunzip -f -S '' ./static/lib/*
 
 .PHONY: jobs

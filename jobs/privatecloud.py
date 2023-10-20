@@ -9,12 +9,12 @@ CONFORMITY = ['default', 'hds', 'hipaa', 'pcidss'] # snc computed
 RANGES = ['vsphere', 'essentials', 'nsx-t']
 SNC_RANGES = ['vsphere', 'nsx-t']
 SNC_PRODUCTS = [
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x1 Gbps (Max 2x10 tunnels)', 'price_snc': round(400*SNC_MARKUP)},
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x2 Gbps (Max 2x10 tunnels)', 'price_snc': round(800*SNC_MARKUP)},
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x5 Gbps (Max 2x10 tunnels)', 'price_snc': round(1800*SNC_MARKUP)},
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x10 Gbps (Max 2x10 tunnels)', 'price_snc': round(3400*SNC_MARKUP)},
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN (Secured Private Network) incluant:\n   - 5 SPNs\n - 5 sous-réseaux par SPN\n - 50 routes statiques par SPN\n - Trafic illimité', 'price_snc': round(1000*SNC_MARKUP)},
-    {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN option connectivité InterDC chiffré\n  - Trafic illimité', 'price_snc': round(1000*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x1 Gbps (Max 2x10 tunnels)', 'price_default': 400, 'price_snc': round(400*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x2 Gbps (Max 2x10 tunnels)', 'price_default': 800, 'price_snc': round(800*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x5 Gbps (Max 2x10 tunnels)', 'price_default': 1800,'price_snc': round(1800*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x10 Gbps (Max 2x10 tunnels)', 'price_default': 3400,'price_snc': round(3400*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN (Secured Private Network) incluant:\n   - 5 SPNs\n - 5 sous-réseaux par SPN\n - 50 routes statiques par SPN\n - Trafic illimité', 'price_default': 1000,'price_snc': round(1000*SNC_MARKUP)},
+    {'range': '', 'type': 'SNC Network', 'description': 'SNC SPN option connectivité InterDC chiffré\n  - Trafic illimité', 'price_default': 1000,'price_snc': round(1000*SNC_MARKUP)},
 ]
 # TZ_REGION = ['RBX_TZ', 'SBG_TZ']
 SNC_PS_PRICE = 2000
