@@ -21,15 +21,18 @@ aws s3api put-bucket-cors --bucket share --cors-configuration file://cors.json -
 cd manifests 
 kubectl create ns ovh-pricelist
 
+# Secret for basic auth
+htpasswd -c auth XXusernameXX
+kubectl create secret generic pricelist-basic-auth --from-file=auth
+
 kubectl apply -f deployment-pricelist.yml
 kubectl expose deployment ovh-pricelist --port 80 --target-port 80 -n ovh-pricelist
 kubectl create ingress ovh-pricelist-tls -n ovh-pricelist --class=default --rule="pricelist.ovh/*=ovh-pricelist:80,tls=ovh-pricelist-cert" --class nginx \
-    --annotation cert-manager.io/cluster-issuer=letsencrypt
+    --annotation cert-manager.io/cluster-issuer=letsencrypt \
+    --annotation nginx.ingress.kubernetes.io/auth-realm='Authentication Required' \
+    --annotation nginx.ingress.kubernetes.io/auth-type=basic \
+    --annotation nginx.ingress.kubernetes.io/auth-secret=pricelist-basic-auth
 
-kubectl apply -f deployment-calculator.yml
-kubectl expose deployment ovh-calculator --port 80 --target-port 80 -n ovh-pricelist
-kubectl create ingress ovh-calculator-tls -n ovh-pricelist --class=default --rule="ovh-calculator.ovh/*=ovh-calculator:80,tls=ovh-calculator-cert" --class nginx \
-    --annotation cert-manager.io/cluster-issuer=letsencrypt
 
 # K8S Cronjob for computing plans
 docker build -t tdr2d/ovh_pricelist:${VERSION}-job .

@@ -21,7 +21,7 @@ const SPECIAL_CELLS = {
     'budget_duration': 'C13',
     'legal_start': 'A62'
 };
-const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'e': 'entreprise', 'b': 'business', 's': 'standard'};
+const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'g': 'entreprise', 'e': 'entreprise', 'b': 'business', 'c': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = {
     'fr': 'Conditions Particulières',
     'en': 'Special Condition',
@@ -30,9 +30,14 @@ const PREFIX_LEGAL_TEXT = {
 const PREFIX_ZONE_TEXT = 'Zone ';
 const TEMPLATE_VERSION = 1;
 
-const num_format = (symbol) => `_ # ##0.00" ${symbol}";- # ##0.00" ${symbol}";_ "";`;
+const num_format = (symbol, decimals) => `_ # ##0.${'0'.repeat(decimals)}" ${symbol}";- # ##0.${'0'.repeat(decimals)}" ${symbol}";_ "";`;
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
 const cell_vertical_offset = (coord, offset) => coord.replace(/([A-Z]+)([0-9]+)/g, (m,col,row)=>`${col}${parseInt(row)+offset}`);
+
+function countDecimals (number) {
+    if (Math.floor(number) === number) return 0;
+    return number.toString().split(".")[1].length || 0; 
+}
 
 function getItemRowHeightFromDescription(description) {
     return description.split('\n').length * 10 * 1.4;
@@ -45,7 +50,7 @@ function DC_key_to_text(key) {
 function getItem(key, quantity, commit, discount) {
     let defaultQuantity = 1;
     console.log(key);
-    if (index[key].description.includes('DB')) {
+    if (index[key].description.includes('DB1')) {
         const match = index[key].description.match(/([0-9]) node/);
         if (match.length == 2) {
             defaultQuantity = parseInt(match[1]);
@@ -80,10 +85,7 @@ function saveXLSX(state) {
     const currency_name = CURRENCY in CURRENCIES ? CURRENCIES[CURRENCY]['name'] : CURRENCY;
 
     getXLSXTemplate(XLSX_TEMPLATE.replace('template', `template_${state.lang}`), XLSX_SHEETNAME).then(sheet => {
-        console.log(sheet.getCell(SPECIAL_CELLS['conformity']).value)
         sheet.getCell(SPECIAL_CELLS['conformity']).value = `${sheet.getCell(SPECIAL_CELLS['conformity']).value} ${(conformity != 'default') ? conformity.toUpperCase() : ''}`;
-        console.log(sheet.getCell(SPECIAL_CELLS['conformity']).value)
-        
         sheet.getCell(SPECIAL_CELLS['link']).value = {'text': 'Calculator link', 'hyperlink': SerilizeState()};
         sheet.getCell(SPECIAL_CELLS['subsidiary_description']).value = OVH_SUBSIDIARY_ADDRESS[sub] || OVH_SUBSIDIARY_ADDRESS['FR'];
         sheet.getCell(SPECIAL_CELLS['client']).value = state.company;
@@ -93,17 +95,16 @@ function saveXLSX(state) {
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
         sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
         sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
-        sheet.getCell(SPECIAL_CELLS['support_percent']).value = SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
-        sheet.getCell(SPECIAL_CELLS['support_min']).value = state.support == 'f' ? 0 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
-
+        sheet.getCell(SPECIAL_CELLS['support_percent']).value = state.support == 'g' ? 15 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
+        sheet.getCell(SPECIAL_CELLS['support_min']).value = ['f','g','c'].includes(state.support) ? 0 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
         if (state.totaldiscount > 0) {
             sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
         }
         for (const cell of SPECIAL_CELLS['price_formated_cells']) {
-            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL, 2);
         }
         for (const cell of COORDINATES_TO_SAVE_FORMULA) {
-            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL, 2);
         }
 
         // Display legals
@@ -134,11 +135,14 @@ function saveXLSX(state) {
                 if (!item || Object.keys(item).length == 0) {
                     continue;
                 }
-                if (offset < 0) {
+                if (offset < 0) {  // first row, update the ref row instead of inserting a new row
                     const row = sheet.getRow(row_index - 1);
                     const item_keys = ['description', 'description', 'description', 'description', 'setupfee', 'pricePerUnit', 'quantity', 'commit', 'discount']
                     for (const i in item_keys) {
                         row.getCell(parseInt(i)+1).value = (item_keys[i] == 'discount') ? item[item_keys[i]]/100 : item[item_keys[i]];
+                        // if (item_keys[i] == 'pricePerUnit') {
+                            // row.getCell(parseInt(i)+1).numFmt = num_format(CURRENCY_SYMBOL, Math.max(2, countDecimals(item[item_keys[i]])));
+                        // }
                     }
                     row.height = getItemRowHeightFromDescription(item['description']);
                 } else {
@@ -183,7 +187,10 @@ function update_formula(sheet, old_coordinates, voffset) {
 function insertPriceRow(sheet, rowIndex, description, installCost, unitCost, quantity, commitDuration, commitDiscount) {
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_item);
     const row_values = [description, null, null, null, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
-    const new_row = sheet.insertRow(rowIndex, row_values, 'i');
+    const new_row = sheet.insertRow(rowIndex, row_values, 'o');
+    // console.log(sheet.getRow(rowIndex).getCell(5))
+    // sheet.getRow(rowIndex).getCell(5).numFmt = num_format(CURRENCY_SYMBOL, Math.max(2, countDecimals(unitCost)));
+
     const s_e = SPECIAL_CELLS['item_width'].split('-');
     if (`${s_e[0]}${rowIndex}` in sheet._merges) {
         delete sheet._merges[`${s_e[0]}${rowIndex}`];
@@ -217,7 +224,7 @@ function getXLSXTemplate(url, sheetName) {
         .then(response => checkStatus(response) && response.arrayBuffer())
         .then(buffer => {
             const workbook = new ExcelJS.Workbook();
-            workbook.creator = 'Thomas Ducrot (calculator.ovh)';
+            workbook.creator = 'Thomas Ducrot (pricelist.ovh)';
             workbook.company = 'OVHCloud';
             return workbook.xlsx.load(buffer);
         })

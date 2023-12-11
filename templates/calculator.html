@@ -59,7 +59,15 @@
 </style>
 
 <h3>Cost Calculator <span class="sep"></span></h3>
+<div class="g-3" style="display: flex">
+    <div class="label-input">
+        <label for="title" class="col-form-label">Conformity</label>&nbsp;&nbsp;&nbsp;
+        <select style="width: 94px" type="select" id="conformity" class="form-select form-select-sm" placeholder="Conformity"></select>
+    </div>
+</div>
+<br>
 <div class="g-3" style="display: flex;">
+
     <div class="label-input">
         <label for="title" class="col-form-label">Title</label>&nbsp;&nbsp;&nbsp;
         <input type="text" id="title" class="form-control form-control-sm" placeholder="Title of my estimate">
@@ -87,9 +95,11 @@
         <div class="label-input" id="support-placeholder">
             <label for="support" class="col-form-label">Support</label>&nbsp;&nbsp;&nbsp;
             <select id="support" class="form-select form-select-sm" style="width: 290px;">
+                <option value="g">Entreprise (15%) - No minimum</option>
                 <option value="f">Entreprise (30%) - No minimum</option>
                 <option value="e">Entreprise (30%)</option>
                 <option value="b" selected>Business (10%)</option>
+                <option value="c">Business (10%) - No minimum</option>
                 <option value="s">Standard</option>
             </select>
         </div>
@@ -155,8 +165,10 @@ const TAX_RATE = res.subsidiaries[sub].locale.taxRate;
 const OVH_SUBSIDIARY_ADDRESS = res.addresses;
 const SUPPORT_MARKUPS_MAP = {
     'f': (price) => price + price*0.3,
+    'g': (price) => price + price*0.15,
     'e': (price) => price + Math.max(SUPPORT['entreprise'].minimun || 5000, price*0.3),
     'b': (price) => price + Math.max(SUPPORT['business'].minimun || 250, price*0.1),
+    'c': (price) => price + price*0.1,
     's': (price) => price,
 };
 
@@ -166,6 +178,7 @@ const index = res.subsidiaries[sub].catalog;
 {% include 'js/serialize.js' %}
 {% include 'js/calculator-utils.js' %}
 {% include 'js/calculator-languages.js' %}
+{% include 'js/calculator-conformity.js' %}
 
 try {
     loadedState = DeserializeURI();
@@ -197,7 +210,8 @@ if (!(state.zones.length)) {
 }
 
 setLastUpdated(res.date);
-setConformityList();
+//setConformityList();
+renderConformitySelect();
 renderLanguages(state);
 Object.keys(ABREV_TOTAL).forEach((id) => {
     if (id == 'legal_checked' || id == 'version') {
@@ -227,7 +241,7 @@ function renderTotalPrice() {
                 continue;
             }
             total += i.total;
-            installFee += (i.setupfee * i.quantity);
+            installFee += i.setupfee;
         }
     }
     state.total = total * ((100 - state.totaldiscount)/100);
