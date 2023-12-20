@@ -30,7 +30,7 @@ const PREFIX_LEGAL_TEXT = {
 const PREFIX_ZONE_TEXT = 'Zone ';
 const TEMPLATE_VERSION = 1;
 
-const num_format = (symbol, decimals) => `_ # ##0.${'0'.repeat(decimals)}" ${symbol}";- # ##0.${'0'.repeat(decimals)}" ${symbol}";_ "";`;
+const num_format = (symbol) => `_ # ##0.00???" ${symbol}";- # ##0.00???" ${symbol}";_ "";`;
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
 const cell_vertical_offset = (coord, offset) => coord.replace(/([A-Z]+)([0-9]+)/g, (m,col,row)=>`${col}${parseInt(row)+offset}`);
 
@@ -101,10 +101,10 @@ function saveXLSX(state) {
             sheet.getCell(SPECIAL_CELLS['exceptionnal_discount']).value = state.totaldiscount;
         }
         for (const cell of SPECIAL_CELLS['price_formated_cells']) {
-            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL, 2);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
         }
         for (const cell of COORDINATES_TO_SAVE_FORMULA) {
-            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL, 2);
+            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
         }
 
         // Display legals
@@ -140,9 +140,6 @@ function saveXLSX(state) {
                     const item_keys = ['description', 'description', 'description', 'description', 'setupfee', 'pricePerUnit', 'quantity', 'commit', 'discount']
                     for (const i in item_keys) {
                         row.getCell(parseInt(i)+1).value = (item_keys[i] == 'discount') ? item[item_keys[i]]/100 : item[item_keys[i]];
-                        // if (item_keys[i] == 'pricePerUnit') {
-                            // row.getCell(parseInt(i)+1).numFmt = num_format(CURRENCY_SYMBOL, Math.max(2, countDecimals(item[item_keys[i]])));
-                        // }
                     }
                     row.height = getItemRowHeightFromDescription(item['description']);
                 } else {
@@ -188,9 +185,6 @@ function insertPriceRow(sheet, rowIndex, description, installCost, unitCost, qua
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_item);
     const row_values = [description, null, null, null, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
     const new_row = sheet.insertRow(rowIndex, row_values, 'o');
-    // console.log(sheet.getRow(rowIndex).getCell(5))
-    // sheet.getRow(rowIndex).getCell(5).numFmt = num_format(CURRENCY_SYMBOL, Math.max(2, countDecimals(unitCost)));
-
     const s_e = SPECIAL_CELLS['item_width'].split('-');
     if (`${s_e[0]}${rowIndex}` in sheet._merges) {
         delete sheet._merges[`${s_e[0]}${rowIndex}`];
