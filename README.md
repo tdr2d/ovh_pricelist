@@ -19,6 +19,5 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 
 
 ### Bugs
-Calculator : fix hourly prices float precision in excel exports 
 wrong price PCC windows licence minimum core is 8, minimum sql core is 4.
 Update Archive Description for cold archive "(Hourly) archive consumption" > "(Hourly) Cold Archive storage consumption/ Minimum 1TB, minimum 180 days"

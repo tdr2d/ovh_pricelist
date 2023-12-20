@@ -139,6 +139,7 @@ def parse_windows_licenses(plan_codes, list_of_cores):
             invoiceName = ' '.join(map(lambda x: x.capitalize(), p['invoiceName'].split('-')))
             item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - {cores} Cores' }
             for con in CONFORMITY + ['snc']:
+                cores = max(4, cores) if 'sql' in invoiceName else max(8, cores)
                 item['price_'+con] = p['price_default'] * cores
             computed_plans.append(item)
 
