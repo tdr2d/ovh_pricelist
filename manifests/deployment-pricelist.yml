@@ -15,6 +15,7 @@ data:
       location / {
         index baremetal.html;
         rewrite ^/$ /baremetal.html;
+        proxy_set_header Authorization "";
         proxy_redirect off;
         proxy_buffering off;
         proxy_pass https://share.s3.gra.io.cloud.ovh.net/static/;
