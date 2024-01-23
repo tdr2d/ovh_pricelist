@@ -3,7 +3,10 @@ Webpage showing OVHcloud catalogue and calculator.
 Aim is to browse quickly the vast OVHcloud catalog with all the derivatives.
 
 Prices are taken from api.ovh.com for different countries including Europe, Canada and the USA.
-For private cloud, packs are computed using ad-hoc formula to match the official prices at https://www.ovhcloud.com/en/hosted-private-cloud/vmware/prices/
+Official prices can be found at :
+- Private Cloud https://www.ovhcloud.com/en/hosted-private-cloud/vmware/prices/
+- Public Cloud https://www.ovhcloud.com/fr/public-cloud/prices/
+- Baremetal Cloud https://www.ovhcloud.com/fr/bare-metal/prices/
 
 
 ## Live
@@ -18,5 +21,4 @@ For private cloud, packs are computed using ad-hoc formula to match the official
 * Quote generator
 
 
-### Bugs
-Update Archive Description for cold archive "(Hourly) archive consumption" > "(Hourly) Cold Archive storage consumption/ Minimum 1TB, minimum 180 days"
+### TODO
