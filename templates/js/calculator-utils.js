@@ -31,6 +31,8 @@ const PREFIX_ZONE_TEXT = 'Zone ';
 const TEMPLATE_VERSION = 1;
 
 const num_format = (symbol) => `_ # ##0.00???" ${symbol}";- # ##0.00???" ${symbol}";_ "";`;
+const num_format_2decimals = (symbol) => `_ # ##0.00" ${symbol}";- # ##0.00" ${symbol}";_ "";`;
+
 const price_formula = (row) => `F${row}*G${row}*(1-I${row})`;
 const cell_vertical_offset = (coord, offset) => coord.replace(/([A-Z]+)([0-9]+)/g, (m,col,row)=>`${col}${parseInt(row)+offset}`);
 
@@ -104,7 +106,7 @@ function saveXLSX(state) {
             sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
         }
         for (const cell of COORDINATES_TO_SAVE_FORMULA) {
-            sheet.getCell(cell).numFmt = num_format(CURRENCY_SYMBOL);
+            sheet.getCell(cell).numFmt = num_format_2decimals(CURRENCY_SYMBOL);
         }
 
         // Display legals
