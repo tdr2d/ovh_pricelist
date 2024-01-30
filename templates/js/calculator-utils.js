@@ -19,7 +19,8 @@ const SPECIAL_CELLS = {
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
     'exceptionnal_discount': 'C12',
     'budget_duration': 'C13',
-    'legal_start': 'A62'
+    'legal_start': 'A47',
+    'legal_commit_text_area_from': 'A48', 'legal_commit_text_area_to': 'J48'
 };
 const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'g': 'entreprise', 'e': 'entreprise', 'b': 'business', 'c': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = {
@@ -110,15 +111,14 @@ function saveXLSX(state) {
         }
 
         // Display legals
-        let legal_count = 0;
+        
+        let legal_index = 0;
+        let legalIndexStart = parseInt(SPECIAL_CELLS['legal_start'].match(/[0-9]+/)[0])
         for (const key of state.legal_checked.split('')) {
-            const text_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count);
-            const url_cell = cell_vertical_offset(SPECIAL_CELLS['legal_start'], legal_count+1);
-            sheet.getCell(text_cell).value =  PREFIX_LEGAL_TEXT[state.lang] + ' ' + res.legal[state.lang][key].text;
-            sheet.getCell(text_cell).style =  {'font': {'bold': true, 'size': 10}};
-            sheet.getCell(url_cell).value =  {'text': res.legal[state.lang][key].url, 'hyperlink': res.legal[state.lang][key].url};
-            legal_count += 2;
+            insertLegalLink(sheet, legalIndexStart + legal_index, PREFIX_LEGAL_TEXT[state.lang] + ' ' + res.legal[state.lang][key].text, res.legal[state.lang][key].url);
+            legal_index += 2;
         }
+        displayCommitLegalText(sheet, legal_index+1);
 
         // Display zones and items
         let offset = -2;
@@ -170,6 +170,17 @@ var saveByteArray = (function () {
     };
 }());
 
+function displayCommitLegalText(sheet, offset) {
+    const area = `${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_from, offset)}-${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_to, offset)}`;
+    const cell = sheet.getCell(area.split('-')[0]);
+    cell.alignment = {
+        horizontal: 'left',
+    };
+    console.log(offset);
+    console.log(area);
+    sheet.mergeCells(area);
+}
+
 // Add a vertical offset to all saved_formulas
 function update_formula(sheet, old_coordinates, voffset) {
     // console.log(voffset);
@@ -180,6 +191,21 @@ function update_formula(sheet, old_coordinates, voffset) {
         const new_formula = old_formula.replace(/(^|[^(])([A-Z]+)([1-9][0-9]*)/g, (m, p0,p1,p2) => `${p0}${p1}${parseInt(p2)+voffset}`);
         // console.log({old: old_coordinates[i], new: new_coord, old_formula: old_formula, new_formula: new_formula})
         sheet.getCell(new_coord).value = {formula: new_formula};
+    }
+}
+
+function insertLegalLink(sheet, rowIndex, description, link) {
+    const row_ref_desc = sheet.getRow(cell_vertical_offset(SPECIAL_CELLS.legal_start, -2))
+    const row_ref_link = sheet.getRow(cell_vertical_offset(SPECIAL_CELLS.legal_start, -1))
+    const new_row_desc = sheet.insertRow(rowIndex, [description], 'o');
+    const new_row_link = sheet.insertRow(rowIndex+1, [link], 'o');
+
+    new_row_desc.getCell(1).style =  {'font': {'bold': true, 'size': 10}};
+    new_row_link.getCell(1).value =  {'text': link, 'hyperlink': link};
+
+    for (const i in row_ref_desc._cells) {
+        new_row_desc._cells[i].style = row_ref_desc._cells[i].style;
+        new_row_link._cells[i].style = row_ref_link._cells[i].style;
     }
 }
 
