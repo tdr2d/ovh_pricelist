@@ -176,7 +176,7 @@ let loadedState = {};
 const index = res.subsidiaries[sub].catalog;
 
 {% include 'js/serialize.js' %}
-{% include 'js/calculator-utils.js' %}
+{% include 'js/calculator-excel.js' %}
 {% include 'js/calculator-languages.js' %}
 {% include 'js/calculator-conformity.js' %}
 
@@ -302,6 +302,7 @@ function addZone(key) {
         $.getElementById(`z${zoneIndex}-delete`).addEventListener('click', function() {
             this.parentElement.parentElement.remove();
             state.zones[zoneIndex] = {items: []};
+            renderTotalPrice();
         });
     }
     return $.querySelector(`.zone${zoneIndex}`);

@@ -111,14 +111,12 @@ function saveXLSX(state) {
         }
 
         // Display legals
-        
         let legal_index = 0;
         let legalIndexStart = parseInt(SPECIAL_CELLS['legal_start'].match(/[0-9]+/)[0])
         for (const key of state.legal_checked.split('')) {
             insertLegalLink(sheet, legalIndexStart + legal_index, PREFIX_LEGAL_TEXT[state.lang] + ' ' + res.legal[state.lang][key].text, res.legal[state.lang][key].url);
             legal_index += 2;
         }
-        displayCommitLegalText(sheet, legal_index+1);
 
         // Display zones and items
         let offset = -2;
@@ -151,6 +149,7 @@ function saveXLSX(state) {
             }
         }
         update_formula(sheet, COORDINATES_TO_SAVE_FORMULA, offset);
+        // displayCommitLegalText(sheet, offset);
         return sheet._workbook.xlsx.writeBuffer();
     })
     .then(buffer => saveByteArray([buffer], `${state.title} v${date}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
@@ -170,16 +169,15 @@ var saveByteArray = (function () {
     };
 }());
 
-function displayCommitLegalText(sheet, offset) {
-    const area = `${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_from, offset)}-${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_to, offset)}`;
-    const cell = sheet.getCell(area.split('-')[0]);
-    cell.alignment = {
-        horizontal: 'left',
-    };
-    console.log(offset);
-    console.log(area);
-    sheet.mergeCells(area);
-}
+// function displayCommitLegalText(sheet, offset) {
+//     const area = `${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_from, offset)}-${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_to, offset)}`;
+//     const cell = sheet.getCell(area.split('-')[0]);
+//     cell.alignment = {
+//         horizontal: 'left',
+//     };
+//     console.log(area);
+//     sheet.mergeCells(area);
+// }
 
 // Add a vertical offset to all saved_formulas
 function update_formula(sheet, old_coordinates, voffset) {
