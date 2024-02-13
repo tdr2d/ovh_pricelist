@@ -209,7 +209,7 @@ function insertLegalLink(sheet, rowIndex, description, link) {
 
 function insertPriceRow(sheet, rowIndex, description, installCost, unitCost, quantity, commitDuration, commitDiscount) {
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_item);
-    const row_values = [description, null, null, null, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
+    const row_values = [description, null, null, null, installCost, unitCost, quantity, parseInt(commitDuration.trim()), commitDiscount, {formula: price_formula(rowIndex)}];
     const new_row = sheet.insertRow(rowIndex, row_values, 'o');
     const s_e = SPECIAL_CELLS['item_width'].split('-');
     if (`${s_e[0]}${rowIndex}` in sheet._merges) {

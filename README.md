@@ -22,6 +22,4 @@ Official prices can be found at :
 
 
 ### TODO
-Conditions avant signature
-Manque une ligne durée de validité
-Phrase de commit
+BUG PHrase de commit condition > 1 not true
