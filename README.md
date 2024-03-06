@@ -22,4 +22,5 @@ Official prices can be found at :
 
 
 ### TODO
+BUG calculator choosing conformity snc then choosing items
 BUG PHrase de commit condition > 1 not true
