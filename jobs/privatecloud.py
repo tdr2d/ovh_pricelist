@@ -191,12 +191,9 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
     cores_quandidates = set([10,6,8,20])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
-        if cr['name'] not in RANGES or not cr['datacenters'][0]['hypervisors'][0]['orderable']:
+        if cr['name'] not in RANGES:  # ['hypervisors'][0]
             continue
         
-        # zones = list(map(lambda dc: dc['cityCode'], cr['datacenters']))
-        # if cr['name'] in SNC_RANGES:
-        #     zones += TZ_REGION
         managementFeePlanCode = cr['datacenters'][0]['managementFees']['planCode']
         if managementFeePlanCode not in plan_codes:
             managementFeePlanCode = managementFeePlanCode.replace('nsx-t', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
@@ -205,10 +202,12 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
         nsxt_ip_option = cr['datacenters'][0]['nsxt-ip-block'] if 'nsxt-ip-block' in cr['datacenters'][0] else None
 
         # List hosts spec
-        for h in cr['datacenters'][0]['hypervisors'][0]['hosts']:
+        orderable_dc = next(filter(lambda x: x['orderable'], cr['datacenters']))
+        hypervisor = next(filter(lambda x: x['orderable'], orderable_dc['hypervisors']))
+        for h in hypervisor['hosts']:
             if 'hourly' in h['name'].lower() or h['planCode'] not in plan_codes:
                 continue
-
+            
             cpuspec = h['specifications']['cpu']
             cpu_text = f"{cpuspec['model']} - {cpuspec['frequency']['value']} {cpuspec['frequency']['unit']} - {cpuspec['cores']} cores/{cpuspec['threads']} Threads"
             ram_text = f"{h['specifications']['memory']['ram']['value']} {h['specifications']['memory']['ram']['unit']}"
@@ -221,7 +220,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             num_host = 2
             if 'vsan' in h['name'].lower():
                 num_host = 3
-            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n  {STORAGE_PACK_DESCRIPTION}"}
+            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n  - {STORAGE_PACK_DESCRIPTION}"}
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text} RAM"} | plan_codes[h['planCode']]
             host['description'] = host['description'].replace('NSX ', 'NSX-T ')
             pack['description'] = pack['description'].replace('NSX ', 'NSX-T ')
@@ -251,7 +250,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             catalog.append(host)
 
         # List options
-        for opt in cr['datacenters'][0]['hypervisors'][0]['options'] + cr['datacenters'][0]['hypervisors'][0]['servicePacks'] + cr['datacenters'][0]['hypervisors'][0]['storages']:
+        for opt in hypervisor['options'] + hypervisor['servicePacks'] + hypervisor['storages']:
             if opt['planCode'] not in plan_codes:
                 continue
             option = deepcopy(plan_codes[opt['planCode']])

@@ -105,7 +105,8 @@ def build_dataset(js):
         if base_addon_options['gpu'] is not None:
             item['description'] += f"GPU: {base_addon_options['gpu']['invoiceName']}\n"
         item['description'] += f"RAM: {base_addon_options['memory']['invoiceName']}\n"
-        item['description'] += f"Storage: {base_addon_options['storage_system']['invoiceName'] + ' + ' if base_addon_options['storage_system'] else ''}\n"
+        if base_addon_options['storage_system']:
+            item['description'] += f"Storage: {base_addon_options['storage_system']['invoiceName']}\n"
         item['description'] += f"Default Public Bandwidth: {base_addon_options['pub_bp']['invoiceName']}"
         if base_addon_options['priv_bp'] is not None:
             item['description'] += f"\nDefault Private Bandwidth: {base_addon_options['priv_bp']['invoiceName']}"
