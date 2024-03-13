@@ -118,6 +118,8 @@ def get_api_cloud_prices(sub):
                     continue
                 if family['family'] == 'instance':
                     item['key'] = item['key'].replace(' consumption', '')
+                if family['family'] == 'databases':
+                    item['key'] = item['key'].replace('apache ', '')
                 rows.append(item)
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
 
@@ -229,10 +231,11 @@ def publiccloud():
     subs = {}
     df_desc = get_webpage()
 
+    # df_desc
+
     for sub in SUBSIDIARIES:
         publiccloud = get_api_cloud_prices(sub)
         df_agora = pd.DataFrame(publiccloud['catalog'])
-
         df = pd.merge(df_agora, df_desc, how='left', on='key')
         df['description'] = df['description'].combine_first(df['invoiceName'])
         df = df.drop_duplicates(subset=['invoiceName', 'price'])

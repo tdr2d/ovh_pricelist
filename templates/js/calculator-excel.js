@@ -55,7 +55,7 @@ function getItem(key, quantity, commit, discount) {
     console.log(key);
     if (index[key].description.includes('DB1')) {
         const match = index[key].description.match(/([0-9]) node/);
-        if (match.length == 2) {
+        if (match && match.length == 2) {
             defaultQuantity = parseInt(match[1]);
         }
     }
