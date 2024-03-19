@@ -1,0 +1,9 @@
+controller:
+  service:
+    annotations:
+      loadbalancer.ovhcloud.com/class: "octavia"
+      loadbalancer.openstack.org/proxy-protocol: "true"
+      loadbalancer.ovhcloud.com/flavor: "small" # openstack loadbalancer flavor list
+      loadbalancer.openstack.org/keep-floatingip: "true"
+  config:
+    use-proxy-protocol: "true"

@@ -37,7 +37,9 @@ function SerilizeState() {
 
     output += '&' + Object.keys(ABREV_TOTAL).map(k => `${ABREV_TOTAL[k]}=${encodeURIComponent(state[k])}`).join('&');
     output += `&zs=${encodeURIComponent(data)}`;
-    navigator.clipboard.writeText(output);
+    if (navigator && navigator.clipboard) {
+        navigator.clipboard.writeText(output);
+    }
     return output;
 }
 
