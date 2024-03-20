@@ -113,8 +113,14 @@ def build_dataset(js):
 
         if tech_specs['server']['range'].lower() in ['scale', 'hgr']:
             item['price_snc'] = round(server_price * SNC_MARKUP)
+
         if item['price'] > 0:
             plans.append(item)
+
+    for i in range(len(server_options)):
+        if 'hgr' in server_options[i]['description'].lower() or 'scale' in server_options[i]['range']:
+            server_options[i]['price_snc'] = round(server_options[i]['price'] * SNC_MARKUP)
+            # print(server_options[i])
 
     return plans + server_options
 
