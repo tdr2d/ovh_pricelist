@@ -6,6 +6,7 @@ import json
 import urllib.request
 import time
 from itertools import product
+import traceback
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -14,10 +15,10 @@ S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
 S3_BUCKET = os.getenv('S3_BUCKET')
 S3_REGION = os.getenv('S3_REGION', 'sbg') 
 
-SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN','US']
+SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN'] # ,'US']
 print(f'Bucket is {S3_BUCKET}, region is {S3_REGION}')
 if 'dev' in S3_BUCKET:
-    SUBSIDIARIES = ['FR']
+    SUBSIDIARIES = ['US']
 TZ_DCS = ['RBX', 'SBG']
 
 API_US = 'https://api.us.ovhcloud.com'
@@ -86,6 +87,7 @@ def exponential_backoff(fun, tries=5):
             return fun()
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
             print(f'Retrying {i}')
             time.sleep(2**i)
     raise ValueError("Number of tries exceeded")

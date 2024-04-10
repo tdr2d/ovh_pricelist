@@ -27,7 +27,13 @@ def build_dataset(js):
     for plan in js['plans']:
         server_name = plan['invoiceName'].upper().replace('ADVANCE', 'ADV') # .split(' ')[0]
         base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage_system': None, 'gpu': None}
-        tech_specs = products[plan['planCode']] if plan['planCode'] in products else products[plan['product']]
+        if plan['planCode'] in products:
+            tech_specs = products[plan['planCode']]
+        elif plan['product'] in products:
+            tech_specs = products[plan['product']]
+        else:
+            print(f'Can\'t find specs for {server_name}')
+            continue
         server_range = 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range']
         has_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']), None)
         if has_price is None:

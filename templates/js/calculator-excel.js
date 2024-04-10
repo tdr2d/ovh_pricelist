@@ -18,9 +18,10 @@ const SPECIAL_CELLS = {
     'tax_name': 'C7', 'tax_rate': 'C8',
     'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
     'exceptionnal_discount': 'C12',
+    'legal_commit_text_ref': 'M13',
     'budget_duration': 'C13',
     'legal_start': 'A47',
-    'legal_commit_text_area_from': 'A48', 'legal_commit_text_area_to': 'J48'
+    'legal_commit_text_area': 'A48'
 };
 const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'g': 'entreprise', 'e': 'entreprise', 'b': 'business', 'c': 'business', 's': 'standard'};
 const PREFIX_LEGAL_TEXT = {
@@ -97,6 +98,7 @@ function saveXLSX(state) {
         sheet.getCell(SPECIAL_CELLS['client_2']).value = state.company;
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
         sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
+        sheet.getCell(SPECIAL_CELLS['currency_symbol']).value = CURRENCY_SYMBOL;
         sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = state.support == 'g' ? 15 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
         sheet.getCell(SPECIAL_CELLS['support_min']).value = ['f','g','c'].includes(state.support) ? 0 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
@@ -119,6 +121,7 @@ function saveXLSX(state) {
         }
 
         // Display zones and items
+        let max_commit = 1;
         let offset = -2;
         let row_index = SPECIAL_CELLS.row_ref_item + 1;
         for (const zone of state.zones) {
@@ -145,11 +148,14 @@ function saveXLSX(state) {
                 } else {
                     row_index = insertPriceRow(sheet, row_index, item.description, item.setupfee, item.pricePerUnit, item.quantity, item.commit, item.discount/100);
                 }
+                if (item['commit'] > max_commit) {
+                    max_commit = item['commit'];
+                }
                 offset += 1;
             }
         }
         update_formula(sheet, COORDINATES_TO_SAVE_FORMULA, offset);
-        // displayCommitLegalText(sheet, offset);
+        displayCommitLegalText(sheet, offset + legal_index, max_commit);
         return sheet._workbook.xlsx.writeBuffer();
     })
     .then(buffer => saveByteArray([buffer], `${state.title} v${date}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
@@ -169,15 +175,15 @@ var saveByteArray = (function () {
     };
 }());
 
-// function displayCommitLegalText(sheet, offset) {
-//     const area = `${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_from, offset)}-${cell_vertical_offset(SPECIAL_CELLS.legal_commit_text_area_to, offset)}`;
-//     const cell = sheet.getCell(area.split('-')[0]);
-//     cell.alignment = {
-//         horizontal: 'left',
-//     };
-//     console.log(area);
-//     sheet.mergeCells(area);
-// }
+function displayCommitLegalText(sheet, offset, max_commit) {
+    console.log(max_commit);
+    if (max_commit <= 1) { return; }
+    let text = sheet.getCell(SPECIAL_CELLS['legal_commit_text_ref']).value;
+    text = text.replace('COMMIT', `${max_commit}`);
+    let legal_text_cell = cell_vertical_offset(SPECIAL_CELLS['legal_commit_text_area'], offset);
+    sheet.getCell(legal_text_cell).value = text;
+    sheet.getCell(legal_text_cell).height = 10 * 1.4 * 6; // 5 lines
+}
 
 // Add a vertical offset to all saved_formulas
 function update_formula(sheet, old_coordinates, voffset) {

@@ -195,9 +195,9 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             continue
         
         managementFeePlanCode = cr['datacenters'][0]['managementFees']['planCode']
-        if managementFeePlanCode not in plan_codes:
-            managementFeePlanCode = managementFeePlanCode.replace('nsx-t', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
-            managementFeePlanCode = managementFeePlanCode.replace('vsphere', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
+        # if managementFeePlanCode not in plan_codes:
+            # managementFeePlanCode = managementFeePlanCode.replace('nsx-t', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
+            # managementFeePlanCode = managementFeePlanCode.replace('vsphere', 'premier') # US api does not have pcc-management-fee-vsphere planCode with > 0 price
         nsxt_vdc_option = cr['datacenters'][0]['nsxt-vdc-option'] if 'nsxt-vdc-option' in cr['datacenters'][0] else None
         nsxt_ip_option = cr['datacenters'][0]['nsxt-ip-block'] if 'nsxt-ip-block' in cr['datacenters'][0] else None
 
@@ -220,7 +220,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             num_host = 2
             if 'vsan' in h['name'].lower():
                 num_host = 3
-            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n  - {STORAGE_PACK_DESCRIPTION}"}
+            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n{STORAGE_PACK_DESCRIPTION}"}
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text} RAM"} | plan_codes[h['planCode']]
             host['description'] = host['description'].replace('NSX ', 'NSX-T ')
             pack['description'] = pack['description'].replace('NSX ', 'NSX-T ')
