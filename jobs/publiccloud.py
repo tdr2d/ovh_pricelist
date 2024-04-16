@@ -59,7 +59,7 @@ REPLACE_PRODUCT_MAP = {
     'archive consumption': 'Cloud Archive Storage - per GB',
 }
 MONTHLY_ONLY_FAMILIES = ['databases', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
-def get_api_cloud_prices(sub):
+def get_api_cloud_prices(sub, debug=False):
     url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
     print(url)
     cloud = get_json(url)
@@ -114,6 +114,8 @@ def get_api_cloud_prices(sub):
                     'price': price['price']['value'],
                     'duration': duration
                 }
+                if debug and invoiceName:
+                    print(f'InvoiceName: {invoiceName.lower()}\tkey: {item["key"]}')
                 if item['price'] < 0.00000001 or ('hour' in duration and item['family'] in MONTHLY_ONLY_FAMILIES):
                     continue
                 if family['family'] == 'instance':
@@ -147,7 +149,7 @@ def merge_columns(columns):
     return merged_cols
 
 
-def build_key_description(df, family, title):
+def webpage_build_key_description(df, family, title):
     keys, descriptions = [], []
     for i, row in df.iterrows():
         desc = title.strip() + ' '
@@ -192,8 +194,7 @@ def build_key_description(df, family, title):
         descriptions.append(desc)
     return keys, descriptions
 
-
-def get_webpage():
+def get_webpage(debug=False):
     html = get_html('https://www.ovhcloud.com/en/public-cloud/prices/#')
     soup = bs4.BeautifulSoup(html, 'lxml')
     container = soup.css.select('#compute')[0].parent
@@ -206,8 +207,11 @@ def get_webpage():
         h3s = div.css.select('h3.public-cloud-prices-title')
         if bool(h3s):
             title = h3s[0].get_text().strip()
+
             try:
                 dfs = pd.read_html(str(div))
+                if 'mongo' in title.lower() and len(dfs) > 1: # remove the different free tier which have only 1 dimentional columns
+                    dfs = dfs[1:]
                 df = pd.concat(dfs)
                 df.columns = merge_columns(df.columns)
                 for col_to_drop in ['Price', 'Total price']:
@@ -219,22 +223,26 @@ def get_webpage():
                     win_df['Name'] = win_df['Name'].apply(lambda x: 'win-' + x)
                     df = pd.concat([df, win_df])
                 
-                k, d = build_key_description(df, family, title)
+                k, d = webpage_build_key_description(df, family, title)
                 keys += k
                 descriptions += d
             except ValueError:
                 pass
-    
+    if debug:
+        print(*filter(None, keys), sep='\n')
     return pd.DataFrame(zip(keys, descriptions), columns=['key', 'description'])
 
 def publiccloud():
     subs = {}
-    df_desc = get_webpage()
-
-    # df_desc
+    debug = False
+    if debug:
+        print('********************************** WEBPAGE KEYS **********************************')
+    df_desc = get_webpage(debug=debug)
+    if debug:
+        print('********************************** API KEYS **********************************')
 
     for sub in SUBSIDIARIES:
-        publiccloud = get_api_cloud_prices(sub)
+        publiccloud = get_api_cloud_prices(sub, debug=debug)
         df_agora = pd.DataFrame(publiccloud['catalog'])
         df = pd.merge(df_agora, df_desc, how='left', on='key')
         df['description'] = df['description'].combine_first(df['invoiceName'])

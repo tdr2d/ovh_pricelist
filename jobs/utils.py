@@ -18,7 +18,7 @@ S3_REGION = os.getenv('S3_REGION', 'sbg')
 SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN'] # ,'US']
 print(f'Bucket is {S3_BUCKET}, region is {S3_REGION}')
 if 'dev' in S3_BUCKET:
-    SUBSIDIARIES = ['US']
+    SUBSIDIARIES = ['FR']
 TZ_DCS = ['RBX', 'SBG']
 
 API_US = 'https://api.us.ovhcloud.com'
