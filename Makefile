@@ -6,14 +6,14 @@ BUCKET := s3://${S3_BUCKET}
 help: ## Show this help
 	@grep -E "^[a-z0-9_-]+:|^##" Makefile | sed -E 's/([\s_]+):.*##(.*)/\1:\2/' | column -s: -t | sed -e 's/##//'
 
-serve: ## dev http server
-	cd static && python3 -m http.server 80
-
 build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share make build
 	jinja templates/calculator.html -E S3_BUCKET -E S3_REGION -o static/calculator.html
 	jinja templates/baremetal.html -E S3_BUCKET -E S3_REGION -o static/baremetal.html
 	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
 	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html
+
+serve: build ## dev http server
+	cd static && python3 -m http.server 80
 
 upload_static_prod: ## Usage for prod: S3_BUCKET=share S3_REGION=gra make upload_static_prod
 	S3_BUCKET=share S3_REGION=gra $(MAKE) build

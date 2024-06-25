@@ -4,8 +4,10 @@ from datetime import datetime
 import pandas as pd
 from copy import deepcopy
 import numpy as np
+import os
 
-CONFORMITY = ['default', 'hds', 'hipaa', 'pcidss'] # snc computed
+
+CONFORMITY = ['default', 'hds', 'hipaa', 'pcidss', 'snc']
 RANGES = ['vsphere', 'essentials', 'nsx-t']
 SNC_RANGES = ['vsphere', 'nsx-t']
 SNC_PRODUCTS = [
@@ -55,6 +57,22 @@ def get_addon_families(obj):
                 plan_codes[addon['plan']['planCode']] = item
     # print(*dict.values(plan_codes), sep='\n')
     return plan_codes
+
+def get_snc_addons(obj):
+    plan_codes = {}
+    for i, addon in enumerate(obj['addons']):
+        item = {
+            'i': i,
+            'invoiceName': addon['invoiceName'],
+            'pc': addon['planCode']
+        }
+        monthly_pricing = next(filter(lambda x: x['price'] > 0 and 'hour' not in x['description'].lower(), addon['pricings']), None)
+        if monthly_pricing is not None:
+            item['price'] = monthly_pricing['price'] / 100000000
+            plan_codes[addon['planCode']] = item
+
+    return plan_codes
+
 
 def get_backup_options(pcc_plan_codes):
     managed_backup = list(filter(lambda x: 'backup' in x['family'] and 'legacy' not in x['invoiceName'], dict.values(pcc_plan_codes)))
@@ -137,7 +155,8 @@ def parse_windows_licenses(plan_codes, list_of_cores):
     for p in plans:
         for cores in list_of_cores:
             invoiceName = ' '.join(map(lambda x: x.capitalize(), p['invoiceName'].split('-')))
-            item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - {cores} Cores' }
+            unit = 'vCores' if 'sql' in invoiceName.lower() else 'Cores'
+            item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - {cores} {unit}' }
             for con in CONFORMITY + ['snc']:
                 cores = max(4, cores) if 'sql' in invoiceName else max(8, cores)
                 item['price_'+con] = p['price_default'] * cores
@@ -178,31 +197,43 @@ def get_veeam_and_zerto_licenses(sub='FR'):
 
     return list(filter(lambda x: x['price_default'] > 0, [veam, zerto]))
 
-def get_pcc_ranges_and_windows_licenses(sub='FR'):
+def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
     pcc_plans = get_json(f'{get_base_api(sub)}/1.0/order/catalog/formatted/privateCloud?ovhSubsidiary={sub}')
+    snc_url = f'https://interne.ovh.net/uservice/gateway/catalog-360/unified-catalog/private_cloud/private_cloud_snc?merchant_code={sub}'
+    snc_pcc_plans = get_json(snc_url, basicauth=os.getenv('AUTH'))
+    
     print(f'{get_base_api(sub)}/1.0/order/catalog/formatted/privateCloud?ovhSubsidiary={sub}')
+    print(snc_url)
 
     plan_codes = {}
     for plans in pcc_plans['plans']:
         plan_codes |= get_addon_families(plans)
+    
+    snc_plan_codes = get_snc_addons(snc_pcc_plans)
 
-    # for k in plan_codes:
-        # print(f'{k} {plan_codes[k]["price_default"]}')
-    cores_quandidates = set([10,6,8,20])
+    if debug:
+        print('plancode\tprice standard\tprix hds\tprix pcidss\tprix snc')
+
+    for k in plan_codes:
+        price_snc = round(snc_plan_codes[k]['price'] * SNC_MARKUP, 2)
+        plan_codes[k]['price_snc'] = price_snc
+        if debug:
+            print(f'{k}\t{plan_codes[k]["price_default"]}\t{plan_codes[k]["price_hds"]}\t{plan_codes[k]["price_pcidss"]}\t{price_snc}\t')
+    cores_quandidates = set([4,10,6,8,20])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
         if cr['name'] not in RANGES:  # ['hypervisors'][0]
             continue
         
         managementFeePlanCode = cr['datacenters'][0]['managementFees']['planCode']
-        # if managementFeePlanCode not in plan_codes:
-            # managementFeePlanCode = managementFeePlanCode.replace('nsx-t', 'premier') # US api does not have pcc-management-fee-nsx-t planCode with > 0 price
-            # managementFeePlanCode = managementFeePlanCode.replace('vsphere', 'premier') # US api does not have pcc-management-fee-vsphere planCode with > 0 price
         nsxt_vdc_option = cr['datacenters'][0]['nsxt-vdc-option'] if 'nsxt-vdc-option' in cr['datacenters'][0] else None
         nsxt_ip_option = cr['datacenters'][0]['nsxt-ip-block'] if 'nsxt-ip-block' in cr['datacenters'][0] else None
 
         # List hosts spec
-        orderable_dc = next(filter(lambda x: x['orderable'], cr['datacenters']))
+        orderable_dc = next(filter(lambda x: x['orderable'], cr['datacenters']), None)
+        if orderable_dc is None:
+            orderable_dc = cr['datacenters'][0]
+        
         hypervisor = next(filter(lambda x: x['orderable'], orderable_dc['hypervisors']))
         for h in hypervisor['hosts']:
             if 'hourly' in h['name'].lower() or h['planCode'] not in plan_codes:
@@ -227,8 +258,8 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
             cores_quandidates.add(h['specifications']['cpu']['cores'])
 
             for conformity in CONFORMITY:
-                if cr['name'] == 'essentials' and conformity != 'default':
-                    continue
+                # if cr['name'] == 'essentials' and conformity != 'default':
+                    # continue
                 price_key = f"price_{conformity}"
                 price_host = plan_codes[h['planCode']][price_key]
                 
@@ -236,11 +267,11 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
                 pack_price = nsxt_vdc_option_price[price_key] if nsxt_vdc_option_price is not None else 0
                 pack_price += nsxt_ip_option_price[price_key] if nsxt_ip_option_price is not None else 0
                 pack_price += pack_datastore[price_key] * 2 + plan_codes[managementFeePlanCode][price_key] + num_host * price_host
-                pack[price_key] = round(pack_price)
+                pack[price_key] = round(pack_price, 2)
 
-                if cr['name'] != 'essentials' and conformity == 'default':
-                    pack['price_snc'] = round(pack_price * SNC_MARKUP)
-                    host['price_snc'] = round(price_host * SNC_MARKUP)
+                # if cr['name'] != 'essentials' and conformity == 'default':
+                    # pack['price_snc'] = round(pack_price * SNC_MARKUP)
+                    # host['price_snc'] = round(price_host * SNC_MARKUP)
 
             # NSX_T packs contains /28 IP Block
             if cr['name'] == 'nsx-t':
@@ -259,19 +290,19 @@ def get_pcc_ranges_and_windows_licenses(sub='FR'):
                 ip_count = 2**(32 - int(option['description'].split('/')[-1]))
                 option['description'] += f" {ip_count} Public IPs"
                 option['type'] = 'Public IP'
-                option['price_snc'] = option['price_default']
+                # option['price_snc'] = round(option['price_default'] * SNC_MARKUP)
                 catalog.append(option)
             elif 'datastore' in option['invoiceName'].lower():
                 option['description'] = f"Additional Datastore - {opt['specifications']['type']} {opt['specifications']['size']['value']} {opt['specifications']['size']['unit']}"
                 option['type'] = 'Datastore'
-                option['price_snc'] = round(option['price_default'] * SNC_MARKUP)
+                # option['price_snc'] = round(option['price_default'] * SNC_MARKUP)
                 catalog.append(option)
 
         catalog += get_backup_options(plan_codes) + parse_windows_licenses(plan_codes, cores_quandidates)
 
     return catalog
 
-def privatecloud():
+def privatecloud(debug=False):
     subs = {}
     for sub in SUBSIDIARIES:
         products = {
@@ -279,7 +310,7 @@ def privatecloud():
             'locale': get_json(f'{get_base_api(sub)}/1.0/order/catalog/public/cloud?ovhSubsidiary={sub}')['locale'],
         }
 
-        catalog = get_pcc_ranges_and_windows_licenses(sub)
+        catalog = get_pcc_ranges_and_windows_licenses(sub, debug=debug)
         if products['locale']['currencyCode'] == 'EUR':
             catalog += SNC_PRODUCTS
         catalog += get_occ_options(sub)
@@ -304,4 +335,4 @@ def privatecloud():
 
 
 if __name__ == '__main__':
-    privatecloud()
+    privatecloud(debug=True)

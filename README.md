@@ -22,11 +22,5 @@ Official prices can be found at :
 
 
 ### TODO
-Baremetal bug:
-  File "/Users/tducrot/tdr2d/ovh_pricelist/jobs/baremetal.py", line 30, in build_dataset
-    tech_specs = products[plan['planCode']] if plan['planCode'] in products else products[plan['product']]
-KeyError: '23cluster-24hci-a1-01'
-
-Remove ZONE rows, create a zone column instead, reduce size of text to 0,7rem
-BUG PHrase de commit condition > 1 not true
+BUG frontend with item having 0 values, it defaults to 1.
 BUG only apply floating precision to unit/price instead of total price

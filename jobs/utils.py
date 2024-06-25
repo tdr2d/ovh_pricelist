@@ -76,8 +76,11 @@ def get_html(url):
     req = urllib.request.Request(url) 
     return urllib.request.urlopen(req).read().decode("utf-8")
 
-def get_json(url):
-    req = urllib.request.Request(url, headers={'Accept': 'application/json'}) 
+def get_json(url, basicauth=''):
+    headers = {'Accept': 'application/json'}
+    if basicauth:
+        headers['Authorization'] = 'Basic ' + basicauth
+    req = urllib.request.Request(url, headers=headers) 
     return json.loads(urllib.request.urlopen(req).read().decode("utf-8"))
 
 
