@@ -310,7 +310,9 @@ def privatecloud(debug=False):
             'locale': get_json(f'{get_base_api(sub)}/1.0/order/catalog/public/cloud?ovhSubsidiary={sub}')['locale'],
         }
 
-        catalog = get_pcc_ranges_and_windows_licenses(sub, debug=debug)
+        def subfun():
+            return get_pcc_ranges_and_windows_licenses(sub, debug=debug)
+        catalog = exponential_backoff(subfun, 3)
         if products['locale']['currencyCode'] == 'EUR':
             catalog += SNC_PRODUCTS
         catalog += get_occ_options(sub)

@@ -18,7 +18,7 @@ def save_indexes():
     print('Getting Baremetal Catalog')
     bm = exponential_backoff(baremetal)
     print('Getting Private Cloud Catalog')
-    pcc = exponential_backoff(privatecloud)
+    pcc = privatecloud()
     print('Getting Public Cloud Catalog')
     pci = exponential_backoff(publiccloud)
     supports = get_support_prices();
