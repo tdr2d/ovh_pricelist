@@ -25,7 +25,7 @@ def build_dataset(js):
 
     # Loop on servers 
     for plan in js['plans']:
-        server_name = plan['invoiceName'].upper().replace('ADVANCE', 'ADV') # .split(' ')[0]
+        server_name = plan['invoiceName'].upper()
         base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage_system': None, 'gpu': None}
         if plan['planCode'] in products:
             tech_specs = products[plan['planCode']]
