@@ -214,6 +214,7 @@ function insertLegalLink(sheet, rowIndex, description, link) {
 }
 
 function insertPriceRow(sheet, rowIndex, description, installCost, unitCost, quantity, commitDuration, commitDiscount) {
+    console.log([rowIndex, description])
     const row_ref = sheet.getRow(SPECIAL_CELLS.row_ref_item);
     const row_values = [description, null, null, null, installCost, unitCost, quantity, commitDuration, commitDiscount, {formula: price_formula(rowIndex)}];
     const new_row = sheet.insertRow(rowIndex, row_values, 'o');
