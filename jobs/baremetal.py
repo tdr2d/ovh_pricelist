@@ -32,7 +32,7 @@ def build_dataset(js):
         elif plan['product'] in products:
             tech_specs = products[plan['product']]
         else:
-            print(f'Can\'t find specs for {server_name}')
+            # print(f'Can\'t find specs for {server_name}')
             continue
         server_range = 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range']
         has_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']), None)

@@ -8,7 +8,7 @@ import json
 import gzip
 import bs4
 import unicodedata
-from legal import get_legal_forward_links, OVH_SUBSIDIARY_ADDRESS
+from legal import get_all_legal_terms, OVH_SUBSIDIARY_ADDRESS
 
 def save_indexes():
     dcs = get_dcs()
@@ -35,7 +35,7 @@ def save_indexes():
         'version': version,
         'date': datetime.datetime.now().isoformat(),
         'dcs': dcs,
-        'legal': get_legal_forward_links(),
+        'legal': get_all_legal_terms(),
         'addresses': OVH_SUBSIDIARY_ADDRESS,
         'subsidiaries': {},
     }
