@@ -70,7 +70,7 @@ LEGALS_DATA = {
     'de': {
         'link': 'https://www.ovhcloud.com/de/terms-and-conditions/contracts/',
         'mandatory_keys' :[
-            {'key': "AGB"},
+            {'key': "AGB", 'title': 'ALLGEMEINE GESCHÄFTSBEDINGUNGEN'},
             {'key': "Auftragsverarbeitungsvertrag 2018", 'title': 'Auftragsverarbeitungsvertrag'},
         ],
         'to_select_keys' : [

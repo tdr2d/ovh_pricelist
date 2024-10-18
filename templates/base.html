@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     // SUB get parameter
-    document.getElementById('sub-list').innerHTML = SUBSIDIARIES.reduce((acc, s, idx) => acc + `${idx != 0 ? '/' :''} <a href="${setURLParams({con: conformity, sub: s})}">${s == sub ? '<b>'+s+'</b>' : s}</a> `, '');
+    document.getElementById('sub-list').innerHTML = 'Subsidiaries: ' + SUBSIDIARIES.reduce((acc, s, idx) => acc + `${idx != 0 ? '/' :''} <a href="${setURLParams({con: conformity, sub: s})}">${s == sub ? '<b>'+s+'</b>' : s}</a> `, '');
 });
     
 </script>

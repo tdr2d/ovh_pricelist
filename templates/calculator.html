@@ -190,6 +190,7 @@ let state = {
     'check-b': true,
     'check-q': true,
     'check-p': true,
+    'search_input': '',
     'zones': [], // loadedState.zones.length ? loadedState.zones : {key: 'SBG', items: []}, // {key, items: [{key, description, setupfee, pricePerUnit, quantity:  commit:  discount: 0, total}]}
     'support': loadedState.support || 'b',
     'totaldiscount': loadedState.totaldiscount || 0,
@@ -263,7 +264,7 @@ function addZone(key) {
     let newzone = document.createElement('div');
     newzone.setAttribute('class', `zone zone${zoneIndex}`);
     newzone.setAttribute('data-zone', `${zoneIndex}`);
-    const selected = key || 'SBG';
+    const selected = key || 'RBX';
     const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${DC_key_to_text(key)}</option>`).join('');
     let deleteBtn = `<button class="btn" type="button" id="z${zoneIndex}-delete">${DELETE_SVG}</button>`;
     if (zoneIndex == 0) {
@@ -296,7 +297,7 @@ function addZone(key) {
     $.getElementById('zones').appendChild(newzone);
     state.zones.push({'key': selected, 'items': []})
     $.getElementById(`z${zoneIndex}`).addEventListener('change', (e) => state.zones[zoneIndex].key = e.target.value);
-    $.getElementById(`add-item-zone${zoneIndex}`).addEventListener('click', function() {AddItemOnClick(this)});
+    $.getElementById(`add-item-zone${zoneIndex}`).addEventListener('click', function() {SearchItem(this)});
     
     if (zoneIndex > 0) {
         $.getElementById(`z${zoneIndex}-delete`).addEventListener('click', function() {
@@ -335,7 +336,7 @@ function SearchOnKeyUp(zone, inputTxt, list_group) {
     inputTxt.parentElement.classList.add("active");
     list_group.style.display = "block";
     list_group.innerHTML = SearchFilterRender(state);
-
+    state.search_input = inputTxt.value;
     const tokens = inputTxt.value.toLowerCase().split(' ').filter(x => x.length > 1);
     index_keys = index_keys.concat(Object.keys(index).filter(function (key) {
         if (!(prefixes.includes(key.charAt(0)))) {
@@ -385,7 +386,7 @@ function SearchDestroy(zone) {
     //         list.addEventListener("click", function (e) {
 }
 
-function AddItemOnClick(el) {
+function SearchItem(el) {
     const zone = el.parentElement;
     zone.querySelector('.search-placeholder').innerHTML = `
 <div class="search" style="position: relative">
@@ -406,7 +407,9 @@ function AddItemOnClick(el) {
             SearchDestroy(zone);
         }
     });
+    inputTxt.value = state.search_input;
     inputTxt.focus();
+    inputTxt.select();
     SearchOnKeyUp(zone, inputTxt, listGroup);
 }
 
