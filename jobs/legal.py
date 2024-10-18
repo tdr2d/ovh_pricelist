@@ -75,8 +75,8 @@ LEGALS_DATA = {
         ],
         'to_select_keys' : [
             {'key': "BESONDERE VERTRAGSBEDINGUNGEN FÜR PUBLIC-CLOUD-DIENSTE", 'selected': True},
-            {'key': "Anlage DRS (dedizierte Rootserver)", 'selected': True},
             {'key': "Specific Conditions Hosted Private Cloud VMware on OVHcloud", 'selected': True},
+            {'key': "Anlage DRS (dedizierte Rootserver)", 'selected': True},
             {'key': "BedingungenOVH Premium Support", 'selected': False},
             {'key': "Besondere Bedingungen OVHcloud Business Support", 'selected': True},
             {'key': "Besondere Bedingungen OVHcloud Enterprise Support", 'selected': True},

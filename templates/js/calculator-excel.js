@@ -3,7 +3,7 @@ const COORDINATES_TO_SAVE_FORMULA = [
 ];
 const SPECIAL_CELLS = {
     'conformity': 'A2',
-    'link': 'M2',
+    'link': 'L2',
     'subsidiary_description': 'B6',
     'price_formated_cells': ['E17', 'F17', 'J17'],
     'client': 'B10',
@@ -13,13 +13,13 @@ const SPECIAL_CELLS = {
     'item_width': 'A-D',
     'row_ref_zone': 16,
     'row_ref_item': 17,
-    'currency_symbol': 'C5',
-    'currency': 'C6',
-    'tax_name': 'C7', 'tax_rate': 'C8',
-    'support_name': 'C9', 'support_percent': 'C10', 'support_min': 'C11',
-    'exceptionnal_discount': 'C12',
+    'currency_symbol': 'M2',
+    'currency': 'N2',
+    'tax_name': 'O2', 'tax_rate': 'P2',
+    'support_name': 'Q2', 'support_percent': 'R2', 'support_min': 'S2',
+    'budget_duration': 'T2',
+    'exceptionnal_discount': 'U2',
     'legal_commit_text_ref': 'M13',
-    'budget_duration': 'C13',
     'legal_start': 'A43',
     'legal_commit_text_area': 'A44'
 };
@@ -93,7 +93,7 @@ function saveXLSX(state) {
         sheet.getCell(SPECIAL_CELLS['author']).value = state.author;
         sheet.getCell(SPECIAL_CELLS['currency']).value = currency_name;
         sheet.getCell(SPECIAL_CELLS['currency_symbol']).value = CURRENCY_SYMBOL;
-        sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support];
+        sheet.getCell(SPECIAL_CELLS['support_name']).value = SUPPORT_KEY_TO_NAME[state.support].toUpperCase();
         sheet.getCell(SPECIAL_CELLS['support_percent']).value = state.support == 'g' ? 15 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].percent;
         sheet.getCell(SPECIAL_CELLS['support_min']).value = ['f','g','c'].includes(state.support) ? 0 : SUPPORT[SUPPORT_KEY_TO_NAME[state.support]].minimum;
         if (state.totaldiscount > 0) {

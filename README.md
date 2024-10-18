@@ -2,12 +2,13 @@
 Webpage showing OVHcloud catalogue and calculator.
 Aim is to browse quickly the vast OVHcloud catalog with all the derivatives.
 
-Prices are taken from api.ovh.com for different countries including Europe, Canada and the USA.
+Prices are taken from api.ovh.com for different countries including Europe, Canada.
 Official prices can be found at :
 - Private Cloud https://www.ovhcloud.com/en/hosted-private-cloud/vmware/prices/
 - Public Cloud https://www.ovhcloud.com/fr/public-cloud/prices/
 - Baremetal Cloud https://www.ovhcloud.com/fr/bare-metal/prices/
 
+It does not support the USA.
 
 ## Live
 * Pricelist https://pricelist.ovh
@@ -22,5 +23,8 @@ Official prices can be found at :
 
 
 ### TODO
-BUG frontend with item having 0 values, it defaults to 1.
-BUG only apply floating precision to unit/price instead of total price
+- improve select input, prevent closing when unfocus
+- ability to add custom input
+- move up and down line
+- BUG frontend with item having 0 values, it defaults to 1.
+- BUG only apply floating precision to unit/price instead of total price

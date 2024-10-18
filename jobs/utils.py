@@ -19,7 +19,7 @@ SUBSIDIARIES = ['CA', 'DE','ES','FR','GB','IE','IT','MA','NL','PL','PT','SN','TN
 print(f'Bucket is {S3_BUCKET}, region is {S3_REGION}')
 if 'dev' in S3_BUCKET:
     SUBSIDIARIES = ['FR']
-TZ_DCS = ['RBX', 'SBG']
+TZ_DCS = ['RBX', 'SBG', 'GRA']
 
 API_US = 'https://api.us.ovhcloud.com'
 API_EU = 'https://api.ovh.com'
