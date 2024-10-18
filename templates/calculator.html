@@ -194,7 +194,7 @@ let state = {
     'support': loadedState.support || 'b',
     'totaldiscount': loadedState.totaldiscount || 0,
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
-    '2': loadedState.legal_checked ? loadedState.legal_checked.split(',') : [],
+    'legal_checked': loadedState.legal_checked || [],
     'version': res.version,
     'lang': sub == 'FR' ? 'fr' : 'en',
 };
@@ -462,15 +462,21 @@ function AddItemToZone(zone, item) {
 }
 
 function renderLegalCheckboxes() {
-    const columns = 2;
     const legal_data = res.legal[state.lang]['to_select_keys'];
+    const columns = 2;
+
+    if (state.legal_checked.length == 0) {
+        for (let i = 0; i < legal_data.length; i++) {
+            if (legal_data[i].selected) { state.legal_checked.push(i) }
+        }
+    }
 
     const keys = legal_data.map((x) => x.title || x.key);
     let html = '<tr>';
     
     for (let i = 0; i < keys.length; i++) {
         // const checked =  state.legal_checked.includes(keys[i]) ? 'checked' : '';
-        const checked = legal_data[i]['selected'] ? 'checked' : '';
+        const checked = state.legal_checked.includes(i) ? 'checked' : '';
         html += `<td><input class="form-check-input legal-checkbox" type="checkbox" value="" id="legal-${i}" data-legalindex="${i}" ${checked}>
         <label class="form-check-label" for="legal-${i}" style="padding: 0 7px;">
             ${legal_data[i].title || legal_data[i].key}
@@ -494,11 +500,11 @@ function renderLegalCheckboxes() {
 }
 
 function onChangeLegal(e) {
-    console.log(e.target);
     let set = new Set(state.legal_checked);
     const index = parseInt(e.target.dataset.legalindex);
     (e.target.checked) ? set.add(index) : set.delete(index);
-    state.legal_checked = Array.from(set).join('');
+    state.legal_checked = Array.from(set);
+    console.log(`onChangeLegal ${state.legal_checked}`)
 }
 
 }) // fetch

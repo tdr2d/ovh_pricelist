@@ -20,17 +20,11 @@ const SPECIAL_CELLS = {
     'exceptionnal_discount': 'C12',
     'legal_commit_text_ref': 'M13',
     'budget_duration': 'C13',
-    'legal_start': 'A47',
-    'legal_commit_text_area': 'A48'
+    'legal_start': 'A43',
+    'legal_commit_text_area': 'A44'
 };
 const SUPPORT_KEY_TO_NAME = {'f': 'entreprise', 'g': 'entreprise', 'e': 'entreprise', 'b': 'business', 'c': 'business', 's': 'standard'};
-const PREFIX_LEGAL_TEXT = {
-    'fr': 'Conditions Particulières',
-    'en': 'Special Condition',
-    'de': 'Besonderen Bedingungen '
-};
 const PREFIX_ZONE_TEXT = 'Zone ';
-const TEMPLATE_VERSION = 1;
 
 const num_format = (symbol) => `_ # ##0.00???" ${symbol}";- # ##0.00???" ${symbol}";_ "";`;
 const num_format_2decimals = (symbol) => `_ # ##0.00" ${symbol}";- # ##0.00" ${symbol}";_ "";`;
@@ -115,8 +109,18 @@ function saveXLSX(state) {
         // Display legals
         let legal_index = 0;
         let legalIndexStart = parseInt(SPECIAL_CELLS['legal_start'].match(/[0-9]+/)[0])
-        for (const key of state.legal_checked.split('')) {
-            insertLegalLink(sheet, legalIndexStart + legal_index, PREFIX_LEGAL_TEXT[state.lang] + ' ' + res.legal[state.lang][key].text, res.legal[state.lang][key].url);
+
+        let legal_choices = res.legal[state.lang]['mandatory_keys'];
+        for (const choice of legal_choices) {
+            const txt = choice.title || choice.key;
+            insertLegalLink(sheet, legalIndexStart + legal_index, txt, choice.url);
+            legal_index += 2;
+        }
+
+        legal_choices = res.legal[state.lang]['to_select_keys'];
+        for (const key of state.legal_checked) {
+            const txt = legal_choices[key].title || legal_choices[key].key;
+            insertLegalLink(sheet, legalIndexStart + legal_index, txt, legal_choices[key].url);
             legal_index += 2;
         }
 
@@ -204,8 +208,8 @@ function insertLegalLink(sheet, rowIndex, description, link) {
     const new_row_desc = sheet.insertRow(rowIndex, [description], 'o');
     const new_row_link = sheet.insertRow(rowIndex+1, [link], 'o');
 
-    new_row_desc.getCell(1).style =  {'font': {'bold': true, 'size': 10}};
-    new_row_link.getCell(1).value =  {'text': link, 'hyperlink': link};
+    new_row_desc.getCell(1).style =  {'font': {'bold': true, 'size': 10, name: 'Arial'}};
+    new_row_link.getCell(1).value =  {'text': link, 'hyperlink': link, 'font': {'bold': false, 'size': 10, name: 'Arial'}};
 
     for (const i in row_ref_desc._cells) {
         new_row_desc._cells[i].style = row_ref_desc._cells[i].style;
@@ -247,11 +251,11 @@ function insertZoneRow(sheet, rowIndex, zoneDescription) {
 
 
 function getXLSXTemplate(url, sheetName) {
-    return fetch(`${url}?v${TEMPLATE_VERSION}`)
+    return fetch(`${url}?v1`)
         .then(response => checkStatus(response) && response.arrayBuffer())
         .then(buffer => {
             const workbook = new ExcelJS.Workbook();
-            workbook.creator = 'Thomas Ducrot (pricelist.ovh)';
+            workbook.creator = 'Thomas Ducrot (pricelist.ovh/calculator.html)';
             workbook.company = 'OVHCloud';
             return workbook.xlsx.load(buffer);
         })

@@ -35,6 +35,7 @@ function SerilizeState() {
         data += zoneString;
     }
 
+
     output += '&' + Object.keys(ABREV_TOTAL).map(k => `${ABREV_TOTAL[k]}=${encodeURIComponent(state[k])}`).join('&');
     output += `&zs=${encodeURIComponent(data)}`;
     if (navigator && navigator.clipboard) {
@@ -60,6 +61,10 @@ function DeserializeURI() {
     let newstate = { zones: []};
     Object.keys(reverse_abrev_total).forEach((k) => {
         newstate[reverse_abrev_total[k]] = decodeURIComponent(new URLSearchParams(search).get(k) || '');
+        if (reverse_abrev_total[k] == 'legal_checked') {
+            console.log(newstate[reverse_abrev_total[k]])
+            newstate[reverse_abrev_total[k]] = JSON.parse(`[${newstate[reverse_abrev_total[k]]}]`);
+        }
     });
     
     search = decodeURIComponent(new URLSearchParams(search).get('zs'));
