@@ -18,4 +18,5 @@ function renderLanguages(state) {
 
 function onChangeLanguage(e) {
     state.lang = e.target.value;
+    renderLegalCheckboxes();
 }

@@ -197,7 +197,7 @@ let state = {
     'total': 0, 'totalSupport': 0, 'totalSupportLocalTax': 0, 'installfee': 0,
     'legal_checked': loadedState.legal_checked || [],
     'version': res.version,
-    'lang': sub == 'FR' ? 'fr' : 'en',
+    'lang': sub == 'FR' ? 'fr' : sub == 'DE' ? 'de' : 'en',
 };
 
 for (const i in loadedState.zones) {
