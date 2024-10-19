@@ -205,8 +205,8 @@ function update_formula(sheet, old_coordinates, voffset) {
 function insertLegalLink(sheet, rowIndex, description, link) {
     const row_ref_desc = sheet.getRow(cell_vertical_offset(SPECIAL_CELLS.legal_start, -2))
     const row_ref_link = sheet.getRow(cell_vertical_offset(SPECIAL_CELLS.legal_start, -1))
-    const new_row_desc = sheet.insertRow(rowIndex, [description], 'o');
-    const new_row_link = sheet.insertRow(rowIndex+1, [link], 'o');
+    const new_row_desc = sheet.insertRow(rowIndex, [description]);
+    const new_row_link = sheet.insertRow(rowIndex+1, [link]);
 
     new_row_desc.getCell(1).style =  {'font': {'bold': true, 'size': 10, name: 'Arial'}};
     new_row_link.getCell(1).value =  {'text': link, 'hyperlink': link, 'font': {'bold': false, 'size': 10, name: 'Arial'}};

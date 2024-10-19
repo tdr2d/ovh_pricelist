@@ -23,6 +23,7 @@ It does not support the USA.
 
 
 ### TODO
+- hide legal conditions for external users
 - ability to add custom input
 - move up and down line
 - BUG frontend with item having 0 values, it defaults to 1.
