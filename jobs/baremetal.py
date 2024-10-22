@@ -103,7 +103,7 @@ def build_dataset(js):
             # 'storage_raid_type': storage_specs['storage']['raid'],
             # 'storage_total_tbytes': storage_amount,
             'setupfee': server_price,
-            'price': server_price, 'price_snc': 0,
+            'price': server_price,
         }
 
         item['description'] = f"Dedicated Server {item['name']}\n"
@@ -117,16 +117,8 @@ def build_dataset(js):
         if base_addon_options['priv_bp'] is not None:
             item['description'] += f"\nDefault Private Bandwidth: {base_addon_options['priv_bp']['invoiceName']}"
 
-        if tech_specs['server']['range'].lower() in ['scale', 'hgr']:
-            item['price_snc'] = round(server_price * SNC_MARKUP)
-
         if item['price'] > 0:
             plans.append(item)
-
-    for i in range(len(server_options)):
-        if 'hgr' in server_options[i]['description'].lower() or 'scale' in server_options[i]['range']:
-            server_options[i]['price_snc'] = round(server_options[i]['price'] * SNC_MARKUP)
-            # print(server_options[i])
 
     return plans + server_options
 
