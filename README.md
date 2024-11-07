@@ -23,6 +23,7 @@ It does not support the USA.
 
 
 ### TODO
+- BUG calculator fix default quantities for MongoDB Production DB2-30
 - hide legal conditions for external users
 - ability to add custom input
 - move up and down line
