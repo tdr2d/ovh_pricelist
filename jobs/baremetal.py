@@ -2,6 +2,13 @@ from datetime import datetime
 from utils import *
 import pandas as pd
 
+REGION_SUFFIXES = {
+    'EUNA': '(Europe, North America)',
+    'mum': 'Asia (India)',
+    'sgp': 'Asia (Singapore)',
+    'syd': 'Oceania (Australia)',
+}
+
 def index_addons(js):
     addon_per_plancode = {}
     for addon in js['addons']:
@@ -26,13 +33,17 @@ def build_dataset(js):
     # Loop on servers 
     for plan in js['plans']:
         server_name = plan['invoiceName'].upper()
-        base_addon_options = { 'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage_system': None, 'gpu': None}
+        region_key = plan['planCode'].split('-')[-1]
+        if region_key not in REGION_SUFFIXES:
+            region_key = 'EUNA'
+        server_name += ' ' + REGION_SUFFIXES[region_key]
+        
+        base_addon_options = {'priv_bp': None, 'pub_bp': None, 'memory': None, 'storage_system': None, 'gpu': None}
         if plan['planCode'] in products:
             tech_specs = products[plan['planCode']]
         elif plan['product'] in products:
             tech_specs = products[plan['product']]
         else:
-            # print(f'Can\'t find specs for {server_name}')
             continue
         server_range = 'high-grade' if tech_specs['server']['range'] == 'hgr' else tech_specs['server']['range']
         has_price = next(filter(lambda x: x['commitment'] == 0 and x['mode'] == 'default' and x['interval'] == 1, plan['pricings']), None)
