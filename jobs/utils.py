@@ -22,7 +22,7 @@ if 'dev' in S3_BUCKET:
 TZ_DCS = ['RBX', 'SBG', 'GRA']
 
 API_US = 'https://api.us.ovhcloud.com'
-API_EU = 'https://api.ovh.com'
+API_EU = 'https://eu.api.ovh.com'
 API_CA = 'https://ca.api.ovh.com'
 SNC_MARKUP = 1.12
 ENCODING_PREFIXES = {

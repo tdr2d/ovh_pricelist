@@ -71,6 +71,10 @@ def get_api_cloud_prices(sub, debug=False):
         if family['family'] in EXCLUDE_FAMILY:
             continue
         for addon in family['addons']:
+            planCode = addon['plan']['planCode']
+            if 'LZ.AF' in planCode:
+                continue
+
             for price in addon['plan']['details']['pricings']['default']:
                 duration = price['description'].lower()
                 invoiceName = addon['plan']['invoiceName'] if family['family'] == 'ai-training' else addon['invoiceName']
@@ -97,6 +101,8 @@ def get_api_cloud_prices(sub, debug=False):
                 if family['family'] == 'coldarchive':
                     invoiceName = invoiceName + ' - per GB'
 
+                
+
                 item = {
                     'family': family['family'],
                     'invoiceName': invoiceName,
@@ -115,7 +121,7 @@ def get_api_cloud_prices(sub, debug=False):
                     'duration': duration
                 }
                 if debug and invoiceName:
-                    print(f'InvoiceName: {invoiceName.lower()}\tkey: {item["key"]}')
+                    print(f'planCode: {planCode}\tInvoiceName: {invoiceName.lower()}\tkey: {item["key"]}\tprice:{item["price"]}')
                 if item['price'] < 0.00000001 or ('hour' in duration and item['family'] in MONTHLY_ONLY_FAMILIES):
                     continue
                 if family['family'] == 'instance':
