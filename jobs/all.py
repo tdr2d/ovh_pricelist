@@ -7,6 +7,7 @@ import datetime
 import json
 import gzip
 import bs4
+import re
 import unicodedata
 from legal import get_all_legal_terms, OVH_SUBSIDIARY_ADDRESS
 
@@ -61,8 +62,8 @@ def get_dcs():
         if 'IPv4' not in txt:
             continue
         country, code, _ = list(map(lambda x: x.strip(), unicodedata.normalize('NFKD', txt).split(' ')))
-        title = bs4.BeautifulSoup(get_html(f'{base_url}{link.get("href")}'), 'lxml').head.title.get_text()
-        city = title.split('OVH')[-1].strip()
+        title = bs4.BeautifulSoup(get_html(f'{base_url}{link.get("href")}'), 'lxml').css.select('#graph_title')[0].get_text()
+        city = re.findall(r'.*?\/([a-zA-Z- ]+)\)', title)[0]
         dcs[code] = {'city': city, 'code': code, 'country': country}
     
     for tz in TZ_DCS:
@@ -70,7 +71,9 @@ def get_dcs():
         dcs[code] = {'code': code, 'city': dcs[tz]['city'] + ' (Trusted Zone)', 'country': dcs[tz]['country'] }
 
     assert len(dict.values(dcs)) > 13
+    # print(dcs)
     return dcs
 
 if __name__ == '__main__':
     save_indexes()
+    # get_dcs()
