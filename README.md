@@ -29,3 +29,4 @@ It does not support the USA.
 - move up and down line
 - BUG frontend with item having 0 values, it defaults to 1.
 - BUG only apply floating precision to unit/price instead of total price
+- Rajouter la colonne unite monthly/hour

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+
+{% block title %}Public Cloud Catalog{% endblock %}
+{% block nav %} {% with HIDE_NAV=True %} {% endwith %} {% endblock %}
+{% block subsidiaries %} {% with HIDE_SUB=True %} {% endwith %} {% endblock %}
+{% block content %}
+
+<table id="sd" class="table nowrap table-hover" style="display: none; width: 100%;">
+    <thead id="sd-thead" class="thead-dark"><tr></tr></thead>
+    <tbody></tbody>
+</table>
+
+<script type="text/javascript">
+var cache_bust = new Date().toDateString().replaceAll(' ','');
+var exportTitle = `Pricelist.ovh - Public Cloud - ${cache_bust}`;
+var ENTERPRISE_SUPPORT_MULTIPLIER = 1.3;
+
+fetch(`${BUCKET_ROOT}/public-cloud.json?sub=${sub}&cache_bust=${cache_bust}`).then(res => res.json()).then(res => {
+
+    res = res[sub];
+
+    var a = [{id: 1}, {id:2}]
+    a.map(x => {})
+
+    setLastUpdated(res.date);
+
+    var COLUMNS = [
+        {text: "Family", key: 'family'},
+        {text: "Description", key: 'description'},
+        {text: `Price (Monthly if not specified) (With Enterprise Support) without local taxes (${res.currency})`, key: 'price'},
+        // {text: "duration", key: 'duration'},
+    ];
+
+    document.querySelector('#sd-thead > tr').innerHTML = COLUMNS.map((col) => `<th>${col.text}</th>`).join('');
+    document.querySelector('#sd > tbody').innerHTML = res.catalog
+        .map((x) => {
+            x.price = x.price * ENTERPRISE_SUPPORT_MULTIPLIER
+            return x
+        }).map((x) => {
+        var row = COLUMNS.map(col => `<td>${x[col.key]}</td>`).join('') 
+        return `<tr>${row}</tr>`;
+    }).join('');
+
+    $('#sd').show();
+    $('#sd').DataTable({
+        header: true,
+        ordering: true,
+        orderCellsTop: true,
+        order: [[ 0, "asc" ]],
+        paging: false,
+        dom: 'Bfrtip',
+        columnDefs: [{ "targets": [], "visible": false }, {'targets': [2], 'type': 'num'}],
+        buttons: [
+            { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
+            { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
+        ]
+    })
+})
+
+
+</script>
+
+{% endblock %}

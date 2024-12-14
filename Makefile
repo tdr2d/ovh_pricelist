@@ -11,6 +11,7 @@ build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share 
 	jinja templates/baremetal.html -E S3_BUCKET -E S3_REGION -o static/baremetal.html
 	jinja templates/private-cloud.html -E S3_BUCKET -E S3_REGION -o static/private-cloud.html
 	jinja templates/public-cloud.html -E S3_BUCKET -E S3_REGION -o static/public-cloud.html
+	jinja templates/public-cloud-enterprise.html -E S3_BUCKET -E S3_REGION -o static/public-cloud-enterprise.html
 
 serve: build ## dev http server
 	cd static && python3 -m http.server 80

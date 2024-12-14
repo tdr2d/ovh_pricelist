@@ -24,7 +24,7 @@ fetch(url).then(res => res.json()).then(res => {
         {title: "Range", key: 'range'},
         {title: "Type", key: 'type'},
         {title: "Description", key: 'description'},
-        {title: `Monthly Price without local taxes (${res.locale.currencyCode})`, key: `price_${conformity}`},
+        {title: `Price (Monthly if not specified) without local taxes (${res.locale.currencyCode})`, key: `price_${conformity}`},
     ];
     document.querySelector('#sd-thead > tr').innerHTML = COLUMNS.map((x) => `<th>${x.title}</th>`).join('');
 

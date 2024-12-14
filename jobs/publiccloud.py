@@ -17,7 +17,9 @@ EXCLUDE_FAMILY = [
 EXCLUDE_PRODUCTS = [
     'bandwidth_archive_out',
     'bandwidth_storage',
-    'serco-asp-r2-256 monthly instance', 'serco-asp-r2-256'
+    'serco-asp-r2-256 monthly instance', 'serco-asp-r2-256',
+    'hourly serco-asp-r2-256', # TODO
+    'eg-120', # TODO
     'eg-120', 'win-eg-120',
     'eg-15', 'win-eg-15',
     'eg-30', 'win-eg-30',

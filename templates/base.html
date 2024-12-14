@@ -14,6 +14,7 @@
 </head>
 <body>
 <nav class="navbar">
+    {% block nav %}
     <a class="navbar-brand" href="/" style="display: flex">
         <svg width="79" height="41" viewBox="0 0 79 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M73.14 2.69C76.9967 9.6413 78.7003 17.5821 78.0344 25.5036C77.3685 33.4252 74.3631 40.9701 69.4 47.18H47.96L54.56 35.51H45.83L56.12 17.38H64.9L73.14 2.71V2.69ZM30.8 47.18H8.94001C3.88432 40.9972 0.816836 33.4299 0.140434 25.4719C-0.535968 17.5139 1.21034 9.53738 5.15001 2.59L19.33 27.22L34.96 0H57.96L30.81 47.16L30.8 47.18Z"/>
@@ -23,6 +24,7 @@
         <h1 style="margin: 0;font-size: 1.8rem;line-height: 1.5;">OVHcloud {{ self.title() }}</h2>  
     </a>
 
+    {% if HIDE_NAV %}{% else %}
     <ul class="nav nav-pills" style="margin: 0 15px">
         <li class="nav-item d-none d-md-block"><a class="nav-link" href="baremetal.html" title="Get the list of all available Baremetal servers at OVHCloud">Baremetal Cloud Servers</a></li>
         <li class="nav-item d-none d-md-block"><a class="nav-link" href="private-cloud.html">Private Cloud</a></li>
@@ -39,7 +41,10 @@
               <li><a class="nav-item dropdown-item" href="calculator.html">Calculator</a></li>
             </ul>
         </li>
-  
+    </ul>
+    {% endif %}
+    
+    {% endblock %}
 </nav>
 <article id="main" class="container-fluid">
     <button type="button" class="btn btn-dark" id="btn-back-to-top">
@@ -111,7 +116,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     // SUB get parameter
+    {% block subsidiaries %}{% if HIDE_SUB %} {% else %}
     document.getElementById('sub-list').innerHTML = 'Subsidiaries: ' + SUBSIDIARIES.reduce((acc, s, idx) => acc + `${idx != 0 ? '/' :''} <a href="${setURLParams({con: conformity, sub: s})}">${s == sub ? '<b>'+s+'</b>' : s}</a> `, '');
+    {% endif %} {% endblock %}
 });
     
 </script>
