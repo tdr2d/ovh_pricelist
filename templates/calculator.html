@@ -207,7 +207,7 @@ for (const i in loadedState.zones) {
     }
 }
 if (!(state.zones.length)) {
-    addZone('SBG');
+    addZone('');
 }
 
 setLastUpdated(res.date);
@@ -264,7 +264,7 @@ function addZone(key) {
     let newzone = document.createElement('div');
     newzone.setAttribute('class', `zone zone${zoneIndex}`);
     newzone.setAttribute('data-zone', `${zoneIndex}`);
-    const selected = key || 'RBX';
+    const selected = key || '';
     const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${DC_key_to_text(key)}</option>`).join('');
     let deleteBtn = `<button class="btn" type="button" id="z${zoneIndex}-delete">${DELETE_SVG}</button>`;
     if (zoneIndex == 0) {
@@ -275,6 +275,7 @@ function addZone(key) {
         ${deleteBtn}
         Zone
         <select id="z${zoneIndex}" class="form-select form-select-sm" aria-label="Default select example" style="width: 200px; margin-left: 20px;">
+            <option value="" ${selected=='' ? 'selected' : ''}></option>
             ${options}
         </select>
         <span class="sep"></span>

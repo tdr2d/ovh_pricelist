@@ -80,7 +80,7 @@ def get_backup_options(pcc_plan_codes):
         size, plan = m['invoiceName'].split('-')[-1], m['invoiceName'].split('-')[-2]
         m['description'] = f"{BACKUP_DESCRIPTION[plan]} - {BACKUP_SIZE[size]}"
         m['type'] = 'Managed Backups'
-        m['price_snc'] = round(m['price_default']*SNC_MARKUP)
+        m['price_snc'] = round(m['price_default']*SNC_MARKUP, 2)
     return managed_backup
 
 def get_occ_options(sub='FR'):

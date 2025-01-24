@@ -42,6 +42,7 @@ function getItemRowHeightFromDescription(description) {
 }
 
 function DC_key_to_text(key) {
+    if (key == '') return ''
     return `${DCS[key].city} (${DCS[key].country})`;
 }
 
@@ -133,9 +134,9 @@ function saveXLSX(state) {
                 continue;
             }
             if (offset < 0) {
-                sheet.getCell(`A${row_index - 2}`).value = PREFIX_ZONE_TEXT + DC_key_to_text(zone['key']);
+                sheet.getCell(`A${row_index - 2}`).value = (zone['key'] != '' ? PREFIX_ZONE_TEXT: '') + DC_key_to_text(zone['key']);
             } else {
-                row_index = insertZoneRow(sheet, row_index, PREFIX_ZONE_TEXT + DC_key_to_text(zone['key']))
+                row_index = insertZoneRow(sheet, row_index, (zone['key'] != '' ? PREFIX_ZONE_TEXT: '') + DC_key_to_text(zone['key']))
             }
             offset += 1;
             for (const item of zone['items']) {
