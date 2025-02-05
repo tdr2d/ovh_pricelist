@@ -17,6 +17,7 @@ fetch(`${BUCKET_ROOT}/public-cloud.json?sub=${sub}&cache_bust=${cache_bust}`).th
 
     var COLUMNS = [
         {text: "Family", key: 'family'},
+        {text: "Plan Code", key: 'plan_code'},
         {text: "Description", key: 'description'},
         {text: `Monthly Price without local taxes (${res.currency})`, key: 'price'},
         // {text: "duration", key: 'duration'},

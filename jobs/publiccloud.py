@@ -1,8 +1,6 @@
 from utils import *
 from datetime import datetime
 import pandas as pd
-import bs4
-import re
 
 EXCLUDE_FAMILY = [
     'option-dc-adp',
@@ -12,252 +10,209 @@ EXCLUDE_FAMILY = [
     'ai-serving-engine',
     'ai-voxist',
     'bandwidth_instance',
-    'data-integration'
+    'data-integration',
+    'data-processing-job',
+    'data-processing-spark-notebook',
+    'dataplatform',
+    'publicip'
 ]
-EXCLUDE_PRODUCTS = [
-    'bandwidth_archive_out',
-    'bandwidth_storage',
-    'serco-asp-r2-256 monthly instance', 'serco-asp-r2-256',
-    'hourly serco-asp-r2-256', # TODO
-    'eg-120', # TODO
-    'eg-120', 'win-eg-120',
-    'eg-15', 'win-eg-15',
-    'eg-30', 'win-eg-30',
-    'eg-60', 'win-eg-60',
-    'eg-7', 'win-eg-7',
-    'g1-15', 'win-g1-15',
-    'g1-30', 'win-g1-30',
-    'g2-15', 'win-g2-15',
-    'g2-30', 'win-g2-30',
-    'g3-120', 'win-g3-120',
-    'g3-30', 'win-g3-30',
-    'hg-120', 'win-hg-120',
-    'hg-15', 'win-hg-15',
-    'hg-30', 'win-hg-30',
-    'hg-60', 'win-hg-60',
-    'hg-7', 'win-hg-7',
-    's1-2', 'win-s1-2', 
-    's1-4', 'win-s1-4', 
-    's1-8', 'win-s1-8', 
-    'sp-120', 'win-sp-120', 
-    'sp-240', 'win-sp-240', 
-    'sp-30', 'win-sp-30', 
-    'sp-60', 'win-sp-60', 
-    'vps-ssd-1', 'win-vps-ssd-1', 
-    'vps-ssd-2', 'win-vps-ssd-2', 
-    'vps-ssd-3', 'win-vps-ssd-3',
-    'ks-1',
-    'ks-2',
+
+EXLUDE_PLAN_CODE = [
+    'loadbalancer.loadbalancer-unit.hour.monthly.postpaid', # legacy lb
+    'ai-training.ai1-standard.minute.monthly.postpaid',
+    'ai-training.ai1-standard.hour.monthly.postpaid',
+    'coldarchive.archive-fees.unit.consumption',
+    'databases.mongodb-discovery-db2-free.month.consumption',
+    'storage-standard.consumption.LZ',
+    'storage-api-call.consumption',
+    'storage-api-call_internal.consumption',
+    'storage-standard.LZ.EU',
+    'storage-standard.consumption.LZ.EU',
+    'storage-standard-ia.consumption',
+    'image.consumption.3AZ',
+    'bandwidth_storage-standard_out.consumption.LZ.EU'
 ]
+
 REPLACE_PRODUCT_MAP = {
     'bandwidth_archive_out consumption': 'Cloud Archive - Egress fees - per GB',
     'volume.snapshot': 'Volume Snapshot - per GB',
     'storage-high-perf': 'Object Storage High-Perf - per GB',
-    'storage-standard': 'Object Storage Standard-Perf - per GB',
+    'storage-standard-3AZ': 'Object Storage Standard-Perf 3AZ - per GB',
     'storage-standard': 'Object Storage Standard-Perf - per GB',
     'bandwidth_storage consumption': 'Outgoing public traffic (Egress) - per GB',
     'archive': 'Cloud Archive Storage - per GB',
     'image': 'Instance Backup - per GB',
     'archive consumption': 'Cloud Archive Storage - per GB',
 }
-MONTHLY_ONLY_FAMILIES = ['databases', 'gateway', 'loadbalancer', 'octavia-loadbalancer', 'volume', 'snapshot', 'registry']
+MONTHLY_ONLY_FAMILIES = [
+    'databases', 
+    'gateway', 
+    'loadbalancer', 
+    'octavia-loadbalancer', 
+    'volume', 
+    'snapshot', 
+    'registry',
+    'floatingip',
+    'volume-backup'
+    # 'storage',
+]
+
+def instance_spec_string(x):
+    if 'name' not in x['tech']:
+        return ''
+    ret = x['tech']['name']
+    ret += f" {x['tech']['os']['family'].capitalize()} Instance"
+
+    ret += f" {x['tech']['cpu']['cores']} vCores"
+    ret += f", {x['tech']['memory']['size']} GB RAM"
+    
+    if 'gpu' in x['tech']:
+        # "gpu": {"memory": {"interface": "HBM2", "size": 16}, "model": "Tesla V100", "number": 1},
+        ret += f", {x['tech']['gpu']['number']}x GPU {x['tech']['gpu']['model']} {x['tech']['gpu']['memory']['size']} GB"
+
+    ret += f", {storage_string(x['tech']['storage']['disks'][0]['capacity'])} {x['tech']['storage']['disks'][0]['technology'] if 'technology' in x['tech']['storage']['disks'][0] else ''}"
+    if 'nvme' in x['tech']:
+        # "nvme": {"disks": [{"capacity": 1900, "number": 2}]},
+        ret += f", {x['tech']['nvme']['disks'][0]['number'] if 'number' in x['tech']['nvme']['disks'][0] else 1}x "
+        ret += f"{storage_string(x['tech']['nvme']['disks'][0]['capacity'])} NVMe Disks"
+
+    ret += f", {bandwidth_string(x['tech']['bandwidth']['level'])}{' guaranteed' if x['tech']['bandwidth']['guaranteed'] else ''} Public Bandwidth"
+    ret += f", {bandwidth_string(x['tech']['vrack']['level'])}{' guaranteed' if x['tech']['vrack']['guaranteed'] else ''} Private Bandwidth"
+
+    return ret
+
+def bandwidth_string(mbps):
+    if mbps < 1000:
+        return f'{mbps} Mbps'
+    return f'{int(mbps/1000) if (mbps/1000).is_integer() else mbps/1000} Gbps'
+
+def storage_string(gb):
+    if gb < 1000:
+        return f'{gb} GB'
+    val = round(gb/1000, 2)
+    return f'{int(val) if val.is_integer() else val} TB'
+
+def coldarchive_hotfix(item):
+    if 'Cold Archive storage' in item['invoiceName']:
+        item['duration'] = 'month'
+        item['description'] = item['invoiceName'] + ' - per GB'
+        item['price'] = item['price'] * 730
+        item['plan_code'] = item['plan_code'].replace('hour','month')
+    elif 'coldarchive.restore.unit.consumption' == item['plan_code']:
+        item['description'] = 'Cold Archive restore' + ' - per GB'
+    return item
+
+def objectstorage_3az_hotfix(item):
+    if item['plan_code'] == 'storage-standard-3AZ.consumption':
+        item['duration'] = 'month'
+        item['description'] = 'Object Storage Standard 3AZ - S3 API - per GB'
+        item['price'] = item['price'] * 730
+        item['family'] += '3az'
+    return item
+
+def index_addons(js):
+    addon_per_plancode = {}
+    for addon in js['addons']:
+        addon_per_plancode[addon['planCode']] = addon
+    return addon_per_plancode
+
+# Map of family and function to render description
+DESCRIPTION_RENDERERS = {
+    'ai-training': lambda x: x['invoiceName'].replace(' on #REGION#', '').replace('Per minute usage for Public Cloud', '(Minute)').replace('Per hour usage for Public Cloud', '(Hourly)'),
+    'databases': lambda x: x['invoiceName'].replace(' on region #REGION#', '').replace('Monthly usage for ', '').replace(' Public Cloud Databases', '') if '-additionnal-storage-gb' in x['plan_code'] else (\
+        f"{x['com']['brickSubtype']} - {x['com']['name']} 1x Node {x['tech']['cpu']['cores']} vCores, {x['tech']['memory']['size']} GB RAM" + \
+        (f", {storage_string(x['tech']['storage']['disks'][0]['maximumCapacity'])} Maximum Storage" if 'storage' in x['tech'] else '')
+    ),
+    'floatingip': lambda x: x['com']['name'] if 'name' in x['com'] else x['invoiceName'],
+    'gateway': lambda x: f"{x['com']['name']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
+    'instance': instance_spec_string,
+    'registry': lambda x: f"Managed Private Registry {x['com']['name']} - {storage_string(x['tech']['storage']['disks'][0]['capacity'])}",
+    'snapshot': lambda x: 'Volume Backup - Stockage réplica x3 - per GB' if x['plan_code'] == 'snapshot.monthly.postpaid' else 'Volume Backup - Stockage réplica x3  - per GB',
+    'storage': lambda x: {
+        'archive': "Cloud Archive storage - per GB",
+        'image': 'Instance Backup - per GB',
+        'storage-standard': 'Object Storage Standard - S3 API - per GB',
+        'storage-high-perf': 'Object Storage High Performance - S3 API - per GB',
+        'storage': 'Object Storage Swift (legacy) - per GB',
+    }[x['plan_code'].replace('.monthly.postpaid', '').replace('.consumption', '')] if 'bandwidth' not in x['plan_code'] else x['invoiceName'] + ' - per GB',
+    'volume': lambda x: f"Block Storage - {x['tech']['name'].capitalize()} {x['tech']['volume']['iops']['level']} " + (f"{x['tech']['volume']['iops']['unit']} max {x['tech']['volume']['iops']['max']} IOPS" if 'unit' in x['tech']['volume']['iops'] else 'IOPS') + ' - per GB',
+    'octavia-loadbalancer': lambda x: f"{x['invoiceName']} - {bandwidth_string(x['tech']['bandwidth']['level'])}"
+}
+
+# test : https://eu.api.ovh.com/v1/order/catalog/public/cloud?ovhSubsidiary=FR
 def get_api_cloud_prices(sub, debug=False):
-    url = f'{get_base_api(sub)}/1.0/order/catalog/formatted/cloud?ovhSubsidiary={sub}'
+    url = f'{get_base_api(sub)}/1.0/order/catalog/public/cloud?ovhSubsidiary={sub}'
     print(url)
     cloud = get_json(url)
-    families = next(filter(lambda x: x['planCode'] == 'project', cloud['plans']))['addonsFamily']
-    currency = cloud['plans'][0]['details']['pricings']['default'][0]['price']['currencyCode']
+    addons_per_plancode = index_addons(cloud)
+    families = next(filter(lambda x: x['planCode'] == 'project', cloud['plans']))['addonFamilies']
+    currency = cloud['locale']['currencyCode']
 
     rows = []
     for family in families:
-        if family['family'] in EXCLUDE_FAMILY:
+        if family['name'] in EXCLUDE_FAMILY:
             continue
-        for addon in family['addons']:
-            planCode = addon['plan']['planCode']
-            if 'LZ.AF' in planCode:
+        for planCode in family['addons']:
+            if 'LZ.AF' in planCode or planCode in EXLUDE_PLAN_CODE:
+                continue
+            
+            addon = addons_per_plancode[planCode]
+            price = addon['pricings'][0]
+            duration = price['description'].lower()
+            if 'month' in duration:
+                duration = 'month'
+            elif 'minute' in duration:
+                duration = 'minute'
+            elif 'hour' in duration or 'consumption' in duration:
+                duration = 'hour'
+            
+            if addon['blobs'] and 'tags' in addon['blobs'] and ('legacy' in addon['blobs']['tags'] or 'coming_soon' in addon['blobs']['tags']):
+                continue
+            if duration != 'month' and family['name'] in MONTHLY_ONLY_FAMILIES:
                 continue
 
-            for price in addon['plan']['details']['pricings']['default']:
-                duration = price['description'].lower()
-                invoiceName = addon['plan']['invoiceName'] if family['family'] == 'ai-training' else addon['invoiceName']
-                invoiceName = invoiceName.replace(' on region #REGION#', '').replace(' on #REGION#', '')
-                invoiceName = invoiceName.replace('Monthly usage for ', '')
-                invoiceName = invoiceName.replace('Public Cloud Database', '').strip()
+            invoiceName = addon['invoiceName']
+            blobs_commercial = addon['blobs']['commercial'] if addon['blobs'] and 'commercial' in addon['blobs'] else {}
+            if 'price' in blobs_commercial:
+                blobs_commercial.pop('price', None)
+            blobs_technical = addon['blobs']['technical'] if addon['blobs'] and 'technical' in addon['blobs'] else {}
 
+            item = {
+                'family': family['name'],
+                'invoiceName': invoiceName,
+                'plan_code': planCode,
+                'price': price['price'] / 100000000,
+                'duration': duration
+            }
 
-                if invoiceName in EXCLUDE_PRODUCTS or invoiceName.replace(' consumption', '').strip() in EXCLUDE_PRODUCTS:
-                    continue
-                
+            if family['name'] == 'coldarchive':
+                item = coldarchive_hotfix(item)
+            if family['name'] == 'storage':
+                item = objectstorage_3az_hotfix(item)
 
-                if 'month' in duration:
-                    duration = 'month'
-                elif 'minute' in duration:
-                    duration = 'minute'
-                elif 'hour' in duration or 'consumption' in duration:
-                    duration = 'hour'
+            # print(item)
+            # print(blobs_commercial)
+            # print(blobs_technical)
 
-                invoiceName = re.sub(r'^snapshot$', 'Volume Backup - per GB',  invoiceName)
-                invoiceName = re.sub(r'^storage$', 'Object Storage Swift - per GB',  invoiceName)
-                for token in dict.keys(REPLACE_PRODUCT_MAP):
-                    invoiceName = invoiceName.replace(token, REPLACE_PRODUCT_MAP[token])
-                if family['family'] == 'coldarchive':
-                    invoiceName = invoiceName + ' - per GB'
-
-                
-
-                item = {
-                    'family': family['family'],
-                    'invoiceName': invoiceName,
-                    'key': invoiceName.lower()
-                        .replace('octavia ', '')
-                        .replace('large','l')
-                        .replace('small', 's')
-                        .replace('medium','m')
-                        .replace(' - ', '-')
-                        .replace('plan mensuel ', '')
-                        .replace('pour ', '')
-                        .replace(' unit', '')
-                        .replace('public cloud ', '')
-                        .replace('-plan-equivalent', '').strip(),
-                    'price': price['price']['value'],
-                    'duration': duration
-                }
-                if debug and invoiceName:
-                    print(f'planCode: {planCode}\tInvoiceName: {invoiceName.lower()}\tkey: {item["key"]}\tprice:{item["price"]}')
-                if item['price'] < 0.00000001 or ('hour' in duration and item['family'] in MONTHLY_ONLY_FAMILIES):
-                    continue
-                if family['family'] == 'instance':
-                    item['key'] = item['key'].replace(' consumption', '')
-                if family['family'] == 'databases':
-                    item['key'] = item['key'].replace('apache ', '')
-                rows.append(item)
+            if item['family'] in DESCRIPTION_RENDERERS:
+                item['description'] = DESCRIPTION_RENDERERS[family['name']]({'plan_code': planCode, 'invoiceName': invoiceName, 'com': blobs_commercial, 'tech': blobs_technical})
+            elif 'description' not in item:
+                item['description'] = invoiceName + json.dumps(blobs_commercial) + json.dumps(blobs_technical)
+            rows.append(item)
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
 
-
-COLUMNS_RENAME = {
-    'Dedicated node(s)': 'node(s)',
-    'Memory': 'RAM',
-    'Usable storage': 'SSD',
-    'vCore': 'vCPU'
-}
-def merge_columns(columns):
-    merged_cols = []
-    for cols in columns:
-        if isinstance(cols, str) or len(cols) == 1:
-            merged_cols = list(columns)
-            break
-        if 'unnamed' in cols[0].lower() or 'informations' in cols[0].lower():
-            merged_cols.append(cols[1])
-        else:
-            merged_cols.append(cols[0])
-    
-    for i in range(len(merged_cols)):
-        if merged_cols[i] in COLUMNS_RENAME:
-            merged_cols[i] = COLUMNS_RENAME[merged_cols[i]]
-    return merged_cols
-
-
-def webpage_build_key_description(df, family, title):
-    keys, descriptions = [], []
-    for i, row in df.iterrows():
-        desc = title.strip() + ' '
-        key = ''
-        if family == 'compute':
-            desc = 'Linux Instance '
-        elif family == 'network':
-            desc = ''
-
-        for i in range(len(df.columns)):
-            col = df.columns[i]
-            if pd.isna(row[col]) or '_' == row[col]:
-                continue
-        
-            if col == 'Name':
-                name = row['Name'].strip()
-                key = name.lower()
-                if 'win-' in name:
-                    desc = desc.replace('Linux', 'Windows')
-                    name = name.replace('win-', '')
-
-                desc += f"{name} -"
-                if family == 'databases':
-                    key = f'{title} {name}'.lower().replace('™', '')
-                elif title == 'Managed Private Registry':
-                    key = 'registry.' + key
-                continue
-            elif family == 'storage' and 'volume' in col.lower(): # Volume Block Storage
-                key = f'volume.{row[col].replace("Volume","").strip().replace(" ", "-")}'
-
-            if family == 'databases' and col == 'SSD':
-                ret = re.findall(r'From (.*?) to.+', row[col])
-                desc += ' ' + ret[0] if bool(ret) else row[col] + f" {col},"
-            else:
-                desc += f" {row[col]} {col},"
-
-        desc = re.sub(r'\s\s+', ' ', desc)[:-1].strip()
-        if family == 'storage' and 'per GB' not in desc:
-            desc += ' - per GB'
-
-        keys.append(key.lower().replace('load balancer ', 'loadbalancer-').replace('load balancer', 'loadbalancer'))
-        descriptions.append(desc)
-    return keys, descriptions
-
-def get_webpage(debug=False):
-    html = get_html('https://www.ovhcloud.com/en/public-cloud/prices/#')
-    soup = bs4.BeautifulSoup(html, 'lxml')
-    container = soup.css.select('#compute')[0].parent
-    family, title, = '', ''
-    keys, descriptions = [], []
-    for div in container.find_all('div', recursive=False):
-        if div.get('id'):
-            family = div.get('id').strip()
-
-        h3s = div.css.select('h3.public-cloud-prices-title')
-        if bool(h3s):
-            title = h3s[0].get_text().strip()
-
-            try:
-                dfs = pd.read_html(str(div))
-                if 'mongo' in title.lower() and len(dfs) > 1: # remove the different free tier which have only 1 dimentional columns
-                    dfs = dfs[1:]
-                df = pd.concat(dfs)
-                df.columns = merge_columns(df.columns)
-                for col_to_drop in ['Price', 'Total price']:
-                    if col_to_drop in df.columns:
-                        df.drop(col_to_drop, axis=1, inplace=True)
-
-                if family == 'compute':
-                    win_df = df.copy()
-                    win_df['Name'] = win_df['Name'].apply(lambda x: 'win-' + x)
-                    df = pd.concat([df, win_df])
-                
-                k, d = webpage_build_key_description(df, family, title)
-                keys += k
-                descriptions += d
-            except ValueError:
-                pass
-    if debug:
-        print(*filter(None, keys), sep='\n')
-    return pd.DataFrame(zip(keys, descriptions), columns=['key', 'description'])
 
 def publiccloud():
     subs = {}
     debug = False
-    if debug:
-        print('********************************** WEBPAGE KEYS **********************************')
-    df_desc = get_webpage(debug=debug)
-    if debug:
-        print('********************************** API KEYS **********************************')
 
     for sub in SUBSIDIARIES:
         publiccloud = get_api_cloud_prices(sub, debug=debug)
-        df_agora = pd.DataFrame(publiccloud['catalog'])
-        df = pd.merge(df_agora, df_desc, how='left', on='key')
-        df['description'] = df['description'].combine_first(df['invoiceName'])
+        df = pd.DataFrame(publiccloud['catalog'])
         df = df.drop_duplicates(subset=['invoiceName', 'price'])
         df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
-
-        df.drop(['invoiceName', 'key'], axis=1, inplace=True)
+        df.drop(['invoiceName'], axis=1, inplace=True)
+        df = df[df.price != 0]
         catalog = df.to_dict('records')
         publiccloud['catalog'] = catalog
         subs[sub] = publiccloud
