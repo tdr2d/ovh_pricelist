@@ -1,7 +1,7 @@
 const LANGUAGES = [
     { 'code': 'fr', 'name': 'French (FR)'},
     { 'code': 'en', 'name': 'English (EN)'},
-    { 'code': 'de', 'name': 'Deutsh (DE)'},
+    { 'code': 'de', 'name': 'Deutsch (DE)'},
 ];
 
 function renderLanguages(state) {

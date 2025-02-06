@@ -121,7 +121,7 @@ DESCRIPTION_RENDERERS = {
     'ai-training': lambda x: x['invoiceName'].replace(' on #REGION#', '').replace('Per minute usage for Public Cloud', '(Minute)').replace('Per hour usage for Public Cloud', '(Hourly)'),
     'databases': lambda x: x['invoiceName'].replace(' on region #REGION#', '').replace('Monthly usage for ', '').replace(' Public Cloud Databases', '') if '-additionnal-storage-gb' in x['plan_code'] else (\
         f"{x['com']['brickSubtype']} - {x['com']['name']} 1x Node {x['tech']['cpu']['cores']} vCores, {x['tech']['memory']['size']} GB RAM" + \
-        (f", {storage_string(x['tech']['storage']['disks'][0]['maximumCapacity'])} Maximum Storage" if 'storage' in x['tech'] else '')
+        (f", {storage_string(x['tech']['storage']['disks'][0]['maximumCapacity'])} Storage" if 'storage' in x['tech'] else '')
     ),
     'floatingip': lambda x: x['com']['name'] if 'name' in x['com'] else x['invoiceName'],
     'gateway': lambda x: f"{x['com']['name']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
