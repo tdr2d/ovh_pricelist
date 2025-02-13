@@ -15,7 +15,7 @@ def save_indexes():
     dcs = get_dcs()
     print(*dict.values(dcs), sep='\n')
     assert len(dict.values(dcs)) >= 14
-
+    legal = get_all_legal_terms()
     print('Getting Baremetal Catalog')
     bm = exponential_backoff(baremetal)
     print('Getting Private Cloud Catalog')
@@ -36,7 +36,7 @@ def save_indexes():
         'version': version,
         'date': datetime.datetime.now().isoformat(),
         'dcs': dcs,
-        'legal': get_all_legal_terms(),
+        'legal': legal,
         'addresses': OVH_SUBSIDIARY_ADDRESS,
         'subsidiaries': {},
     }

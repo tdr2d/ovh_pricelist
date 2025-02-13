@@ -95,7 +95,7 @@
         <div class="label-input" id="support-placeholder">
             <label for="support" class="col-form-label">Support</label>&nbsp;&nbsp;&nbsp;
             <select id="support" class="form-select form-select-sm" style="width: 290px;">
-                <option value="g">Entreprise (15%) - No minimum</option>
+                <!-- <option value="g">Entreprise (15%) - No minimum</option> -->
                 <option value="f">Entreprise (30%) - No minimum</option>
                 <option value="e">Entreprise (30%)</option>
                 <option value="b" selected>Business (10%)</option>
@@ -165,7 +165,7 @@ const TAX_RATE = res.subsidiaries[sub].locale.taxRate;
 const OVH_SUBSIDIARY_ADDRESS = res.addresses;
 const SUPPORT_MARKUPS_MAP = {
     'f': (price) => price + price*0.3,
-    'g': (price) => price + price*0.15,
+    // 'g': (price) => price + price*0.15,
     'e': (price) => price + Math.max(SUPPORT['entreprise'].minimun || 5000, price*0.3),
     'b': (price) => price + Math.max(SUPPORT['business'].minimun || 250, price*0.1),
     'c': (price) => price + price*0.1,

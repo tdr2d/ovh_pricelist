@@ -116,13 +116,22 @@ def index_addons(js):
         addon_per_plancode[addon['planCode']] = addon
     return addon_per_plancode
 
+def database_description(x):
+    desc = x['invoiceName'].replace(' on region #REGION#', '').replace('Monthly usage for ', '').replace(' Public Cloud Databases', '')
+    if ('-additional-storage-' in x['plan_code'] or '-additionnal-storage-' in x['plan_code']):
+        return desc
+
+    if 'brickSubtype' in x['com']:
+        desc = f"{x['com']['brickSubtype']} - {x['com']['name']}"
+    desc += f" 1x Node {x['tech']['cpu']['cores']} vCores, {x['tech']['memory']['size']} GB RAM"
+    if 'storage' in x['tech']:
+        desc += f" {storage_string(x['tech']['storage']['disks'][0]['maximumCapacity'])} Storage"
+    return desc
+
 # Map of family and function to render description
 DESCRIPTION_RENDERERS = {
     'ai-training': lambda x: x['invoiceName'].replace(' on #REGION#', '').replace('Per minute usage for Public Cloud', '(Minute)').replace('Per hour usage for Public Cloud', '(Hourly)'),
-    'databases': lambda x: x['invoiceName'].replace(' on region #REGION#', '').replace('Monthly usage for ', '').replace(' Public Cloud Databases', '') if '-additionnal-storage-gb' in x['plan_code'] else (\
-        f"{x['com']['brickSubtype']} - {x['com']['name']} 1x Node {x['tech']['cpu']['cores']} vCores, {x['tech']['memory']['size']} GB RAM" + \
-        (f", {storage_string(x['tech']['storage']['disks'][0]['maximumCapacity'])} Storage" if 'storage' in x['tech'] else '')
-    ),
+    'databases': database_description,
     'floatingip': lambda x: x['com']['name'] if 'name' in x['com'] else x['invoiceName'],
     'gateway': lambda x: f"{x['com']['name']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
     'instance': instance_spec_string,
@@ -155,9 +164,12 @@ def get_api_cloud_prices(sub, debug=False):
         for planCode in family['addons']:
             if 'LZ.AF' in planCode or planCode in EXLUDE_PLAN_CODE:
                 continue
-            
             addon = addons_per_plancode[planCode]
             price = addon['pricings'][0]
+            
+            if int(price['price']) == 0 and float(price['price']).is_integer():
+                continue
+
             duration = price['description'].lower()
             if 'month' in duration:
                 duration = 'month'
@@ -190,9 +202,10 @@ def get_api_cloud_prices(sub, debug=False):
             if family['name'] == 'storage':
                 item = objectstorage_3az_hotfix(item)
 
-            # print(item)
-            # print(blobs_commercial)
-            # print(blobs_technical)
+            if debug:
+                print(item)
+                print(blobs_commercial)
+                print(blobs_technical)
 
             if item['family'] in DESCRIPTION_RENDERERS:
                 item['description'] = DESCRIPTION_RENDERERS[family['name']]({'plan_code': planCode, 'invoiceName': invoiceName, 'com': blobs_commercial, 'tech': blobs_technical})
@@ -202,14 +215,14 @@ def get_api_cloud_prices(sub, debug=False):
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
 
 
-def publiccloud():
+def publiccloud(debug=False):
     subs = {}
-    debug = False
+    debug = debug
 
     for sub in SUBSIDIARIES:
         publiccloud = get_api_cloud_prices(sub, debug=debug)
         df = pd.DataFrame(publiccloud['catalog'])
-        df = df.drop_duplicates(subset=['invoiceName', 'price'])
+        df = df.drop_duplicates(subset=['plan_code', 'price'])
         df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
         df.drop(['invoiceName'], axis=1, inplace=True)
         df = df[df.price != 0]
@@ -221,5 +234,5 @@ def publiccloud():
     return subs
 
 if __name__ == '__main__':
-    publiccloud()
+    publiccloud(debug=True)
 
