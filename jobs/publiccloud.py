@@ -135,6 +135,7 @@ DESCRIPTION_RENDERERS = {
     'floatingip': lambda x: x['com']['name'] if 'name' in x['com'] else x['invoiceName'],
     'gateway': lambda x: f"{x['com']['name']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
     'instance': instance_spec_string,
+    'publiccloud-instance': instance_spec_string,
     'registry': lambda x: f"Managed Private Registry {x['com']['name']} - {storage_string(x['tech']['storage']['disks'][0]['capacity'])}",
     'snapshot': lambda x: 'Volume Backup - Stockage réplica x3 - per GB' if x['plan_code'] == 'snapshot.monthly.postpaid' else 'Volume Backup - Stockage réplica x3  - per GB',
     'storage': lambda x: {
@@ -161,14 +162,15 @@ def get_api_cloud_prices(sub, debug=False):
     for family in families:
         if family['name'] in EXCLUDE_FAMILY:
             continue
-        for planCode in family['addons']:
-            if 'LZ.AF' in planCode or planCode in EXLUDE_PLAN_CODE:
+        for planCode in f   amily['addons']:
+            if 'LZ.' in planCode or planCode in EXLUDE_PLAN_CODE:
                 continue
             addon = addons_per_plancode[planCode]
             price = addon['pricings'][0]
             
             if int(price['price']) == 0 and float(price['price']).is_integer():
                 continue
+            
 
             duration = price['description'].lower()
             if 'month' in duration:
@@ -178,11 +180,11 @@ def get_api_cloud_prices(sub, debug=False):
             elif 'hour' in duration or 'consumption' in duration:
                 duration = 'hour'
             
-            if addon['blobs'] and 'tags' in addon['blobs'] and ('legacy' in addon['blobs']['tags'] or 'coming_soon' in addon['blobs']['tags']):
+            if addon['blobs'] and 'tags' in addon['blobs'] and ('legacy' in addon['blobs']['tags'] or ('coming_soon' in addon['blobs']['tags'] and 'active' not in addon['blobs']['tags'])):
                 continue
             if duration != 'month' and family['name'] in MONTHLY_ONLY_FAMILIES:
                 continue
-
+            
             invoiceName = addon['invoiceName']
             blobs_commercial = addon['blobs']['commercial'] if addon['blobs'] and 'commercial' in addon['blobs'] else {}
             if 'price' in blobs_commercial:
@@ -196,6 +198,8 @@ def get_api_cloud_prices(sub, debug=False):
                 'price': price['price'] / 100000000,
                 'duration': duration
             }
+            if not item['family']:
+                print(item)
 
             if family['name'] == 'coldarchive':
                 item = coldarchive_hotfix(item)
@@ -203,9 +207,9 @@ def get_api_cloud_prices(sub, debug=False):
                 item = objectstorage_3az_hotfix(item)
 
             if debug:
-                print(item)
-                print(blobs_commercial)
-                print(blobs_technical)
+                print(item['plan_code'])
+            #     print(blobs_commercial)
+            #     print(blobs_technical)
 
             if item['family'] in DESCRIPTION_RENDERERS:
                 item['description'] = DESCRIPTION_RENDERERS[family['name']]({'plan_code': planCode, 'invoiceName': invoiceName, 'com': blobs_commercial, 'tech': blobs_technical})
