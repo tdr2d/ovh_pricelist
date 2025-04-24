@@ -162,7 +162,7 @@ def get_api_cloud_prices(sub, debug=False):
     for family in families:
         if family['name'] in EXCLUDE_FAMILY:
             continue
-        for planCode in f   amily['addons']:
+        for planCode in family['addons']:
             if 'LZ.' in planCode or planCode in EXLUDE_PLAN_CODE:
                 continue
             addon = addons_per_plancode[planCode]

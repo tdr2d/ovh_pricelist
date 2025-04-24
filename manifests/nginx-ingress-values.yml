@@ -1,4 +1,6 @@
 controller:
+  admissionWebhooks:
+    enabled: "false"
   service:
     annotations:
       loadbalancer.ovhcloud.com/class: "octavia"

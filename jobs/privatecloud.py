@@ -214,12 +214,16 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
     if debug:
         print('plancode\tprice standard\tprix hds\tprix pcidss\tprix snc')
 
+    # SET SNC Prices
     for k in plan_codes:
+        if k not in snc_plan_codes:
+            print(f"WARNING: {k} not in SNC catalogue, ignoring plan")
+            continue
         price_snc = round(snc_plan_codes[k]['price'] * SNC_MARKUP, 2)
         plan_codes[k]['price_snc'] = price_snc
         if debug:
             print(f'{k}\t{plan_codes[k]["price_default"]}\t{plan_codes[k]["price_hds"]}\t{plan_codes[k]["price_pcidss"]}\t{price_snc}\t')
-    cores_quandidates = set([4,10,6,8,20])
+    cores_quandidates = set([4,10,6,8,20,48])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
         if cr['name'] not in RANGES:  # ['hypervisors'][0]
