@@ -23,9 +23,11 @@ It does not support the USA.
 
 
 ### TODO
+- Italian legal terms
+- Baremetal GPU options
 - hide legal conditions for external users
 - ability to add custom input
 - move up and down line
 - BUG frontend with item having 0 values, it defaults to 1.
-- BUG only apply floating precision to unit/price instead of total price
+- BUG template excel only apply floating precision to unit/price instead of total price
 - Rajouter la colonne unite monthly/hour
