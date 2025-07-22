@@ -17,17 +17,19 @@ It does not support the USA.
 ## Features
 * Table view of all ovhcloud.com catalogue with hardware, price, and few other informations.
 * Sorting and filtering
-* Export to CSV / EXCEL / PDF / JSON
+* Export to CSV / EXCEL
 * Price estimate
 * Quote generator
 
 
 ### TODO
+- double price of public cloud instances (due to 3az ref)
+- Add data plateform refs
 - Italian legal terms
 - Baremetal GPU options
-- hide legal conditions for external users
+- apply global discount after support
+- auto add legal conditions for external users
 - ability to add custom input
 - move up and down line
 - BUG frontend with item having 0 values, it defaults to 1.
-- BUG template excel only apply floating precision to unit/price instead of total price
-- Rajouter la colonne unite monthly/hour
+- BUG fix template excel floating precision in total column

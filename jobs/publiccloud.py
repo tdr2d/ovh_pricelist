@@ -144,6 +144,11 @@ DESCRIPTION_RENDERERS = {
         'storage-standard': 'Object Storage Standard - S3 API - per GB',
         'storage-high-perf': 'Object Storage High Performance - S3 API - per GB',
         'storage': 'Object Storage Swift (legacy) - per GB',
+        'earlydelete_storage-standard-ia': 'Object Storage Infrequent Access - Deletion - per GB',
+        'earlydelete_storage-standard-ia-3AZ': 'Object Storage Infrequent Access 3AZ - Deletion - per GB',
+        'storage-standard-ia-3AZ': 'Object Storage Infrequent Access 3AZ - S3 API - per GB',
+        'retrieval_storage-standard-ia': 'Object Storage Infrequent Access - Retrieval - per GB',
+        'retrieval_storage-standard-ia-3AZ': 'Object Storage Infrequent Access 3AZ - Retrieval - per GB'
     }[x['plan_code'].replace('.monthly.postpaid', '').replace('.consumption', '')] if 'bandwidth' not in x['plan_code'] else x['invoiceName'] + ' - per GB',
     'volume': lambda x: f"Block Storage - {x['tech']['name'].capitalize()} {x['tech']['volume']['iops']['level']} " + (f"{x['tech']['volume']['iops']['unit']} max {x['tech']['volume']['iops']['max']} IOPS" if 'unit' in x['tech']['volume']['iops'] else 'IOPS') + ' - per GB',
     'octavia-loadbalancer': lambda x: f"{x['invoiceName']} - {bandwidth_string(x['tech']['bandwidth']['level'])}"
