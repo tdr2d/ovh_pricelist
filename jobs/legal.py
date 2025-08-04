@@ -7,7 +7,7 @@ import json
 OVH_SUBSIDIARY_ADDRESS = {
     'FR': 'OVHCloud - 2 rue Kellermann BP 80 157 59053 Roubaix Cedex 1 – France Société par Actions Simplifiée au capital de 10 174 560 € - RCS Lille Métropole 424 761 419 – Code APE 2620Z N°TVA FR22424761419',
     'CZ': '',
-    'DE': 'OVH GmbH, with an authorized capital of € 25.000,  having its registered offfice at  Christophstraße 19, 50670 Köln, Germany registered in Commercial Register Saarbrücken, with the Company Registration Number HRB 15369, USt-IdNr.: DE245768940',
+    'DE': 'OVH GmbH, with an authorized capital of € 25.000, having its registered offfice at Oskar-Jaeger-Str. 173/K6, 50825 Cologne, Germany registered in Commercial Register B of Cologne HRB 122481 VATID: DE245768940',
     'ES': 'OVH HISPANO SL, with an authorised capital of € 203 006 having its registered offfice at C/ Alcalá 21, 5.ª planta, 28014 Madrid, España, registered in the Registro Mercantil de Madrid Tomo 19.514, Folio 77, Sección 8ª, Hoja M-342678 e inscripción 5ª',
     'FI': '',
     'CA': 'HEBERGEMENT OVH INC., société par actions régie par la Loi sur les sociétés par actions (RLRQ, C. S-31.1), dont le siège social est situé au 800-1801 avenue McGill Collège, Montréal, QC, H3A 2N4 (Canada)',
