@@ -14,7 +14,11 @@ EXCLUDE_FAMILY = [
     'data-processing-job',
     'data-processing-spark-notebook',
     'dataplatform',
-    'publicip'
+    'publicip',
+    'quantum-notebook',
+    'quantum-notebook-workspace',
+    'quantum-processing-unit',
+    'rancher'
 ]
 
 EXLUDE_PLAN_CODE = [
@@ -151,7 +155,10 @@ DESCRIPTION_RENDERERS = {
         'retrieval_storage-standard-ia-3AZ': 'Object Storage Infrequent Access 3AZ - Retrieval - per GB'
     }[x['plan_code'].replace('.monthly.postpaid', '').replace('.consumption', '')] if 'bandwidth' not in x['plan_code'] else x['invoiceName'] + ' - per GB',
     'volume': lambda x: f"Block Storage - {x['tech']['name'].capitalize()} {x['tech']['volume']['iops']['level']} " + (f"{x['tech']['volume']['iops']['unit']} max {x['tech']['volume']['iops']['max']} IOPS" if 'unit' in x['tech']['volume']['iops'] else 'IOPS') + ' - per GB',
-    'octavia-loadbalancer': lambda x: f"{x['invoiceName']} - {bandwidth_string(x['tech']['bandwidth']['level'])}"
+    'octavia-loadbalancer': lambda x: f"{x['invoiceName']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
+    'ai-endpoints': lambda x: f"{x['invoiceName']} - Quantization {x['tech']['quantization']}",
+    'mks': lambda x: f"{x['invoiceName'].replace('multi-zones (#REGION#)', '')}",
+
 }
 
 # test : https://eu.api.ovh.com/v1/order/catalog/public/cloud?ovhSubsidiary=FR
@@ -231,7 +238,8 @@ def publiccloud(debug=False):
     for sub in SUBSIDIARIES:
         publiccloud = get_api_cloud_prices(sub, debug=debug)
         df = pd.DataFrame(publiccloud['catalog'])
-        df = df.drop_duplicates(subset=['plan_code', 'price'])
+        # df = df.drop_duplicates(subset=['plan_code', 'price'])
+        df = df.drop_duplicates(subset=['description', 'price'])
         df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
         df.drop(['invoiceName'], axis=1, inplace=True)
         df = df[df.price != 0]
