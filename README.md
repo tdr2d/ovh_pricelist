@@ -23,10 +23,10 @@ It does not support the USA.
 
 
 ### TODO
-- double price of public cloud instances (due to 3az ref)
+- Bug empty region and 
 - Add data plateform refs
-- Italian legal terms
 - Baremetal GPU options
+- Italian legal terms
 - apply global discount after support
 - auto add legal conditions for external users
 - ability to add custom input

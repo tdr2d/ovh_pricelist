@@ -192,8 +192,8 @@ def get_veeam_and_zerto_licenses(sub='FR'):
     for con in CONFORMITY:
         veam['price_'+con] = veeam_price
         zerto['price_'+con] = zerto_price
-    veam['price_snc'] = round(veeam_price*SNC_MARKUP)
-    # zerto['price_snc'] = round(zerto_price*SNC_MARKUP)
+    veam['price_snc'] = round(veeam_price*SNC_MARKUP,2)
+    zerto['price_snc'] = round(zerto_price*SNC_MARKUP,2)
 
     return list(filter(lambda x: x['price_default'] > 0, [veam, zerto]))
 
