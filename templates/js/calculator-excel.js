@@ -66,7 +66,8 @@ function getItem(key, quantity, commit, discount) {
         discount: discount || 0,
     };
     let setupFee = item['setupfee'] * item.quantity;
-    if (item.key.startsWith('b-') && item.commit >= 6) {
+    // SETUP FEES IS OFFERED
+    if (item.key.startsWith('b-')) {
         setupFee = 0;
         item['setupfee'] = 0
     }

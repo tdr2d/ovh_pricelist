@@ -23,9 +23,8 @@ It does not support the USA.
 
 
 ### TODO
-- Bug empty region and 
+- Bug empty region and export link
 - Add data plateform refs
-- Baremetal GPU options
 - Italian legal terms
 - apply global discount after support
 - auto add legal conditions for external users
