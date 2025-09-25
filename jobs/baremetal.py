@@ -86,7 +86,11 @@ def build_dataset(js):
                     else:
                         server_options.append(item)
             elif addon_family['name'] == 'gpu':
-                base_addon_options['gpu'] = addons[addon_family['addons'][0]]
+                base_addon_options['gpu'] = addons[addon_family['default']]
+                for x in addon_family['addons']:
+                    item = {'range': server_range, 'price': addons[x]['price'], 'name': server_name, 'setupfee': 0 }
+                    item['description'] = f"{item['name']} - GPU Option: {addons[x]['invoiceName']}"
+                    server_options.append(item)
         
         # storage_specs = products[base_addon_options['storage']['product']]
         memory_specs = products[base_addon_options['memory']['product']]
