@@ -264,7 +264,7 @@ function addZone(key) {
     let newzone = document.createElement('div');
     newzone.setAttribute('class', `zone zone${zoneIndex}`);
     newzone.setAttribute('data-zone', `${zoneIndex}`);
-    const selected = key || '';
+    const selected = key || 'EMP'; // Default Empty selected Zone
     const options = Object.keys(DCS).map(key => `<option value="${key}" ${key == selected ? 'selected' : ''}>${DC_key_to_text(key)}</option>`).join('');
     let deleteBtn = `<button class="btn" type="button" id="z${zoneIndex}-delete">${DELETE_SVG}</button>`;
     if (zoneIndex == 0) {

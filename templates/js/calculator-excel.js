@@ -42,7 +42,7 @@ function getItemRowHeightFromDescription(description) {
 }
 
 function DC_key_to_text(key) {
-    if (key == '') return ''
+    if (key == 'EMP') return '' // EMP means empty zone
     return `${DCS[key].city} (${DCS[key].country})`;
 }
 
