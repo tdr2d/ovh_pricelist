@@ -56,7 +56,7 @@ def get_dcs():
     base_url = 'https://smokeping.ovh.net/smokeping'
     html = get_html(f'{base_url}?target=OVH.DCs')
     links = bs4.BeautifulSoup(html, 'lxml').css.select('ul.menuactive a.link')
-    dcs = {}
+    dcs = {'EMP': {'city': '', 'code': 'EMP', 'country': ''}}
     for link in links:
         txt = link.get_text()
         if 'IPv4' not in txt:
