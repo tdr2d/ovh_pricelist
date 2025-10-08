@@ -23,10 +23,8 @@ It does not support the USA.
 
 
 ### TODO
-- Bug empty region and export link
 - Add data plateform refs
 - Italian legal terms
-- apply global discount after support
 - auto add legal conditions for external users
 - ability to add custom input
 - move up and down line

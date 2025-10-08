@@ -153,8 +153,9 @@ const XLSX_TEMPLATE = '/template.xlsx';
 const XLSX_SHEETNAME = 'quote';
 const version = new URLSearchParams(location.search).get('v') || null;
 const cache_bust = new Date().toDateString().replaceAll(' ','');
-const url = BUCKET_ROOT + '/' + ((version === null) ? `pricelist-index.json?${cache_bust}` : `pricelist-index-v${version}.json`);
-
+// FIXME remove comment
+// const url = BUCKET_ROOT + '/' + ((version === null) ? `pricelist-index.json?${cache_bust}` : `pricelist-index-v${version}.json`);
+const url = 'http://localhost/pricelist-index.json'
 
 fetch(url).then(res => res.json()).then(res => {
 const DCS = res.dcs;
