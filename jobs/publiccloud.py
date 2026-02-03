@@ -18,7 +18,8 @@ EXCLUDE_FAMILY = [
     'quantum-notebook',
     'quantum-notebook-workspace',
     'quantum-processing-unit',
-    'rancher'
+    'rancher',
+    'volume-backup'
 ]
 
 EXLUDE_PLAN_CODE = [
@@ -57,8 +58,12 @@ MONTHLY_ONLY_FAMILIES = [
     'snapshot', 
     'registry',
     'floatingip',
-    'volume-backup'
-    'storage',
+    'volume-backup',
+    'storage'
+]
+
+ORPHAN_ADDONS = [
+    'instance.windows-vcore-license.hour.consumption',
 ]
 
 def instance_spec_string(x):
@@ -189,7 +194,6 @@ def get_api_cloud_prices(sub, debug=False):
                 continue
             addon = addons_per_plancode[planCode]
             price = addon['pricings'][0]
-            
             if int(price['price']) == 0 and float(price['price']).is_integer():
                 continue
             
@@ -219,16 +223,14 @@ def get_api_cloud_prices(sub, debug=False):
                 'price': price['price'] / 100000000,
                 'duration': duration
             }
-            if not item['family']:
-                print(item)
 
             if family['name'] == 'coldarchive':
                 item = coldarchive_hotfix(item)
             if family['name'] == 'storage':
                 item = objectstorage_3az_hotfix(item)
 
-            if debug:
-                print(item['plan_code'])
+            # if debug:
+                # print(item['plan_code'])
             #     print(blobs_commercial)
             #     print(blobs_technical)
 
@@ -237,7 +239,54 @@ def get_api_cloud_prices(sub, debug=False):
             elif 'description' not in item:
                 item['description'] = invoiceName + json.dumps(blobs_commercial) + json.dumps(blobs_technical)
             rows.append(item)
+    
+    for plancode in ORPHAN_ADDONS:
+        rows.append(item_with_plan_code(addons_per_plancode, plancode))
+
     return { 'currency': currency, 'catalog': rows, 'date': datetime.now().isoformat() }
+
+
+def item_with_plan_code(addons_per_plancode, plan_code):
+    addon = addons_per_plancode[plan_code]
+    price = addon['pricings'][0]
+    duration = price['description'].lower()
+    if 'month' in duration:
+        duration = 'month'
+    elif 'minute' in duration:
+        duration = 'minute'
+    elif 'hour' in duration or 'consumption' in duration:
+        duration = 'hour'
+    
+    item = {
+        'family': 'other',
+        'invoiceName': addon['invoiceName'],
+        'plan_code': plan_code,
+        'price': price['price'] / 100000000,
+        'duration': duration,
+        'description': addon['invoiceName']
+    }
+    return item
+
+
+def postprocessing(df):
+    df = df.drop_duplicates(subset=['plan_code', 'price'])
+
+    threeaz = df[df.plan_code.str.contains('.3AZ')]
+    apac = df[df.plan_code.str.contains('.apac')]
+    print(threeaz)
+
+    # df = df.drop_duplicates(subset=['description', 'price'])
+    
+
+    df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x else '') + x))
+    df.drop(['invoiceName'], axis=1, inplace=True)
+    df = df[df.price != 0]
+
+    # TODO if plan code ends with .3AZ, add (3AZ) in description
+
+
+
+    return df
 
 
 def publiccloud(debug=False):
@@ -247,11 +296,7 @@ def publiccloud(debug=False):
     for sub in SUBSIDIARIES:
         publiccloud = get_api_cloud_prices(sub, debug=debug)
         df = pd.DataFrame(publiccloud['catalog'])
-        # df = df.drop_duplicates(subset=['plan_code', 'price'])
-        df = df.drop_duplicates(subset=['description', 'price'])
-        df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x.lower() else '') + x))
-        df.drop(['invoiceName'], axis=1, inplace=True)
-        df = df[df.price != 0]
+        df = postprocessing(df)
         catalog = df.to_dict('records')
         publiccloud['catalog'] = catalog
         subs[sub] = publiccloud
