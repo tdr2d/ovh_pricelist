@@ -32,13 +32,12 @@ LEGALS_DATA = {
             {'key': "Annexe Traitement de données à caractère personnel" },
         ],
         'to_select_keys' : [
-            {'key': "Conditions particulières du service OVH Public Cloud", 'selected': True },
-            {'key': "Conditions Particulieres Hosted Private Cloud VMware on OVHcloud", 'selected': True },
+            {'key': "Conditions générales de service", 'selected': True },
+            {'key': "Conditions Particulieres - Hosted Private Cloud VMware on OVHcloud", 'selected': True },
             {'key': "Conditions particulières de location de serveurs dédiés", 'selected': True },
-            {'key': "Conditions particulieres Support Premium", 'selected': False },
+            {'key': "Conditions particulières Support Premium", 'selected': False },
             {'key': "Conditions particulières Support Business", 'selected': True },
             {'key': "Conditions particulières Support Entreprise", 'selected': True },
-            {'key': "Conditions Particulières SAP HANA on Private Cloud", 'selected': False },
             {'key': "Conditions particulières OVHcloud Connect", 'selected': False },
             {'key': "Conditions Particulières Load Balancer", 'selected': False },
             {'key': "Conditions Générales de Services Professionnels", 'selected': True },
@@ -55,13 +54,12 @@ LEGALS_DATA = {
             {'key': "Data Processing Agreement"}
         ],
         'to_select_keys' : [
-            {'key': "Specific Conditions for Public Cloud", 'selected': True},
-            {'key': "Specific Conditions Hosted Private Cloud VMware on OVHcloud", 'selected': True},
+            {'key': "General terms and conditions of services", 'selected': True},
+            {'key': "Specific Conditions - Hosted Private Cloud VMware on OVHcloud", 'selected': True},
             {'key': None, 'title': "Specific Conditions for Baremetal Servers", 'selected': True, 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_partDedie-ie.pdf'},
             {'key': "OVH Premium Support Specific Conditions", 'selected': False},
             {'key': "Specific Conditions OVHcloud Business Support", 'selected': True},
             {'key': "Specific Conditions OVHcloud Enterprise Support", 'selected': True},
-            {'key': "Specific Conditions - SAP HANA on Private Cloud", 'selected': True},
             {'key': "Specific Conditions - Professional Services", 'selected': True},
             {'key': "Specific Conditions OVHcloud Connect", 'selected': False},
             {'key': "Specific Conditions for Load Balancer", 'selected': False},
@@ -70,20 +68,19 @@ LEGALS_DATA = {
     'de': {
         'link': 'https://www.ovhcloud.com/de/terms-and-conditions/contracts/',
         'mandatory_keys' :[
-            {'key': "AGB", 'title': 'ALLGEMEINE GESCHÄFTSBEDINGUNGEN'},
-            {'key': "Auftragsverarbeitungsvertrag 2018", 'title': 'Auftragsverarbeitungsvertrag'},
+            {'key': "AGB - Allgemeine Geschäftsbedingungen"},
+            {'key': "Unterauftragsverarbeiter OVH"},
         ],
         'to_select_keys' : [
-            {'key': "BESONDERE VERTRAGSBEDINGUNGEN FÜR PUBLIC-CLOUD-DIENSTE", 'selected': True},
-            {'key': "Specific Conditions Hosted Private Cloud VMware on OVHcloud", 'selected': True},
-            {'key': "Anlage DRS (dedizierte Rootserver)", 'selected': True},
-            {'key': "BedingungenOVH Premium Support", 'selected': False},
-            {'key': "Besondere Bedingungen OVHcloud Business Support", 'selected': True},
-            {'key': "Besondere Bedingungen OVHcloud Enterprise Support", 'selected': True},
-            {'key': "Besondere Vertragsbedingungen Sap Hana on Private Cloud", 'selected': False},
+            {'key': "Besondere Vertragsbedingungen - Public Cloud Dienste", 'selected': True},
+            {'key': "Besondere Vertragsbedingungen - Hosted Private Cloud VMware on OVHcloud", 'selected': True},
+            {'key': "Besondere Vertragsbedingungen - Dedicated Server", 'selected': True},
+            {'key': "Besondere Vertragsbedingungen - OVH Premium Support", 'selected': False},
+            {'key': "Besondere Vertragsbedingungen - OVHcloud Business Support", 'selected': True},
+            {'key': "Besondere Vertragsbedingungen - OVHcloud Enterprise Support", 'selected': True},
             {'key': "Besondere Vertragsbedingungen - Professional Services", 'selected': True},
             {'key': "Besondere Vertragsbedingungen - OVHcloud Connect", 'selected': False},
-            {'key': "Besondere Vertragsbedingungen Load Balancer", 'selected': False},
+            {'key': "Besondere Vertragsbedingungen - Load Balancer", 'selected': False},
         ]
     },
     'it': {
@@ -94,12 +91,11 @@ LEGALS_DATA = {
         ],
         'to_select_keys' : [
             {'key': "Condizioni Particolari di utilizzo del Public Cloud OVH", 'selected': True},
-            {'key': "Specific Conditions Hosted Private Cloud VMware on OVHcloud", 'title': 'CONDIZIONI PARTICOLARI DI SERVIZIO HOSTED PRIVATE CLOUD VMware on OVHcloud', 'selected': True},
+            {'key': "Specific Conditions - Hosted Private Cloud VMware on OVHcloud", 'title': 'CONDIZIONI PARTICOLARI DI SERVIZIO HOSTED PRIVATE CLOUD VMware on OVHcloud', 'selected': True},
             {'key': "Condizioni Particolari dei server dedicati", 'selected': True},
             {'key': "Condizioni Supporto Premium di OVH", 'selected': False},
             {'key': "Specific Conditions OVHcloud Business Support", 'selected': True},
             {'key': "Specific Conditions OVHcloud Enterprise Support", 'selected': True},
-            {'key': None, 'title': 'Condizioni Particolari - SAP HANA on Private Cloud', 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/SAP_HANA_on_Private_Cloud-it.pdf', 'selected': False},
             {'key': "Condizioni Particolari – Servizi Professionali", 'selected': True},
             {'key': "Specific Conditions OVHcloud Connect", 'selected': False},
             {'key': "Condizioni Particolari Load Balancer", 'selected': False},
@@ -139,11 +135,13 @@ def get_legal_terms_map(lang):
     r.encoding = r.apparent_encoding
     html = r.text
     soup = bs4.BeautifulSoup(html, 'html.parser')
-    links = soup.select('.ods-table-standard [data-tc-clic]')
+    rows = soup.select('.ods-table-standard tr')
     link_map = {}
-    for link in links:
-        title = link['title'].strip()
-        link_map[title] = link['href'].strip()
+    for tr in rows:
+        tds = tr.select('td')
+        title = tds[0].get_text().strip()
+        link = tds[1].select('a')[0]['href']
+        link_map[title] = link
     return link_map
 
 if __name__ == '__main__':

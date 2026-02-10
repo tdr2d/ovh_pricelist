@@ -219,7 +219,7 @@ def get_api_cloud_prices(sub, debug=False):
             item = {
                 'family': family['name'],
                 'invoiceName': invoiceName,
-                'plan_code': planCode,
+                'plan_code': planCode.lower(),
                 'price': price['price'] / 100000000,
                 'duration': duration
             }
@@ -229,8 +229,8 @@ def get_api_cloud_prices(sub, debug=False):
             if family['name'] == 'storage':
                 item = objectstorage_3az_hotfix(item)
 
-            # if debug:
-                # print(item['plan_code'])
+            if debug:
+                print(item['plan_code'])
             #     print(blobs_commercial)
             #     print(blobs_technical)
 
@@ -260,7 +260,7 @@ def item_with_plan_code(addons_per_plancode, plan_code):
     item = {
         'family': 'other',
         'invoiceName': addon['invoiceName'],
-        'plan_code': plan_code,
+        'plan_code': plan_code.lower(),
         'price': price['price'] / 100000000,
         'duration': duration,
         'description': addon['invoiceName']
@@ -271,20 +271,19 @@ def item_with_plan_code(addons_per_plancode, plan_code):
 def postprocessing(df):
     df = df.drop_duplicates(subset=['plan_code', 'price'])
 
-    threeaz = df[df.plan_code.str.contains('.3AZ')]
-    apac = df[df.plan_code.str.contains('.apac')]
-    print(threeaz)
+    # Set 3AZ Prefix
+    threeaz = df[df.plan_code.str.contains('.3az')]['description'].apply(lambda x: ('(3AZ) ' + x))
+    df.update(threeaz)
 
-    # df = df.drop_duplicates(subset=['description', 'price'])
-    
+    # Set APAC Prefix
+    apac = df[df.plan_code.str.contains('.apac')]['description'].apply(lambda x: ('(APAC) ' + x))
+    df.update(apac)
 
-    df.update(df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x else '') + x))
+    # Set Hourly prefix in description for hourly products
+    hourly = df[df['duration'] == 'hour']['description'].apply(lambda x: ('(Hourly) ' if 'hour' not in x else '') + x)
+    df.update(hourly)
     df.drop(['invoiceName'], axis=1, inplace=True)
     df = df[df.price != 0]
-
-    # TODO if plan code ends with .3AZ, add (3AZ) in description
-
-
 
     return df
 
