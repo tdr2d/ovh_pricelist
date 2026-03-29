@@ -4,7 +4,7 @@ ENDPOINT := https://s3.gra.io.cloud.ovh.net/  # PROD
 BUCKET := s3://${S3_BUCKET}
 
 help: ## Show this help
-	@grep -E "^[a-z0-9_-]+:|^##" Makefile | sed -E 's/([\s_]+):.*##(.*)/\1:\2/' | column -s: -t | sed -e 's/##//'
+	@grep -E "^[a-z0-9_-]+:|^##" Makefile | sed -E 's/([a-z0-9_]+):.*##(.*)/\1:\2/' | column -s: -t | sed -e 's/##//'
 
 build: ## build static html files, for prod use : S3_REGION=gra S3_BUCKET=share make build
 	jinja templates/calculator.html -E S3_BUCKET -E S3_REGION -o static/calculator.html
@@ -36,3 +36,9 @@ purge_s3_objects: ## Usage MATCH='lib/*' make purge_s3_objects
 
 upload_jobs:
 	ls jobs/*.py |  xargs -I{} aws s3 --endpoint-url $(ENDPOINT) cp --acl public-read {} $(BUCKET){}
+##
+## API
+init_api_db: ## Create api db
+	cd api && rm foo.db && sqlite3 foo.db < tables.sql
+build_api: ## Build go API
+	CGO_ENABLED=1 cd api && go build .

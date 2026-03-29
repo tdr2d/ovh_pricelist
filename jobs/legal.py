@@ -32,7 +32,7 @@ LEGALS_DATA = {
             {'key': "Annexe Traitement de données à caractère personnel" },
         ],
         'to_select_keys' : [
-            {'key': "Conditions générales de service", 'selected': True },
+            {'key': "Conditions particulières des services Public Cloud", 'selected': True },
             {'key': "Conditions Particulieres - Hosted Private Cloud VMware on OVHcloud", 'selected': True },
             {'key': "Conditions particulières de location de serveurs dédiés", 'selected': True },
             {'key': "Conditions particulières Support Premium", 'selected': False },
@@ -54,7 +54,7 @@ LEGALS_DATA = {
             {'key': "Data Processing Agreement"}
         ],
         'to_select_keys' : [
-            {'key': "General terms and conditions of services", 'selected': True},
+            {'key': "Specific Conditions for Public Cloud", 'selected': True},
             {'key': "Specific Conditions - Hosted Private Cloud VMware on OVHcloud", 'selected': True},
             {'key': None, 'title': "Specific Conditions for Baremetal Servers", 'selected': True, 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_partDedie-ie.pdf'},
             {'key': "OVH Premium Support Specific Conditions", 'selected': False},
