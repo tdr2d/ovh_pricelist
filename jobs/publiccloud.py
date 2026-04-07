@@ -159,6 +159,14 @@ def storage_plan_code_description(x):
         return plan_code
     return x['invoiceName'] + ' - per GB'
 
+def iops_description(tech):
+    ret = f"{tech['volume']['iops']['level']} "
+    if 'unit' in tech['volume']['iops']:
+        ret += f"{tech['volume']['iops']['unit']} max {tech['volume']['iops']['max']} IOPS"
+    else:
+        ret += 'IOPS'
+    return ret
+
 DESCRIPTION_RENDERERS = {
     'ai-training': lambda x: x['invoiceName'].replace(' on #REGION#', '').replace('Per minute usage for Public Cloud', '(Minute)').replace('Per hour usage for Public Cloud', '(Hourly)'),
     'databases': database_description,
@@ -169,11 +177,12 @@ DESCRIPTION_RENDERERS = {
     'registry': lambda x: f"Managed Private Registry {x['com']['name']} - {storage_string(x['tech']['storage']['disks'][0]['capacity'])}",
     'snapshot': lambda x: 'Volume Backup - Stockage réplica x3 - per GB' if x['plan_code'] == 'snapshot.monthly.postpaid' else 'Volume Backup - Stockage réplica x3  - per GB',
     'storage': storage_plan_code_description,
-    'volume': lambda x: f"Block Storage - {x['tech']['name'].capitalize()} {x['tech']['volume']['iops']['level']} " + (f"{x['tech']['volume']['iops']['unit']} max {x['tech']['volume']['iops']['max']} IOPS" if 'unit' in x['tech']['volume']['iops'] else 'IOPS') + ' - per GB',
+    'volume': lambda x: f"Block Storage - {x['tech']['name'].capitalize()} {iops_description(x['tech'])} - per GB",
     'octavia-loadbalancer': lambda x: f"{x['invoiceName']} - {bandwidth_string(x['tech']['bandwidth']['level'])}",
     'ai-endpoints': lambda x: f"{x['invoiceName']} - Quantization {x['tech']['quantization']}",
     'mks': lambda x: f"{x['invoiceName'].replace('multi-zones (#REGION#)', '')}",
-
+    'share': lambda x: f"{x['invoiceName']} - minimum {x['tech']['volume']['capacity']['min']} GB - {iops_description(x['tech'])} - per GB",
+    'share-snapshot': lambda x: x['invoiceName'] + ' - per GB'
 }
 
 # test : https://eu.api.ovh.com/v1/order/catalog/public/cloud?ovhSubsidiary=FR

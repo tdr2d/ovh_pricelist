@@ -33,20 +33,22 @@ LEGALS_DATA = {
         ],
         'to_select_keys' : [
             {'key': "Conditions particulières des services Public Cloud", 'selected': True },
-            {'key': "Conditions Particulieres - Hosted Private Cloud VMware on OVHcloud", 'selected': True },
-            {'key': "Conditions particulières de location de serveurs dédiés", 'selected': True },
-            {'key': "Conditions particulières Support Premium", 'selected': False },
-            {'key': "Conditions particulières Support Business", 'selected': True },
-            {'key': "Conditions particulières Support Entreprise", 'selected': True },
-            {'key': "Conditions particulières OVHcloud Connect", 'selected': False },
-            {'key': "Conditions Particulières Load Balancer", 'selected': False },
-            {'key': "Conditions Générales de Services Professionnels", 'selected': True },
+            {'key': "Conditions particulieres - Hosted Private Cloud VMware on OVHcloud", 'selected': True },
+            {'key': "Conditions particulières - location de serveurs dédiés", 'selected': True },
+            {'key': "Conditions particulières - Support Premium", 'selected': False },
+            {'key': "Conditions particulières - Support Business", 'selected': True },
+            {'key': "Conditions particulières - Support Entreprise", 'selected': True },
+            {'key': "Conditions particulières - OVHcloud Connect", 'selected': False },
+            {'key': "Conditions particulières - Load Balancer", 'selected': False },
+            {'key': "Conditions générales - Services Professionnels", 'selected': True },
             {'key': None, 'title': "HDS pour VMware on OVHcloud - Serveurs Dédiés - Nutanix - File Storage", 'selected': False, 'url': "https://contract.eu.ovhapis.com/1.0/pdf/HPC_HDS-fr.pdf" },
             {'key': None, 'title': "Healthcare - Public Cloud", 'selected': False, 'url': "https://contract.eu.ovhapis.com/1.0/pdf/Public_Cloud_Health_Care_HDS-fr.pdf" },
             {'key': None, 'title': 'Conditions Particulières HPC SNC', 'selected': False, 'url': 'https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/0c59e05-HPC_SNC-FR-3.0.pdf'},
             {'key': None, 'title': "Conditions Particulières Support Editeur d'OVHcloud pour HPC SecNumCloud", 'selected': False, 'url': 'https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/2cbc744-Support_Editeur_SNC-FR-2.0.pdf'}
         ]
     },
+
+    
     'en': {
         'link': 'https://www.ovhcloud.com/en-ie/terms-and-conditions/contracts/',
         'mandatory_keys' :[
@@ -54,15 +56,15 @@ LEGALS_DATA = {
             {'key': "Data Processing Agreement"}
         ],
         'to_select_keys' : [
-            {'key': "Specific Conditions for Public Cloud", 'selected': True},
+            {'key': "Specific Conditions for Public Cloud Services", 'selected': True},
             {'key': "Specific Conditions - Hosted Private Cloud VMware on OVHcloud", 'selected': True},
             {'key': None, 'title': "Specific Conditions for Baremetal Servers", 'selected': True, 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/contrat_partDedie-ie.pdf'},
-            {'key': "OVH Premium Support Specific Conditions", 'selected': False},
-            {'key': "Specific Conditions OVHcloud Business Support", 'selected': True},
-            {'key': "Specific Conditions OVHcloud Enterprise Support", 'selected': True},
+            {'key': "Specific Conditions - OVH Premium Support", 'selected': False},
+            {'key': "Specific Conditions OVHcloud - Business Support", 'selected': True},
+            {'key': "Specific Conditions OVHcloud - Enterprise Support", 'selected': True},
             {'key': "Specific Conditions - Professional Services", 'selected': True},
-            {'key': "Specific Conditions OVHcloud Connect", 'selected': False},
-            {'key': "Specific Conditions for Load Balancer", 'selected': False},
+            {'key': "Specific Conditions - OVHcloud Connect", 'selected': False},
+            {'key': "Specific Conditions -  Load Balancer", 'selected': False},
         ]
     },
     'de': {
@@ -86,19 +88,19 @@ LEGALS_DATA = {
     'it': {
         'link': 'https://www.ovhcloud.com/it/terms-and-conditions/contracts/',
         'mandatory_keys' :[
-            {'key': 'Condizioni Generali di Servizio', 'title': 'Condizioni Generali di Servizio'},
+            {'key': 'Condizioni generali di servizio', 'title': 'Condizioni Generali di Servizio'},
             {'key': 'Contratto per il trattamento dei dati', 'title': 'Contratto per il trattamento dei dati'},
         ],
         'to_select_keys' : [
-            {'key': "Condizioni Particolari di utilizzo del Public Cloud OVH", 'selected': True},
-            {'key': "Specific Conditions - Hosted Private Cloud VMware on OVHcloud", 'title': 'CONDIZIONI PARTICOLARI DI SERVIZIO HOSTED PRIVATE CLOUD VMware on OVHcloud', 'selected': True},
-            {'key': "Condizioni Particolari dei server dedicati", 'selected': True},
-            {'key': "Condizioni Supporto Premium di OVH", 'selected': False},
+            {'key': "Condizioni particolari di utilizzo del Public Cloud OVH", 'selected': True},
+            {'key': "Condizioni particolari - Hosted Private Cloud VMware on OVHcloud", 'title': 'CONDIZIONI PARTICOLARI DI SERVIZIO HOSTED PRIVATE CLOUD VMware on OVHcloud', 'selected': True},
+            {'key': "Condizioni particolari del Dedicated Cloud Windows", 'selected': True},
+            {'key': None, 'title': "Condizioni Supporto Premium di OVH", 'selected': False, 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/conditions_particulieres_support_premium-it.pdf'},
             {'key': "Specific Conditions OVHcloud Business Support", 'selected': True},
             {'key': "Specific Conditions OVHcloud Enterprise Support", 'selected': True},
-            {'key': "Condizioni Particolari – Servizi Professionali", 'selected': True},
+            {'key': "Condizioni particolari – Servizi Professionali", 'selected': True},
             {'key': "Specific Conditions OVHcloud Connect", 'selected': False},
-            {'key': "Condizioni Particolari Load Balancer", 'selected': False},
+            {'key': "Condizioni particolari - Load Balancer", 'selected': False},
         ]
     }
 }
@@ -140,8 +142,9 @@ def get_legal_terms_map(lang):
     for tr in rows:
         tds = tr.select('td')
         title = tds[0].get_text().strip()
-        link = tds[1].select('a')[0]['href']
+        link = tds[1].select('a')[0]['href'].strip()
         link_map[title] = link
+        # print(title)
     return link_map
 
 if __name__ == '__main__':
