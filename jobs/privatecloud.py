@@ -226,6 +226,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
     cores_quandidates = set([4,10,6,8,20,48])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
+        print(cr['name'])
         if cr['name'] not in RANGES:  # ['hypervisors'][0]
             continue
         

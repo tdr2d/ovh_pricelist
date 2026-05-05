@@ -55,23 +55,27 @@ def save_indexes():
 def get_dcs():
     base_url = 'https://smokeping.ovh.net/smokeping'
     html = get_html(f'{base_url}?target=OVH.DCs')
-    links = bs4.BeautifulSoup(html, 'lxml').css.select('ul.menuactive a.link')
     dcs = {'EMP': {'city': '', 'code': 'EMP', 'country': ''}}
+    links = bs4.BeautifulSoup(html, 'lxml').css.select('ul.menuactive a.link')
     for link in links:
         txt = link.get_text()
         if 'IPv4' not in txt:
             continue
         country, code, _ = list(map(lambda x: x.strip(), unicodedata.normalize('NFKD', txt).split(' ')))
+        code = re.findall(r'[A-Z]{3,}', code)[0]
         title = bs4.BeautifulSoup(get_html(f'{base_url}{link.get("href")}'), 'lxml').css.select('#graph_title')[0].get_text()
         city = re.findall(r'.*?\/([a-zA-Z- ]+)\)', title)[0]
+        city = city.split('-')[-1] # Split Lilles-Roubaix
+        city = city.split(' ')[0] # Split Milan' 'A
         dcs[code] = {'city': city, 'code': code, 'country': country}
-    
-    for tz in TZ_DCS:
-        code = f"{tz} TZ"
-        dcs[code] = {'code': code, 'city': dcs[tz]['city'] + ' (Trusted Zone)', 'country': dcs[tz]['country'] }
 
+        if code in THREE_AZ_DCS:
+            dcs[code]['city'] += ' (3AZ)' 
+
+        # if code in TZ_DCS:
+        #     dcs[f"{code} TZ"] = {'code': f"{code} TZ", 'city': dcs[code]['city'] + ' (Trusted Zone)', 'country': dcs[code]['country'] }
+    
     assert len(dict.values(dcs)) > 13
-    # print(dcs)
     return dcs
 
 if __name__ == '__main__':

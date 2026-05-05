@@ -20,6 +20,7 @@ print(f'Bucket is {S3_BUCKET}, region is {S3_REGION}')
 if 'dev' in S3_BUCKET:
     SUBSIDIARIES = ['FR']
 TZ_DCS = ['RBX', 'SBG', 'GRA']
+THREE_AZ_DCS = ['PAR','MIL']
 
 API_US = 'https://api.us.ovhcloud.com'
 API_EU = 'https://eu.api.ovh.com'
