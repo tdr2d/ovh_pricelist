@@ -24,5 +24,7 @@ It does not support the USA.
 
 ### TODO
 - PAR3 region encoding issue, shows empty when reloading page
+- legal condition v2
+- add hour column for hourly prices
 - Add nutanix catalogue
 - Add NAS-HA

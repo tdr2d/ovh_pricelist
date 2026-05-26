@@ -1,6 +1,9 @@
 from datetime import datetime
 from utils import *
 import pandas as pd
+import re
+
+pd.options.mode.chained_assignment = None  # default='warn'
 
 REGION_SUFFIXES = {
     'EUNA': '(Europe, North America)',
@@ -8,6 +11,9 @@ REGION_SUFFIXES = {
     'sgp': 'Asia (Singapore)',
     'syd': 'Oceania (Australia)',
 }
+
+
+RE_RAM_EXTRACT_FROM_PLAN_CODE = re.compile('ram-([1-9][0-9]*)g')
 
 def index_addons(js):
     addon_per_plancode = {}
@@ -57,7 +63,8 @@ def build_dataset(js):
         for addon_family in plan['addonFamilies']:
             if addon_family['name'] == 'memory':
                 for x in addon_family['addons']:
-                    item = {'range': server_range, 'price': addons[x]['price'], 'name': server_name, 'setupfee': 0 }
+                    ram_size = int(re.findall(RE_RAM_EXTRACT_FROM_PLAN_CODE, addons[x]['planCode'])[0])
+                    item = {'range': server_range, 'price': addons[x]['price'], 'name': server_name, 'setupfee': 0, 'ram_size': ram_size}
                     item['description'] = f"{item['name']} - RAM Option: {addons[x]['invoiceName']}"
                     if item['price'] == 0:
                         base_addon_options['memory'] = addons[x]
@@ -161,8 +168,58 @@ def baremetal():
         data = { 'catalog': dataset, 'date': datetime.now().isoformat(), 'locale': data['locale'], 'currency': data['locale']['currencyCode'] }
         catalog[sub] = data
     upload_gzip_json(catalog , 'baremetal_prices.json', S3_BUCKET)
-    # json.dump(catalog, open('baremetal.json', 'w+'))
+    json.dump(catalog, open('baremetal.json', 'w+'))
     return catalog
 
+def get_scale_hgr_combination(catalog):
+    df = pd.DataFrame(catalog['FR']['catalog'])
+
+    # Filter scale / hgr range
+    df = df[(df['range'] == 'scale')] 
+    # df = df[(df['range'] == 'high-grade') | (df['range'] == 'scale')] 
+
+    # Filter EUNA region server only
+    df = df[df['name'].str.contains(REGION_SUFFIXES['EUNA'])]
+    df['name'] = df['name'].apply(lambda x: x.split(' ' + REGION_SUFFIXES['EUNA'])[0])
+
+    # Remove bandwidth option
+    df = df[~df['description'].str.contains('Bandwidth Option')]
+    # Remove Storage option
+    df = df[~df['description'].str.contains('Storage Option')]
+
+    servers = df[df['cpu_model'].str.contains('AMD')]                           # Filter AMD servers
+    servers = servers[df['description'].str.contains('Dedicated Server')]       # Get Server Default Price
+    servers = servers[~df['name'].str.contains('GPU')]                          # remove GPU server
+    servers['total_price'] = servers['price']
+    servers['cpu_cores'] = servers['cpu_cores'].astype(int)
+
+    options = df[~df['description'].str.contains('Dedicated Server')]
+    options['total_price'] = options['price']
+
+    # Add servers['cpu_model', 'cpu_cores', 'cpu_threads'] colums to options having same 'name'
+    for i, server in servers.iterrows():
+        sub_options = options[options['name'] == server['name']]
+        sub_options['cpu_cores'] = server['cpu_cores']
+        sub_options['cpu_model'] = server['cpu_model']
+        sub_options['total_price'] = sub_options['total_price'].apply(lambda x: x + server['price']) 
+        options.update(sub_options)
+    
+    options = options[options['cpu_cores'] != '']
+    options['cpu_cores'] = options['cpu_cores'].astype(int)
+
+    total = pd.concat([servers, options])
+    to_update = total[~total['name'].str.contains(' | ')]
+    to_update['name'] = to_update.apply(lambda x: x['name'] + ' | ' + x['cpu_model'], axis=1)
+    total.update(to_update)
+
+    total.sort_values(['name', 'ram_size'], inplace=True)
+    columns = ['name', 'cpu_cores', 'ram_size', 'total_price']
+
+    total[columns].to_excel('baremetal_proxmox.xlsx', index=None)
+
+
 if __name__ == '__main__':
-    baremetal()
+    # baremetal()
+    catalog = json.load(open('baremetal.json', 'r'))
+    # print(catalog)
+    get_scale_hgr_combination(catalog)
