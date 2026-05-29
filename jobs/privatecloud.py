@@ -5,10 +5,11 @@ import pandas as pd
 from copy import deepcopy
 import numpy as np
 import os
+from functools import reduce
 
 
 CONFORMITY = ['default', 'hds', 'hipaa', 'pcidss', 'snc']
-RANGES = ['vsphere', 'essentials', 'nsx-t']
+RANGES = ['vsphere', 'nsx-t']
 SNC_RANGES = ['vsphere', 'nsx-t']
 SNC_PRODUCTS = [
     {'range': '', 'type': 'SNC Network', 'description': 'SNC VPN Gateway, 2x1 Gbps (Max 2x10 tunnels)', 'price_default': 400, 'price_snc': round(400*SNC_MARKUP)},
@@ -148,19 +149,17 @@ def get_ps(sub='FR'):
         plans.append({'type': 'PS', 'description': plan['invoiceName'] + ' SNC', 'setupfee': SNC_PS_PRICE, 'price_snc': 0})
     return plans
 
-def parse_windows_licenses(plan_codes, list_of_cores):
+def parse_windows_licenses(plan_codes):
     plans = filter(lambda x: x['family'] == 'windows-license' and 'veeam' not in x['invoiceName'].lower(), dict.values(plan_codes))
     
     computed_plans = []
     for p in plans:
-        for cores in list_of_cores:
-            invoiceName = ' '.join(map(lambda x: x.capitalize(), p['invoiceName'].split('-')))
-            unit = 'vCores' if 'sql' in invoiceName.lower() else 'Cores'
-            item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - {cores} {unit}' }
-            for con in CONFORMITY + ['snc']:
-                cores = max(4, cores) if 'sql' in invoiceName.lower() else max(8, cores)
-                item['price_'+con] = p['price_default'] * cores
-            computed_plans.append(item)
+        invoiceName = ' '.join(map(lambda x: x.capitalize(), p['invoiceName'].split('-')))
+        unit = 'vCore' if 'sql' in invoiceName.lower() else 'Core'
+        item = {'type': 'Licence', 'description': invoiceName.capitalize() + f' - per {unit}' }
+        for con in CONFORMITY + ['snc']:
+            item['price_'+con] = p['price_default'] * 1
+        computed_plans.append(item)
 
     return computed_plans
 
@@ -223,7 +222,6 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
         plan_codes[k]['price_snc'] = price_snc
         if debug:
             print(f'{k}\t{plan_codes[k]["price_default"]}\t{plan_codes[k]["price_hds"]}\t{plan_codes[k]["price_pcidss"]}\t{price_snc}\t')
-    cores_quandidates = set([4,10,6,8,20,48])
     catalog = []
     for cr in pcc_plans['commercialRanges']:
         print(cr['name'])
@@ -239,8 +237,11 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
         if orderable_dc is None:
             orderable_dc = cr['datacenters'][0]
         
-        hypervisor = next(filter(lambda x: x['orderable'], orderable_dc['hypervisors']))
-        for h in hypervisor['hosts']:
+        hypervisors = filter(lambda x: x['orderable'], orderable_dc['hypervisors'])
+        hosts = []
+        for hypervisor in hypervisors:
+            hosts += hypervisor['hosts']
+        for h in hosts:
             if 'hourly' in h['name'].lower() or h['planCode'] not in plan_codes:
                 continue
             
@@ -260,7 +261,6 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text} RAM"} | plan_codes[h['planCode']]
             host['description'] = host['description'].replace('NSX ', 'NSX-T ')
             pack['description'] = pack['description'].replace('NSX ', 'NSX-T ')
-            cores_quandidates.add(h['specifications']['cpu']['cores'])
 
             for conformity in CONFORMITY:
                 # if cr['name'] == 'essentials' and conformity != 'default':
@@ -303,8 +303,7 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
                 # option['price_snc'] = round(option['price_default'] * SNC_MARKUP)
                 catalog.append(option)
 
-        catalog += get_backup_options(plan_codes) + parse_windows_licenses(plan_codes, cores_quandidates)
-
+        catalog += get_backup_options(plan_codes) + parse_windows_licenses(plan_codes)
     return catalog
 
 def privatecloud(debug=False):

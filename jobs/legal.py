@@ -94,7 +94,7 @@ LEGALS_DATA = {
         'to_select_keys' : [
             {'key': "Condizioni particolari di utilizzo del Public Cloud OVH", 'selected': True},
             {'key': "Condizioni particolari - Hosted Private Cloud VMware on OVHcloud", 'title': 'CONDIZIONI PARTICOLARI DI SERVIZIO HOSTED PRIVATE CLOUD VMware on OVHcloud', 'selected': True},
-            {'key': "Condizioni particolari del Dedicated Cloud Windows", 'selected': True},
+            {'key': "Condizioni particolari dei server dedicati", 'selected': True},
             {'key': None, 'title': "Condizioni Supporto Premium di OVH", 'selected': False, 'url': 'https://contract.eu.ovhapis.com/1.0/pdf/conditions_particulieres_support_premium-it.pdf'},
             {'key': "Specific Conditions OVHcloud Business Support", 'selected': True},
             {'key': "Specific Conditions OVHcloud Enterprise Support", 'selected': True},
