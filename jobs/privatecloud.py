@@ -255,12 +255,12 @@ def get_pcc_ranges_and_windows_licenses(sub='FR', debug=False):
             pack_datastore = plan_codes[h['storagesPack'][0]] # always X2 this value
 
             num_host = 2
-            if 'vsan' in h['name'].lower():
+            if 'vsan' in h['name'].lower() or ['STO-']:
                 num_host = 3
-            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {cr['name'].upper()} {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n{STORAGE_PACK_DESCRIPTION}"}
+            pack = {'range': cr['name'], 'type': 'Pack', 'description': f"Pack {h['name']}\n  - {num_host}x Host {h['name']}\n  - {cpu_text}\n  - {ram_text} RAM\n{STORAGE_PACK_DESCRIPTION}"}
             host = {'range': cr['name'], 'type': 'Host', 'description': f"Additional Host {h['name']}\n{cpu_text}\n{ram_text} RAM"} | plan_codes[h['planCode']]
-            host['description'] = host['description'].replace('NSX ', 'NSX-T ')
-            pack['description'] = pack['description'].replace('NSX ', 'NSX-T ')
+            # host['description'] = host['description'].replace('NSX ', 'NSX-T ')
+            # pack['description'] = pack['description'].replace('NSX ', 'NSX-T ')
 
             for conformity in CONFORMITY:
                 # if cr['name'] == 'essentials' and conformity != 'default':

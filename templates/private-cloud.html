@@ -21,8 +21,8 @@ fetch(url).then(res => res.json()).then(res => {
     setLastUpdated(res.date);
 
     var COLUMNS = [
-        {title: "Range", key: 'range'},
-        {title: "Type", key: 'type'},
+        // {title: "Range", key: 'range'},
+        // {title: "Type", key: 'type'},
         {title: "Description", key: 'description'},
         {title: `Price (Monthly if not specified) without local taxes (${res.locale.currencyCode})`, key: `price_${conformity}`},
     ];
@@ -46,7 +46,7 @@ fetch(url).then(res => res.json()).then(res => {
         order: [[ 0, "desc" ]],
         paging: false,
         dom: 'Bfrtip',
-        columnDefs: [{ "targets": [], "visible": false }, {'targets': [3], 'type': 'num'}],
+        columnDefs: [{ "targets": [], "visible": false }, {'targets': [COLUMNS.length-1], 'type': 'num'}],
         buttons: [
             { extend: 'excel', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to Excel`, exportOptions: { modifier: { page: 'current' } } },
             { extend: 'csv', title: exportTitle, attr: {class: 'btn btn-outline-secondary btn-sm buttons-csv buttons-html5'}, text: `${DOWNLOAD_SVG} Export to CSV`, exportOptions: { modifier: { page: 'current' } } }
